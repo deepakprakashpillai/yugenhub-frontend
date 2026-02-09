@@ -5,20 +5,30 @@ import { Icons } from '../components/Icons';
 import { TaskModal } from '../components/modals';
 import FloatingActionButton from '../components/FloatingActionButton';
 import TaskSection from '../components/TaskSection';
+import TaskFilters from '../components/TaskFilters';
 import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
+import { usePermission } from '../hooks/usePermissions';
+import { PERMISSIONS } from '../config/permissions';
 
 const TasksPage = () => {
     const { user } = useAuth();
+    const canViewAll = usePermission(PERMISSIONS.VIEW_ALL_TASKS);
     const [searchParams, setSearchParams] = useSearchParams();
 
     // UI State
-    const [tab, setTab] = useState('my_tasks'); // 'my_tasks' | 'all_tasks'
+    const [tab, setTab] = useState(canViewAll ? 'my_tasks' : 'my_tasks'); // Default to 'my_tasks'
     const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'list'
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [users, setUsers] = useState([]);
+    const [filters, setFilters] = useState({
+        search: '',
+        status: 'all',
+        priority: 'all',
+        sort_by: 'created_at'
+    });
 
     // Fetch users for assignment (needed for TaskModal)
     useEffect(() => {
@@ -62,7 +72,8 @@ const TasksPage = () => {
             color: "text-blue-400",
             params: {
                 category: 'deliverable',
-                assigned_to: tab === 'my_tasks' ? user?.id : undefined
+                assigned_to: tab === 'my_tasks' ? user?.id : undefined,
+                ...filters
             }
         },
         {
@@ -73,7 +84,8 @@ const TasksPage = () => {
             params: {
                 category: 'general',
                 has_project: true,
-                assigned_to: tab === 'my_tasks' ? user?.id : undefined
+                assigned_to: tab === 'my_tasks' ? user?.id : undefined,
+                ...filters
             }
         },
         {
@@ -84,7 +96,8 @@ const TasksPage = () => {
             params: {
                 category: 'general',
                 has_project: false,
-                assigned_to: tab === 'my_tasks' ? user?.id : undefined
+                assigned_to: tab === 'my_tasks' ? user?.id : undefined,
+                ...filters
             }
         }
     ];
@@ -134,7 +147,7 @@ const TasksPage = () => {
                         >
                             My Tasks
                         </button>
-                        {['owner', 'admin'].includes(user?.role) && (
+                        {canViewAll && (
                             <button
                                 onClick={() => setTab('all_tasks')}
                                 className={clsx(
@@ -148,6 +161,9 @@ const TasksPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Filters */}
+            <TaskFilters filters={filters} onChange={setFilters} />
 
             {/* Sections */}
             <div className="space-y-4">

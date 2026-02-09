@@ -11,6 +11,8 @@ import { Icons } from '../components/Icons';
 import clsx from 'clsx';
 import SkeletonCard from '../components/SkeletonCard';
 import TaskModal from '../components/modals/TaskModal';
+import { usePermission } from '../hooks/usePermissions';
+import { PERMISSIONS } from '../config/permissions';
 
 const CalendarPage = () => {
     const navigate = useNavigate();
@@ -26,9 +28,12 @@ const CalendarPage = () => {
     const [selectedTask, setSelectedTask] = useState(null);
     const [users, setUsers] = useState([]);
 
+    // Permission Check (kept for future use, not used for Calendar access)
+    const canViewAll = usePermission(PERMISSIONS.VIEW_ALL_CALENDAR);
+
     // Filter States
     const [showType, setShowType] = useState('all'); // 'all' | 'event' | 'task'
-    const [assignedOnly, setAssignedOnly] = useState(false);
+    const [assignedOnly, setAssignedOnly] = useState(false); // Default: Show all events, optional filter
 
     // Compute Calendar Grid
     const { days, startDate, endDate } = useMemo(() => {
@@ -136,6 +141,23 @@ const CalendarPage = () => {
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
+                    {/* My Schedule Toggle - Hide for members when viewing only tasks (redundant) */}
+                    {(canViewAll || showType !== 'task') && (
+                        <button
+                            onClick={() => setAssignedOnly(!assignedOnly)}
+                            className={clsx(
+                                "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all",
+                                assignedOnly
+                                    ? "bg-purple-500/20 text-purple-400 border-purple-500/50"
+                                    : "bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"
+                            )}
+                        >
+                            <Icons.User className="w-3.5 h-3.5" />
+                            My Schedule
+                            {assignedOnly && <Icons.Check className="w-3.5 h-3.5" />}
+                        </button>
+                    )}
+
                     {/* Filter Toggles */}
                     <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-xl border border-zinc-800">
                         <button
@@ -174,21 +196,6 @@ const CalendarPage = () => {
                             Tasks
                         </button>
                     </div>
-
-                    {/* Assigned to Me Toggle */}
-                    <button
-                        onClick={() => setAssignedOnly(!assignedOnly)}
-                        className={clsx(
-                            "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all",
-                            assignedOnly
-                                ? "bg-purple-500/20 text-purple-400 border-purple-500/50"
-                                : "bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"
-                        )}
-                    >
-                        <Icons.User className="w-3.5 h-3.5" />
-                        My Schedule
-                        {assignedOnly && <Icons.Check className="w-3.5 h-3.5" />}
-                    </button>
 
                     {/* Month Navigation */}
                     <div className="flex items-center gap-4 bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800 backdrop-blur-sm">

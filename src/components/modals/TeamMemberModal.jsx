@@ -49,7 +49,8 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
         setFormData(prev => ({
             ...prev,
             associate_id: associateId,
-            associate_name: associate?.name || ''
+            associate_name: associate?.name || '',
+            role: associate?.primary_role || prev.role || 'Photographer'
         }));
     };
 

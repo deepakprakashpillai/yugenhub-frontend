@@ -45,7 +45,11 @@ import {
     LogIn,
     CheckSquare,
     Video,
-    Circle
+    Circle,
+    PieChart,
+    Activity,
+    BarChart,
+    Zap
 } from 'lucide-react';
 
 export const Icons = {
@@ -110,5 +114,9 @@ export const Icons = {
     LogIn,
     CheckSquare,
     Video,
-    Circle
+    Circle,
+    PieChart,
+    Activity,
+    BarChart,
+    Zap
 };

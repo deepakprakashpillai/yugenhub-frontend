@@ -42,6 +42,26 @@ const StatusBadge = ({ status }) => {
     );
 };
 
+// Progress Bar Component
+const ProgressBar = ({ total, completed, className }) => {
+    if (total === 0) return null;
+    const percent = Math.round((completed / total) * 100);
+    return (
+        <div className={clsx("w-full max-w-xs", className)}>
+            <div className="flex justify-between text-xs text-zinc-500 mb-1">
+                <span>Progress</span>
+                <span>{percent}% ({completed}/{total})</span>
+            </div>
+            <div className="h-1.5 bg-zinc-700/50 rounded-full overflow-hidden">
+                <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500"
+                    style={{ width: `${percent}%` }}
+                />
+            </div>
+        </div>
+    );
+};
+
 // Template Switcher Component
 const VerticalTemplate = ({ project }) => {
     const vertical = project?.vertical?.toLowerCase();
@@ -193,6 +213,10 @@ const EventSection = ({
     const startTime = formatTime(event.start_date);
     const endTime = formatTime(event.end_date);
 
+    // Calculate Event Progress
+    const eventCompleted = eventTasks.filter(t => ['done', 'completed'].includes(t.status)).length;
+    const eventTotal = eventTasks.length;
+
     return (
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
             {/* Event Header (Clickable) */}
@@ -222,9 +246,10 @@ const EventSection = ({
                     </div>
                 </button>
                 <div className="flex items-center gap-3">
+                    <div className="hidden sm:block min-w-[150px] mr-4">
+                        <ProgressBar total={eventTotal} completed={eventCompleted} />
+                    </div>
                     <div className="text-right text-sm hidden sm:block">
-                        <span className="text-zinc-500">{eventTasks?.length || 0} Deliverables</span>
-                        <span className="text-zinc-600 mx-2">•</span>
                         <span className="text-zinc-500">{event.assignments?.length || 0} Team</span>
                     </div>
                     <button
@@ -560,7 +585,7 @@ const ProjectPage = () => {
         setStatusDropdown(false);
         // Validation: Cannot complete project with incomplete tasks
         if (newStatus === 'completed') {
-            const incompleteTasks = tasks.filter(t => t.status !== 'completed');
+            const incompleteTasks = tasks.filter(t => !['done', 'completed'].includes(t.status));
             if (incompleteTasks.length > 0) {
                 toast.error(`Cannot mark as Completed. ${incompleteTasks.length} task(s) are still pending.`);
                 return;
@@ -621,6 +646,14 @@ const ProjectPage = () => {
         );
     }
 
+    // Calculate Project Progress
+    const projectCompleted = tasks.filter(t => ['done', 'completed'].includes(t.status)).length;
+    const projectTotal = tasks.length;
+
+    // Split Tasks
+    const deliverables = tasks.filter(t => t.category === 'deliverable');
+    const generalTasks = tasks.filter(t => t.category !== 'deliverable');
+
     return (
         <div className="p-8 pb-20 max-w-[1400px] mx-auto">
             {/* Header */}
@@ -630,6 +663,9 @@ const ProjectPage = () => {
                 </button>
                 <div className="flex items-center gap-3">
                     <span className="text-zinc-500 font-mono text-sm">{project.code}</span>
+                    <div className="w-48 ml-4">
+                        <ProgressBar total={projectTotal} completed={projectCompleted} />
+                    </div>
 
                     {/* Status Transition Dropdown */}
                     <div className="relative">
@@ -696,31 +732,58 @@ const ProjectPage = () => {
                 </div>
             )}
 
-            {/* Tasks Tab */}
+            {/* Tasks Tab (Split View) */}
             {activeTab === 'tasks' && (
-                <div className="mb-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <Icons.ClipboardList className="w-5 h-5 text-zinc-500" />
-                            Project Tasks ({tasks.length})
-                        </h3>
-                        <button
-                            onClick={() => setTaskModal({ open: true, task: null })}
-                            className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors"
-                        >
-                            <Icons.Plus className="w-4 h-4" /> Add Task
-                        </button>
+                <div className="mb-8 space-y-10">
+                    {/* 1. Deliverables Section */}
+                    <div>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <Icons.Package className="w-5 h-5 text-zinc-500" />
+                                Deliverables ({deliverables.length})
+                            </h3>
+                            {/* We don't usually add deliverables here directly, but could if needed */}
+                        </div>
+                        {deliverables.length === 0 ? (
+                            <p className="text-zinc-600 italic">No deliverables tracked.</p>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {deliverables.map(task => (
+                                    <TaskCard key={task.id} task={task} onClick={() => setTaskModal({ open: true, task })} />
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {tasks.length === 0 ? (
-                        <EmptyState title="No tasks defined" message="Create tasks to track deliverables and internal work." onClear={() => setTaskModal({ open: true, task: null })} />
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {tasks.map(task => (
-                                <TaskCard key={task.id} task={task} onClick={() => setTaskModal({ open: true, task })} />
-                            ))}
+                    {/* 2. Other Tasks Section */}
+                    <div>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <Icons.ClipboardList className="w-5 h-5 text-zinc-500" />
+                                Other Tasks ({generalTasks.length})
+                            </h3>
+                            <button
+                                onClick={() => setTaskModal({ open: true, task: null })}
+                                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors"
+                            >
+                                <Icons.Plus className="w-4 h-4" /> Add Task
+                            </button>
                         </div>
-                    )}
+
+                        {generalTasks.length === 0 ? (
+                            <EmptyState
+                                title="No other tasks"
+                                message="Create general tasks for internal work."
+                                onClear={() => setTaskModal({ open: true, task: null })}
+                            />
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {generalTasks.map(task => (
+                                    <TaskCard key={task.id} task={task} onClick={() => setTaskModal({ open: true, task })} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 

@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
+import DashboardPage from './pages/DashboardPage';
 import DevLoginPage from './pages/DevLoginPage';
 import VerticalPage from './pages/VerticalPage';
 import ClientsPage from './pages/ClientsPage';
@@ -44,7 +45,7 @@ function AppRoutes() {
 
       <Route path="/" element={
         <ProtectedRoute>
-          <div className="p-10">Dashboard</div>
+          <DashboardPage />
         </ProtectedRoute>
       } />
 

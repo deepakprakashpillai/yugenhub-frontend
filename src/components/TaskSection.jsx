@@ -33,7 +33,8 @@ const TaskSection = ({
                 ...fetchParams,
                 page,
                 limit: LIMIT,
-                completed: showCompleted
+                completed: showCompleted,
+                order: fetchParams.sort_by === 'due_date' ? 'asc' : 'desc'
             };
 
             // Clean undefined params

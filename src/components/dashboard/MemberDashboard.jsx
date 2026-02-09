@@ -1,0 +1,101 @@
+import { useState, useEffect } from 'react';
+import api from '../../api/axios';
+import { Icons } from '../Icons';
+import AttentionSection from './AttentionSection';
+import WorkloadSection from './WorkloadSection';
+import { Badge } from '../ui/badge';
+import { Link } from 'react-router-dom';
+
+const MemberDashboard = ({ user }) => {
+    const [loading, setLoading] = useState(true);
+    const [attention, setAttention] = useState([]);
+    const [workload, setWorkload] = useState({});
+    const [myTasks, setMyTasks] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const results = await Promise.allSettled([
+                    api.get('/dashboard/attention?scope=me'),
+                    api.get('/dashboard/workload?scope=me'),
+                    api.get(`/tasks?assigned_to=${user.id}&completed=false&sort_by=due_date&order=asc&limit=5`)
+                ]);
+
+                if (results[0].status === 'fulfilled') setAttention(results[0].value.data);
+                if (results[1].status === 'fulfilled') setWorkload(results[1].value.data);
+                if (results[2].status === 'fulfilled') {
+                    const tasksResponse = results[2].value.data;
+                    // Handle paginated response structure
+                    setMyTasks(Array.isArray(tasksResponse) ? tasksResponse : tasksResponse.data || []);
+                }
+
+            } catch (err) {
+                console.error("Member Dashboard fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [user.id]);
+
+    if (loading) return (
+        <div className="h-full flex items-center justify-center p-12">
+            <Icons.Loader className="w-8 h-8 animate-spin text-purple-500" />
+        </div>
+    );
+
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* 1. My Focus (Attention) */}
+            <AttentionSection items={attention} scope="me" />
+
+            {/* 2. My Workload Stats */}
+            <WorkloadSection type="me" data={workload} />
+
+            {/* 3. My Upcoming Tasks */}
+            <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-3xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <Icons.List className="w-5 h-5 text-blue-500" />
+                        My Next Tasks
+                    </h2>
+                    <Link to="/tasks" className="text-sm text-zinc-400 hover:text-white transition-colors">
+                        View All
+                    </Link>
+                </div>
+
+                <div className="space-y-3">
+                    {myTasks.length === 0 ? (
+                        <p className="text-zinc-500 italic">No upcoming tasks.</p>
+                    ) : (
+                        myTasks.map((task) => (
+                            <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-zinc-700 transition-all">
+                                <div>
+                                    <h3 className="font-medium text-white mb-1">{task.title}</h3>
+                                    <div className="flex items-center gap-3 text-xs text-zinc-500">
+                                        <span className="flex items-center gap-1">
+                                            <Icons.Calendar className="w-3 h-3" />
+                                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Date'}
+                                        </span>
+                                        {task.status === 'urgent' && (
+                                            <span className="text-red-400 font-bold">URGENT</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <Badge variant="outline" className={`
+                                    ${task.priority === 'urgent' ? 'border-red-500/30 text-red-500' :
+                                        task.priority === 'high' ? 'border-orange-500/30 text-orange-500' :
+                                            'border-zinc-700 text-zinc-400'}
+                                `}>
+                                    {task.priority || 'Normal'}
+                                </Badge>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default MemberDashboard;
