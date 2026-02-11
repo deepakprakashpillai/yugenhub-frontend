@@ -282,6 +282,21 @@ const ProjectSlideOver = ({
                         </select>
                     </div>
 
+                    <div className="mb-3">
+                        <label className="block text-xs text-zinc-400 mb-1">Religion</label>
+                        <select
+                            name="religion"
+                            value={metadata.religion || 'Hindu'}
+                            onChange={handleMetadataChange}
+                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                        >
+                            <option value="Hindu">Hindu</option>
+                            <option value="Christian">Christian</option>
+                            <option value="Muslim">Muslim</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
                             <label className="block text-xs text-zinc-400 mb-1">Groom Name</label>

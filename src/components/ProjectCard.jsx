@@ -139,6 +139,11 @@ const ProjectCard = ({ project }) => {
                                 {project.metadata.side === 'Both' ? '👫 Both' : project.metadata.side === 'Groom' ? '👔 Groom' : '👗 Bride'}
                             </span>
                         )}
+                        {project.vertical === 'knots' && project.metadata?.religion && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                {project.metadata.religion}
+                            </span>
+                        )}
                         {project.vertical === 'pluto' && project.metadata?.occasion_type && (
                             <span className={clsx(
                                 "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",

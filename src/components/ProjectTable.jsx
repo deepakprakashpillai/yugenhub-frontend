@@ -40,7 +40,14 @@ const ProjectTable = ({ projects }) => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-white">{project.title}</div>
-                                        <div className="text-xs text-zinc-500">{project.metadata?.client_name}</div>
+                                        <div className="text-xs text-zinc-500 flex items-center gap-2">
+                                            <span>{project.metadata?.client_name}</span>
+                                            {project.vertical === 'knots' && project.metadata?.religion && (
+                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                                                    {project.metadata.religion}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={clsx(

@@ -407,7 +407,7 @@ const ProjectPage = () => {
         try {
             const [res, tasksRes, usersRes] = await Promise.all([
                 api.get(`/projects/${id}`),
-                api.get(`/tasks?project_id=${id}`),
+                api.get(`/tasks?project_id=${id}&context=project_page`),
                 api.get('/users')
             ]);
             setProject(res.data);
@@ -470,7 +470,7 @@ const ProjectPage = () => {
             } else {
                 await api.post('/tasks', payload);
             }
-            const res = await api.get(`/tasks?project_id=${id}`);
+            const res = await api.get(`/tasks?project_id=${id}&context=project_page`);
             setTasks(res.data.data || []);
             setTaskModal({ open: false, task: null, eventId: null });
             toast.success(taskModal.task ? 'Saved successfully' : 'Created successfully');
@@ -523,7 +523,7 @@ const ProjectPage = () => {
         try {
             await api.delete(`/tasks/${deleteDeliverableModal.task.id}`);
             // Refresh Tasks
-            const res = await api.get(`/tasks?project_id=${id}`);
+            const res = await api.get(`/tasks?project_id=${id}&context=project_page`);
             setTasks(res.data.data || []);
             setDeleteDeliverableModal({ open: false, task: null });
         } catch (err) {

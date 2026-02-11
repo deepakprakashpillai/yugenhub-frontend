@@ -118,6 +118,10 @@ const WeddingTemplate = ({ project }) => {
                         <span className="text-white font-semibold">{meta.wedding_style || '—'}</span>
                     </div>
                     <div className="bg-zinc-800/50 rounded-xl p-4">
+                        <span className="text-zinc-500 text-xs uppercase tracking-wide block mb-1">Religion</span>
+                        <span className="text-white font-semibold">{meta.religion || '—'}</span>
+                    </div>
+                    <div className="bg-zinc-800/50 rounded-xl p-4">
                         <span className="text-zinc-500 text-xs uppercase tracking-wide block mb-1">Wedding Date</span>
                         <span className="text-white font-semibold">{weddingDate}</span>
                     </div>

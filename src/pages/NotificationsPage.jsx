@@ -55,11 +55,30 @@ const NotificationsPage = () => {
         if (!notification.read) {
             handleMarkAsRead(notification.id);
         }
-        // Navigate to the resource if available
+
+        // 1. If metadata has project_id, go to Project Page for context
+        if (notification.metadata?.project_id) {
+            navigate(`/projects/${notification.metadata.project_id}`);
+            return;
+        }
+
+        // 2. Fallback: Navigate to the resource if available
         if (notification.resource_type === 'task' && notification.resource_id) {
             // Navigate to tasks page with taskId query param to open modal
             navigate(`/tasks?taskId=${notification.resource_id}`);
         }
+    };
+
+    // Helper to render message with bold text (simple parser for **text**)
+    const renderMessage = (text) => {
+        if (!text) return null;
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, index) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={index} className="text-white font-bold">{part.slice(2, -2)}</strong>;
+            }
+            return part;
+        });
     };
 
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -137,7 +156,7 @@ const NotificationsPage = () => {
                                     "text-xs mt-1",
                                     notification.read ? "text-zinc-600" : "text-zinc-400"
                                 )}>
-                                    {notification.message}
+                                    {renderMessage(notification.message)}
                                 </p>
                                 <p className="text-[10px] text-zinc-600 mt-2">
                                     {new Date(notification.created_at).toLocaleString()}
