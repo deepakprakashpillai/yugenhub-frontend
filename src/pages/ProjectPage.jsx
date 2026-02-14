@@ -3,6 +3,7 @@ import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { Skeleton } from '../components/ui/Skeleton';
 import { Icons } from '../components/Icons';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -527,9 +528,15 @@ const EventSection = ({
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-zinc-600 text-sm italic p-4 bg-zinc-800/30 rounded-xl">
-                                        No deliverables assigned to this event yet.
-                                    </p>
+                                    <EmptyState
+                                        title="No deliverables yet"
+                                        message="Add deliverables to track for this event."
+                                        icon={Icons.Package}
+                                        action={{
+                                            label: "Add Deliverable",
+                                            onClick: onAddDeliverable
+                                        }}
+                                    />
                                 )}
                             </div>
 
@@ -560,9 +567,15 @@ const EventSection = ({
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-zinc-600 text-sm italic p-4 bg-zinc-800/30 rounded-xl">
-                                        No team members assigned to this event yet.
-                                    </p>
+                                    <EmptyState
+                                        title="No team assigned"
+                                        message="Assign team members to this event."
+                                        icon={Icons.Users}
+                                        action={{
+                                            label: "Assign Member",
+                                            onClick: onAddTeamMember
+                                        }}
+                                    />
                                 )}
                             </div>
                         </div>
@@ -820,15 +833,29 @@ const ProjectPage = () => {
     };
 
     if (loading) {
-        return (
-            <div className="p-8 max-w-[1400px] mx-auto">
-                <div className="animate-pulse">
-                    <div className="h-8 w-32 bg-zinc-800 rounded mb-8"></div>
-                    <div className="h-48 bg-zinc-800 rounded-2xl mb-8"></div>
-                    <div className="h-64 bg-zinc-800 rounded-2xl"></div>
+        if (loading) {
+            return (
+                <div className="p-8 max-w-[1400px] mx-auto space-y-8">
+                    <div className="flex justify-between items-center">
+                        <Skeleton className="h-10 w-32" />
+                        <div className="flex gap-4">
+                            <Skeleton className="h-10 w-48" />
+                            <Skeleton className="h-10 w-24" />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-8">
+                            <Skeleton className="h-64 rounded-2xl" />
+                            <Skeleton className="h-48 rounded-2xl" />
+                        </div>
+                        <div className="space-y-8">
+                            <Skeleton className="h-32 rounded-2xl" />
+                            <Skeleton className="h-96 rounded-2xl" />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
     }
 
     if (error) {

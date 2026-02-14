@@ -5,6 +5,7 @@ import AttentionSection from './AttentionSection';
 import WorkloadSection from './WorkloadSection';
 import { Badge } from '../ui/badge';
 import { Link } from 'react-router-dom';
+import EmptyState from '../EmptyState';
 
 const MemberDashboard = ({ user }) => {
     const [loading, setLoading] = useState(true);
@@ -39,8 +40,22 @@ const MemberDashboard = ({ user }) => {
     }, [user.id]);
 
     if (loading) return (
-        <div className="h-full flex items-center justify-center p-12">
-            <Icons.Loader className="w-8 h-8 animate-spin text-purple-500" />
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Attention Section Skeleton */}
+            <div className="h-48 w-full bg-zinc-900/40 rounded-3xl border border-zinc-800/50 p-6 space-y-4">
+                <div className="flex gap-4">
+                    <div className="h-12 w-12 bg-zinc-800 rounded-xl animate-pulse" />
+                    <div className="space-y-2">
+                        <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
+                        <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 h-64 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 animate-pulse" />
+                <div className="h-64 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 animate-pulse" />
+            </div>
         </div>
     );
 
@@ -66,7 +81,15 @@ const MemberDashboard = ({ user }) => {
 
                 <div className="space-y-3">
                     {myTasks.length === 0 ? (
-                        <p className="text-zinc-500 italic">No upcoming tasks.</p>
+                        <EmptyState
+                            title="No upcoming tasks"
+                            message="You're all caught up! Enjoy your day."
+                            icon={Icons.CheckCircle}
+                            action={{
+                                label: "Find Work",
+                                to: "/tasks"
+                            }}
+                        />
                     ) : (
                         myTasks.map((task) => (
                             <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-zinc-700 transition-all">
@@ -93,8 +116,9 @@ const MemberDashboard = ({ user }) => {
                         ))
                     )}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
+
     );
 };
 

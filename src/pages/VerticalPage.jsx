@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ import { ProjectSlideOver, ClientModal } from '../components/modals';
 import { v4 as uuidv4 } from 'uuid';
 
 const VerticalPage = ({ vertical, title }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -32,6 +34,24 @@ const VerticalPage = ({ vertical, title }) => {
     const [projectSlideOver, setProjectSlideOver] = useState(false);
     const [clientModal, setClientModal] = useState({ open: false, callback: null });
     const [actionLoading, setActionLoading] = useState(false);
+
+    // Auto-open Project SlideOver if ?action=new exists
+    useEffect(() => {
+        if (searchParams.get('action') === 'new') {
+            setProjectSlideOver(true);
+        }
+    }, [searchParams]);
+
+    // Handle closing slideover and clearing param
+    const handleCloseSlideOver = () => {
+        setProjectSlideOver(false);
+        // Remove action param but keep others if any (though currently we don't use others in URL for filter state sync yet)
+        if (searchParams.get('action') === 'new') {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('action');
+            setSearchParams(newParams);
+        }
+    };
 
     // --- Pagination & Filter State ---
     const [page, setPage] = useState(1);
@@ -298,7 +318,7 @@ const VerticalPage = ({ vertical, title }) => {
             {/* Project Slide-Over */}
             <ProjectSlideOver
                 isOpen={projectSlideOver}
-                onClose={() => setProjectSlideOver(false)}
+                onClose={handleCloseSlideOver}
                 onSave={handleAddProject}
                 onAddClient={handleAddClient}
                 vertical={vertical}

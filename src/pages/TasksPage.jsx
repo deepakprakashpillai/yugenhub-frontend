@@ -43,16 +43,40 @@ const TasksPage = () => {
         fetchUsers();
     }, []);
 
+    // Auto-open modal from URL
+    useEffect(() => {
+        if (searchParams.get('action') === 'new') {
+            setEditingTask(null);
+            setIsModalOpen(true);
+        }
+    }, [searchParams]);
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        if (searchParams.get('action') === 'new') {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('action');
+            setSearchParams(newParams);
+        }
+    };
+
     const handleSaveTask = async (formData) => {
         try {
             if (editingTask) {
                 await api.patch(`/tasks/${editingTask.id}`, formData);
             } else {
-                await api.post('/tasks', { ...formData, type: 'internal' });
+                await api.post('/tasks', { ...formData });
             }
             setRefreshTrigger(prev => prev + 1);
             setIsModalOpen(false);
             setEditingTask(null);
+
+            // Clear URL param if present
+            if (searchParams.get('action') === 'new') {
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete('action');
+                setSearchParams(newParams);
+            }
         } catch (err) {
             console.error(err);
         }
@@ -190,7 +214,7 @@ const TasksPage = () => {
             {/* Modal */}
             <TaskModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseModal}
                 onSave={handleSaveTask}
                 task={editingTask}
                 users={users}

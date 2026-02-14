@@ -123,8 +123,11 @@ const TaskSection = ({
                 <EmptyState
                     title="No tasks found"
                     message={showCompleted ? "No completed tasks in this section." : "You're all caught up!"}
-                    onClear={showCompleted ? () => setShowCompleted(false) : undefined}
-                    actionLabel={showCompleted ? "Show Active Tasks" : undefined}
+                    icon={Icons.ClipboardList}
+                    action={showCompleted ? {
+                        label: "Show Active Tasks",
+                        onClick: () => setShowCompleted(false)
+                    } : undefined}
                 />
             ) : (
                 <>

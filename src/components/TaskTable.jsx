@@ -112,13 +112,13 @@ const TaskTable = ({ tasks, onTaskClick }) => {
 
                                 {/* Project */}
                                 <td className="px-6 py-4">
-                                    {task.project_name ? (
+                                    {(task.project_name || task.project_code) ? (
                                         <Link
                                             to={`/projects/${task.project_id}`}
                                             onClick={(e) => e.stopPropagation()}
                                             className="text-xs text-zinc-400 bg-zinc-800/50 hover:bg-zinc-700/50 hover:text-white transition-colors px-2 py-1 rounded inline-block"
                                         >
-                                            {task.project_name}
+                                            {task.project_name || task.project_code}
                                         </Link>
                                     ) : (
                                         <span className="text-zinc-600 text-xs">Internal</span>

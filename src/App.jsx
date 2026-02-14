@@ -16,18 +16,43 @@ import NotificationsPage from './pages/NotificationsPage';
 import CalendarPage from './pages/CalendarPage';
 import SettingsPage from './pages/SettingsPage';
 
-// Placeholder for Client ID - In production use ENV
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+import { CommandPalette } from './components/CommandPalette';
+import { Skeleton } from './components/ui/Skeleton';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
-  if (loading) return <div className="h-screen w-full flex items-center justify-center bg-black text-white">Loading...</div>;
+  if (loading) return (
+    <div className="flex h-screen w-full bg-black">
+      {/* Sidebar Skeleton */}
+      <div className="w-64 border-r border-zinc-800 p-6 space-y-8 hidden md:block">
+        <div className="h-8 w-32 bg-zinc-800 rounded-lg animate-pulse" />
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-6 w-full" />
+          ))}
+        </div>
+      </div>
+      {/* Content Skeleton */}
+      <div className="flex-1 p-8 space-y-6">
+        <div className="flex justify-between">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-32 col-span-2" />
+          <Skeleton className="h-32" />
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    </div>
+  );
 
   if (!isAuthenticated) return <Navigate to="/login" />;
 
   return (
     <div className="flex bg-black min-h-screen text-white">
+      <CommandPalette />
       {/* 1. SIDEBAR: Always stays on the left */}
       <Sidebar />
 
@@ -122,7 +147,7 @@ function AppRoutes() {
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <AgencyConfigProvider>
           <Toaster theme="dark" position="bottom-right" richColors />

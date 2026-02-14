@@ -49,7 +49,8 @@ import {
     PieChart,
     Activity,
     BarChart,
-    Zap
+    Zap,
+    ArrowUpRight
 } from 'lucide-react';
 
 export const Icons = {
@@ -118,5 +119,6 @@ export const Icons = {
     PieChart,
     Activity,
     BarChart,
-    Zap
+    Zap,
+    ArrowUpRight
 };

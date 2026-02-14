@@ -41,7 +41,7 @@ const TaskCard = ({ task, onClick, onStatusChange }) => {
                     <span title={`Priority: ${task.priority}`} className="p-1 rounded bg-zinc-900 border border-zinc-800">
                         {priorityIcons[task.priority]}
                     </span>
-                    {task.project_name && (
+                    {(task.project_name || task.project_code) && (
                         <Link
                             to={`/projects/${task.project_id}`}
                             onClick={(e) => e.stopPropagation()}
@@ -49,7 +49,7 @@ const TaskCard = ({ task, onClick, onStatusChange }) => {
                         >
                             <div className={clsx("w-1.5 h-1.5 rounded-full bg-gradient-to-r", task.project_color || "from-zinc-500 to-zinc-400")} />
                             <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wide truncate max-w-[80px]">
-                                {task.project_name}
+                                {task.project_name || task.project_code}
                             </span>
                         </Link>
                     )}

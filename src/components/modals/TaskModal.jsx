@@ -31,6 +31,12 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
         comment: ''
     });
 
+    // Project Selection State
+    const [selectedVertical, setSelectedVertical] = useState('general');
+    const [projects, setProjects] = useState([]);
+    const [projectsLoading, setProjectsLoading] = useState(false);
+    const [selectedProjectId, setSelectedProjectId] = useState(projectId || ''); // Prop or local state
+
     const [history, setHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
 
@@ -49,6 +55,22 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 due_date: task.due_date ? task.due_date.split('T')[0] : '',
                 comment: ''
             });
+            // Try to deduce vertical/project from task if available
+            // Note: If task object has project info, we should use it. 
+            // Assuming task.project object or check backend response structure.
+            if (task.project_id) {
+                setSelectedProjectId(task.project_id);
+                // If we knew the vertical, we'd set it here. 
+                // For now, if we don't know, maybe we default to general or try to fetch project details?
+                // Ideally task should have project: { vertical: '...' }
+                if (task.project && task.project.vertical) {
+                    setSelectedVertical(task.project.vertical);
+                }
+            } else {
+                setSelectedProjectId('');
+                setSelectedVertical('general');
+            }
+
             fetchHistory();
         } else if (isOpen) {
             setFormData({
@@ -61,6 +83,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 comment: ''
             });
             setHistory([]);
+            setSelectedVertical('general');
+            setSelectedProjectId('');
         }
 
         // Robustness: Fetch users directly when modal opens to ensure list is populated
@@ -74,6 +98,35 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 .catch(err => console.error("Modal user fetch failed", err));
         }
     }, [isOpen, task]);
+
+    // Fetch Projects when Vertical Changes
+    useEffect(() => {
+        if (selectedVertical === 'general' || !isOpen) {
+            setProjects([]);
+            return;
+        }
+
+        const fetchProjects = async () => {
+            setProjectsLoading(true);
+            try {
+                // Fetch ongoing projects for this vertical
+                const res = await api.get('/projects', {
+                    params: {
+                        vertical: selectedVertical,
+                        status: 'ongoing', // Only active projects
+                        limit: 100 // Reasonable limit for dropdown
+                    }
+                });
+                setProjects(res.data.data || []);
+            } catch (err) {
+                console.error("Failed to load projects", err);
+            } finally {
+                setProjectsLoading(false);
+            }
+        };
+
+        fetchProjects();
+    }, [selectedVertical, isOpen]);
 
     const fetchHistory = async () => {
         if (!task) return;
@@ -110,9 +163,9 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
             ...formData,
             due_date: formData.due_date || null,
             assigned_to: formData.assigned_to || null,
-            category: isDeliverable ? 'deliverable' : 'general',
-            type: 'project',
-            project_id: projectId,
+            category: isDeliverable ? 'deliverable' : (selectedProjectId ? 'general' : 'general'), // Keep general category but add project linkage
+            type: selectedProjectId ? 'project' : 'internal', // Update type based on project selection
+            project_id: selectedProjectId || projectId,
         };
 
         if (isDeliverable) {
@@ -215,6 +268,44 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                             placeholder="Assignee"
                             className="w-40"
                         />
+
+                        {/* Vertical Selection */}
+                        <Select
+                            value={selectedVertical}
+                            onChange={(val) => {
+                                setSelectedVertical(val);
+                                setSelectedProjectId(''); // Reset project on vertical change
+                            }}
+                            options={[
+                                { value: 'general', label: 'General Task', icon: Icons.Layers, color: 'text-zinc-400' },
+                                ...(config?.verticals?.map(v => ({
+                                    value: v.id,
+                                    label: v.label,
+                                    icon: Icons.Briefcase, // Or dynamic icon if available
+                                    color: v.color ? `text-[${v.color}]` : 'text-zinc-400' // Note: dynamic classes might need style prop or safelist
+                                })) || [])
+                            ]}
+                            placeholder="Type"
+                            className="w-40"
+                        />
+
+                        {/* Project Selection (Conditional) */}
+                        {selectedVertical !== 'general' && (
+                            <Select
+                                value={selectedProjectId}
+                                onChange={setSelectedProjectId}
+                                options={projects.map(p => ({
+                                    value: p._id,
+                                    label: p.title || p.code,
+                                    icon: Icons.Briefcase,
+                                    color: 'text-zinc-300'
+                                }))}
+                                placeholder={projectsLoading ? "Loading..." : "Select Project"}
+                                className="w-48"
+                                disabled={projectsLoading}
+                            />
+                        )}
+
                         {/* Due Date (Native Picker styled minimally) */}
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">

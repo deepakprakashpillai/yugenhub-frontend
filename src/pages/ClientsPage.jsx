@@ -308,7 +308,15 @@ const ClientsPage = () => {
                     {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
             ) : clients.length === 0 ? (
-                <EmptyState onClear={() => { setSearch(''); setTypeFilter('') }} title="No clients found" message="Try adjusting your search to find the client you're looking for." />
+                <EmptyState
+                    title="No clients found"
+                    message="Try adjusting your search to find the client you're looking for."
+                    icon={Icons.Search}
+                    action={{
+                        label: "Clear Filters",
+                        onClick: () => { setSearch(''); setTypeFilter('') }
+                    }}
+                />
             ) : (
                 <AnimatePresence mode='wait'>
                     {viewMode === 'grid' ? (

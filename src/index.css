@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Command Palette Backdrop */
+[cmdk-dialog] {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+[cmdk-dialog][data-state="open"] {
+  visibility: visible;
+  opacity: 1;
+}
+
+[cmdk-overlay] {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+}
