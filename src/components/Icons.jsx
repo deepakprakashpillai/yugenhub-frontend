@@ -9,6 +9,7 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronDown,
+    ChevronUp,
     MoreVertical,
     X,
     Phone,
@@ -50,7 +51,9 @@ import {
     Activity,
     BarChart,
     Zap,
-    ArrowUpRight
+    ArrowUpRight,
+    LayoutTemplate,
+    Download
 } from 'lucide-react';
 
 export const Icons = {
@@ -63,6 +66,7 @@ export const Icons = {
     ChevronLeft,
     ChevronRight,
     ChevronDown,
+    ChevronUp,
     More: MoreVertical,
     X,
     Phone,
@@ -120,5 +124,7 @@ export const Icons = {
     Activity,
     BarChart,
     Zap,
-    ArrowUpRight
+    ArrowUpRight,
+    LayoutTemplate,
+    Download
 };

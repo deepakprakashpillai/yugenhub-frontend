@@ -12,3 +12,4 @@ export { default as ProjectSlideOver } from './ProjectSlideOver';
 export { default as TaskModal } from './TaskModal';
 export { default as InviteUserModal } from './InviteUserModal';
 export { default as EditUserModal } from './EditUserModal';
+export { TemplateModal } from './TemplateModal';

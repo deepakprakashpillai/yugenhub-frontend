@@ -4,6 +4,7 @@ import api from '../api/axios';
 import { Icons } from '../components/Icons';
 import { TaskModal } from '../components/modals';
 import FloatingActionButton from '../components/FloatingActionButton';
+import { toast } from 'sonner';
 import TaskSection from '../components/TaskSection';
 import TaskFilters from '../components/TaskFilters';
 import clsx from 'clsx';
@@ -64,8 +65,10 @@ const TasksPage = () => {
         try {
             if (editingTask) {
                 await api.patch(`/tasks/${editingTask.id}`, formData);
+                toast.success("Task updated successfully");
             } else {
                 await api.post('/tasks', { ...formData });
+                toast.success("Task created successfully");
             }
             setRefreshTrigger(prev => prev + 1);
             setIsModalOpen(false);
@@ -79,6 +82,7 @@ const TasksPage = () => {
             }
         } catch (err) {
             console.error(err);
+            toast.error("Failed to save task");
         }
     };
 

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import clsx from 'clsx';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import { TemplateModal } from './TemplateModal';
 
 const ProjectSlideOver = ({
     isOpen,
@@ -40,6 +41,12 @@ const ProjectSlideOver = ({
 
     // Associates for Team Selection
     const [associates, setAssociates] = useState([]);
+
+    // Template Import State
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+
+    // Collapsible Sections State
+    const [isWeddingDetailsOpen, setIsWeddingDetailsOpen] = useState(false);
 
     // Fetch clients and associates
     useEffect(() => {
@@ -78,6 +85,7 @@ const ProjectSlideOver = ({
             setMetadata({});
             setEvents([]);
             setClientSearch('');
+            setShowTemplateModal(false);
         }
     }, [isOpen]);
 
@@ -114,6 +122,35 @@ const ProjectSlideOver = ({
             setClients(prev => [...prev, newClient]);
             handleSelectClient(newClient);
         });
+    };
+
+    const handleImportTemplate = (template) => {
+        if (events.length > 0) {
+            if (!confirm("Importing a template will replace existing events. Continue?")) return;
+        }
+
+        // Map template events to new instances with new IDs
+        const newEvents = (template.events || []).map(evt => ({
+            ...evt,
+            id: uuidv4(),
+            start_date: '',
+            start_time: '',
+            end_date: '',
+            end_time: '',
+            venue_name: '',
+            venue_location: '',
+            notes: evt.notes || '',
+            assignments: [], // Clear assignments as they are project specific usually
+            deliverables: (evt.deliverables || []).map(d => ({
+                ...d,
+                id: uuidv4(),
+                status: 'Pending',
+                due_date: ''
+            }))
+        }));
+
+        setEvents(newEvents);
+        toast.success(`Imported template: ${template.name}`);
     };
 
     // --- Event Handlers ---
@@ -335,151 +372,162 @@ const ProjectSlideOver = ({
         if (verticalType === 'wedding') {
             return (
                 <>
-                    <h4 className="text-sm uppercase tracking-widest text-zinc-500 font-medium mt-6 mb-3 flex items-center gap-2">
-                        <Icons.Heart className="w-4 h-4" />
-                        Wedding Details
-                    </h4>
+                    <button
+                        type="button"
+                        onClick={() => setIsWeddingDetailsOpen(!isWeddingDetailsOpen)}
+                        className="w-full flex items-center justify-between text-sm uppercase tracking-widest text-zinc-500 font-medium mt-6 mb-3 hover:text-zinc-300 transition-colors"
+                    >
+                        <span className="flex items-center gap-2">
+                            <Icons.Heart className="w-4 h-4" />
+                            Wedding Details
+                        </span>
+                        {isWeddingDetailsOpen ? <Icons.ChevronUp className="w-4 h-4" /> : <Icons.ChevronDown className="w-4 h-4" />}
+                    </button>
 
-                    <div className="mb-3">
-                        <label className="block text-xs text-zinc-400 mb-1">Side</label>
-                        <select
-                            name="side"
-                            value={metadata.side || 'both'}
-                            onChange={handleMetadataChange}
-                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                        >
-                            <option value="groom">Groom</option>
-                            <option value="bride">Bride</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
+                    {isWeddingDetailsOpen && (
+                        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="mb-3">
+                                <label className="block text-xs text-zinc-400 mb-1">Side</label>
+                                <select
+                                    name="side"
+                                    value={metadata.side || 'both'}
+                                    onChange={handleMetadataChange}
+                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                >
+                                    <option value="groom">Groom</option>
+                                    <option value="bride">Bride</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
 
-                    <div className="mb-3">
-                        <label className="block text-xs text-zinc-400 mb-1">Religion</label>
-                        <select
-                            name="religion"
-                            value={metadata.religion || 'Hindu'}
-                            onChange={handleMetadataChange}
-                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                        >
-                            <option value="Hindu">Hindu</option>
-                            <option value="Christian">Christian</option>
-                            <option value="Muslim">Muslim</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
+                            <div className="mb-3">
+                                <label className="block text-xs text-zinc-400 mb-1">Religion</label>
+                                <select
+                                    name="religion"
+                                    value={metadata.religion || 'Hindu'}
+                                    onChange={handleMetadataChange}
+                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                >
+                                    <option value="Hindu">Hindu</option>
+                                    <option value="Christian">Christian</option>
+                                    <option value="Muslim">Muslim</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Groom Name</label>
-                            <input
-                                type="text"
-                                name="groom_name"
-                                value={metadata.groom_name || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Groom's name"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Groom Number</label>
-                            <input
-                                type="tel"
-                                name="groom_number"
-                                value={metadata.groom_number || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Phone number"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                    </div>
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Groom Name</label>
+                                    <input
+                                        type="text"
+                                        name="groom_name"
+                                        value={metadata.groom_name || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="Groom's name"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Groom Number</label>
+                                    <input
+                                        type="tel"
+                                        name="groom_number"
+                                        value={metadata.groom_number || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="Phone number"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Bride Name</label>
-                            <input
-                                type="text"
-                                name="bride_name"
-                                value={metadata.bride_name || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Bride's name"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Bride Number</label>
-                            <input
-                                type="tel"
-                                name="bride_number"
-                                value={metadata.bride_number || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Phone number"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                    </div>
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Bride Name</label>
+                                    <input
+                                        type="text"
+                                        name="bride_name"
+                                        value={metadata.bride_name || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="Bride's name"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Bride Number</label>
+                                    <input
+                                        type="tel"
+                                        name="bride_number"
+                                        value={metadata.bride_number || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="Phone number"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Groom Age</label>
-                            <input
-                                type="number"
-                                name="groom_age"
-                                value={metadata.groom_age || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Age"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Bride Age</label>
-                            <input
-                                type="number"
-                                name="bride_age"
-                                value={metadata.bride_age || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Age"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                    </div>
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Groom Age</label>
+                                    <input
+                                        type="number"
+                                        name="groom_age"
+                                        value={metadata.groom_age || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="Age"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Bride Age</label>
+                                    <input
+                                        type="number"
+                                        name="bride_age"
+                                        value={metadata.bride_age || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="Age"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            </div>
 
-                    <div className="mb-3">
-                        <label className="block text-xs text-zinc-400 mb-1">Wedding Style</label>
-                        <input
-                            type="text"
-                            name="wedding_style"
-                            value={metadata.wedding_style || ''}
-                            onChange={handleMetadataChange}
-                            placeholder="e.g. Traditional, Modern, Destination"
-                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                        />
-                    </div>
+                            <div className="mb-3">
+                                <label className="block text-xs text-zinc-400 mb-1">Wedding Style</label>
+                                <input
+                                    type="text"
+                                    name="wedding_style"
+                                    value={metadata.wedding_style || ''}
+                                    onChange={handleMetadataChange}
+                                    placeholder="e.g. Traditional, Modern, Destination"
+                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                />
+                            </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Groom Location</label>
-                            <input
-                                type="text"
-                                name="groom_location"
-                                value={metadata.groom_location || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="City/Address"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Groom Location</label>
+                                    <input
+                                        type="text"
+                                        name="groom_location"
+                                        value={metadata.groom_location || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="City/Address"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-zinc-400 mb-1">Bride Location</label>
+                                    <input
+                                        type="text"
+                                        name="bride_location"
+                                        value={metadata.bride_location || ''}
+                                        onChange={handleMetadataChange}
+                                        placeholder="City/Address"
+                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-xs text-zinc-400 mb-1">Bride Location</label>
-                            <input
-                                type="text"
-                                name="bride_location"
-                                value={metadata.bride_location || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="City/Address"
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                            />
-                        </div>
-                    </div>
+                    )}
 
                     {/* Render Custom Fields defined in Config */}
                     {renderCustomFields(customFields, verticalType)}
@@ -607,194 +655,272 @@ const ProjectSlideOver = ({
     };
 
     const renderEventsSection = () => (
-        <div className="mt-8 border-t border-zinc-800 pt-6">
-            <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm uppercase tracking-widest text-zinc-500 font-medium flex items-center gap-2">
-                    <Icons.Calendar className="w-4 h-4" />
-                    Events & Deliverables
-                </h4>
-                <button
-                    onClick={handleAddEvent}
-                    className="text-xs flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                    <Icons.Plus className="w-3 h-3" />
-                    Add Event
-                </button>
+        <div className="mt-8 pt-6 border-t border-zinc-800/50">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h4 className="text-sm uppercase tracking-widest text-zinc-400 font-semibold flex items-center gap-2">
+                        <Icons.Calendar className="w-4 h-4 text-purple-400" />
+                        Events & Deliverables
+                    </h4>
+                    <p className="text-xs text-zinc-500 mt-1 ml-6">Manage project events and their deliverables</p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowTemplateModal(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-lg text-xs font-medium transition-all border border-zinc-700/50 hover:border-zinc-600"
+                    >
+                        <Icons.Download className="w-3.5 h-3.5" />
+                        Import Template
+                    </button>
+                    <button
+                        onClick={handleAddEvent}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
+                    >
+                        <Icons.Plus className="w-3.5 h-3.5" />
+                        Add Event
+                    </button>
+                </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
+                {events.length === 0 && (
+                    <div className="text-center py-8 border-2 border-dashed border-zinc-800 rounded-xl bg-zinc-900/30">
+                        <Icons.Calendar className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+                        <p className="text-sm text-zinc-400">No events added yet</p>
+                        <button
+                            onClick={handleAddEvent}
+                            className="text-xs text-purple-400 hover:text-purple-300 mt-2 font-medium"
+                        >
+                            + Add your first event
+                        </button>
+                    </div>
+                )}
+
                 {events.map((event, index) => (
-                    <div key={event.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                    <div key={event.id} className="bg-zinc-900/50 border border-zinc-800/80 rounded-xl overflow-hidden shadow-sm hover:border-zinc-700 transition-colors group">
                         {/* Event Header */}
-                        <div className="p-4 bg-zinc-800/50 flex flex-col gap-3">
-                            <div className="flex items-start justify-between gap-3">
-                                <input
-                                    type="text"
-                                    value={event.type}
-                                    onChange={(e) => handleEventChange(index, 'type', e.target.value)}
-                                    placeholder="Event Type (e.g., Wedding, Reception)"
-                                    className="flex-1 bg-transparent border-none text-white font-medium p-0 focus:ring-0 placeholder-zinc-600"
-                                />
+                        <div className="p-4 bg-zinc-800/30 border-b border-zinc-800/50 flex flex-col gap-4">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                    <label className="text-[10px] uppercase text-zinc-500 font-semibold mb-1.5 block tracking-wider">Event Type</label>
+                                    <input
+                                        type="text"
+                                        value={event.type}
+                                        onChange={(e) => handleEventChange(index, 'type', e.target.value)}
+                                        placeholder="e.g. Wedding Reception"
+                                        className="w-full bg-transparent border-0 border-b border-zinc-700 focus:border-purple-500 text-base font-medium text-white p-0 pb-1 focus:ring-0 placeholder-zinc-600 transition-colors"
+                                    />
+                                </div>
                                 <button
                                     onClick={() => handleRemoveEvent(index)}
-                                    className="text-zinc-500 hover:text-red-400 transition-colors"
+                                    className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                    title="Remove Event"
                                 >
-                                    <Icons.X className="w-4 h-4" />
+                                    <Icons.Trash className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            {/* Date/Time Inputs */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-[10px] text-zinc-500 mb-1">Start Date & Time</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="date"
-                                            value={event.start_date}
-                                            onChange={(e) => handleEventChange(index, 'start_date', e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        />
-                                        <input
-                                            type="time"
-                                            value={event.start_time}
-                                            onChange={(e) => handleEventChange(index, 'start_time', e.target.value)}
-                                            className="w-24 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Date & Time */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium">
+                                        <Icons.Clock className="w-3.5 h-3.5" />
+                                        Timing
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="text-[10px] text-zinc-500 mb-1 block">Start</label>
+                                            <div className="flex gap-1">
+                                                <input
+                                                    type="date"
+                                                    value={event.start_date}
+                                                    onChange={(e) => handleEventChange(index, 'start_date', e.target.value)}
+                                                    className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-xs text-zinc-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20"
+                                                />
+                                                <input
+                                                    type="time"
+                                                    value={event.start_time}
+                                                    onChange={(e) => handleEventChange(index, 'start_time', e.target.value)}
+                                                    className="w-20 bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-xs text-zinc-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] text-zinc-500 mb-1 block">End</label>
+                                            <div className="flex gap-1">
+                                                <input
+                                                    type="date"
+                                                    value={event.end_date}
+                                                    onChange={(e) => handleEventChange(index, 'end_date', e.target.value)}
+                                                    className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-xs text-zinc-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20"
+                                                />
+                                                <input
+                                                    type="time"
+                                                    value={event.end_time}
+                                                    onChange={(e) => handleEventChange(index, 'end_time', e.target.value)}
+                                                    className="w-20 bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-xs text-zinc-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] text-zinc-500 mb-1">End Date & Time</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="date"
-                                            value={event.end_date}
-                                            onChange={(e) => handleEventChange(index, 'end_date', e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        />
-                                        <input
-                                            type="time"
-                                            value={event.end_time}
-                                            onChange={(e) => handleEventChange(index, 'end_time', e.target.value)}
-                                            className="w-24 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Venue */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <input
-                                    type="text"
-                                    value={event.venue_name}
-                                    onChange={(e) => handleEventChange(index, 'venue_name', e.target.value)}
-                                    placeholder="Venue Name"
-                                    className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                />
-                                <input
-                                    type="text"
-                                    value={event.venue_location}
-                                    onChange={(e) => handleEventChange(index, 'venue_location', e.target.value)}
-                                    placeholder="Venue Location"
-                                    className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                />
+                                {/* Venue */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium">
+                                        <Icons.MapPin className="w-3.5 h-3.5" />
+                                        Venue
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="text-[10px] text-zinc-500 mb-1 block">Name</label>
+                                            <input
+                                                type="text"
+                                                value={event.venue_name}
+                                                onChange={(e) => handleEventChange(index, 'venue_name', e.target.value)}
+                                                placeholder="Venue Name"
+                                                className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-xs text-zinc-300 placeholder-zinc-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] text-zinc-500 mb-1 block">Location</label>
+                                            <input
+                                                type="text"
+                                                value={event.venue_location}
+                                                onChange={(e) => handleEventChange(index, 'venue_location', e.target.value)}
+                                                placeholder="Address/City"
+                                                className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1.5 text-xs text-zinc-300 placeholder-zinc-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Deliverables Section */}
-                        <div className="p-4 border-t border-zinc-800">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs text-zinc-500 font-medium">Deliverables</span>
-                                <button
-                                    onClick={() => handleAddDeliverable(index)}
-                                    className="text-[10px] text-purple-400 hover:text-purple-300"
-                                >
-                                    + Add Item
-                                </button>
-                            </div>
-                            <div className="space-y-2">
-                                {event.deliverables.map((del, dIndex) => (
-                                    <div key={del.id} className="flex items-start gap-2">
-                                        <select
-                                            value={del.type}
-                                            onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        >
-                                            {(config?.deliverableTypes || []).map(dt => (
-                                                <option key={dt} value={dt}>{dt}</option>
-                                            ))}
-                                        </select>
-                                        <input
-                                            type="number"
-                                            value={del.quantity}
-                                            onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
-                                            className="w-12 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white text-center"
-                                        />
-                                        <button
-                                            onClick={() => handleRemoveDeliverable(index, dIndex)}
-                                            className="text-zinc-600 hover:text-red-400 p-1"
-                                        >
-                                            <Icons.X className="w-3 h-3" />
-                                        </button>
+                        <div className="flex flex-col gap-px bg-zinc-800/50">
+                            {/* Deliverables Section */}
+                            <div className="p-5 bg-zinc-900/30">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
+                                        <Icons.Package className="w-4 h-4" />
+                                        Deliverables
+                                        <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs text-zinc-500 font-medium">{event.deliverables.length}</span>
                                     </div>
-                                ))}
+                                    <button
+                                        onClick={() => handleAddDeliverable(index)}
+                                        className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                    >
+                                        <Icons.Plus className="w-3.5 h-3.5" />
+                                        Add Item
+                                    </button>
+                                </div>
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {event.deliverables.map((del, dIndex) => (
+                                        <div key={del.id} className="flex items-center gap-3 bg-zinc-950/50 p-2.5 rounded-lg border border-zinc-800/50 group/item hover:border-zinc-700 transition-colors">
+                                            <select
+                                                value={del.type}
+                                                onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
+                                                className="flex-1 bg-transparent border-0 text-sm text-zinc-300 focus:ring-0 p-0 cursor-pointer"
+                                            >
+                                                <option value="" disabled>Select Type</option>
+                                                {(config?.deliverableTypes || []).map(dt => (
+                                                    <option key={dt} value={dt}>{dt}</option>
+                                                ))}
+                                            </select>
+                                            <div className="w-px h-6 bg-zinc-800"></div>
+                                            <input
+                                                type="number"
+                                                value={del.quantity}
+                                                onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
+                                                className="w-12 bg-transparent border-0 text-sm text-zinc-400 focus:text-white focus:ring-0 p-0 text-center font-medium"
+                                                min="1"
+                                            />
+                                            <button
+                                                onClick={() => handleRemoveDeliverable(index, dIndex)}
+                                                className="text-zinc-600 hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:bg-zinc-900"
+                                            >
+                                                <Icons.X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {event.deliverables.length === 0 && (
+                                        <div className="text-center py-6 border border-dashed border-zinc-800/50 rounded-lg bg-zinc-900/20">
+                                            <p className="text-xs text-zinc-500 italic">No deliverables added yet</p>
+                                            <button
+                                                onClick={() => handleAddDeliverable(index)}
+                                                className="text-xs text-purple-400 hover:text-purple-300 mt-1.5"
+                                            >
+                                                + Add one
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Team Section */}
-                        <div className="p-4 border-t border-zinc-800">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs text-zinc-500 font-medium">Team</span>
-                                <button
-                                    onClick={() => handleAddAssignment(index)}
-                                    className="text-[10px] text-purple-400 hover:text-purple-300"
-                                >
-                                    + Add Member
-                                </button>
-                            </div>
-                            <div className="space-y-2">
-                                {event.assignments.map((assign, aIndex) => (
-                                    <div key={assign.id} className="flex items-start gap-2">
-                                        <select
-                                            value={assign.associate_id}
-                                            onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
-                                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        >
-                                            <option value="">Select Associate</option>
-                                            {associates.map(assoc => (
-                                                <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
-                                            ))}
-                                        </select>
-                                        <input
-                                            type="text"
-                                            value={assign.role}
-                                            onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
-                                            placeholder="Role"
-                                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        />
-                                        <button
-                                            onClick={() => handleRemoveAssignment(index, aIndex)}
-                                            className="text-zinc-600 hover:text-red-400 p-1"
-                                        >
-                                            <Icons.X className="w-3 h-3" />
-                                        </button>
+                            {/* Team Section */}
+                            <div className="p-5 bg-zinc-900/30 border-t border-zinc-800/50">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
+                                        <Icons.Users className="w-4 h-4" />
+                                        Team Assignments
+                                        <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs text-zinc-500 font-medium">{event.assignments.length}</span>
                                     </div>
-                                ))}
+                                    <button
+                                        onClick={() => handleAddAssignment(index)}
+                                        className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                    >
+                                        <Icons.Plus className="w-3.5 h-3.5" />
+                                        Add Member
+                                    </button>
+                                </div>
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {event.assignments.map((assign, aIndex) => (
+                                        <div key={assign.id} className="grid grid-cols-[1fr,1fr,auto] gap-3 items-center bg-zinc-950/50 p-2.5 rounded-lg border border-zinc-800/50 group/item hover:border-zinc-700 transition-colors">
+                                            <div className="min-w-0">
+                                                <select
+                                                    value={assign.associate_id}
+                                                    onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
+                                                    className="w-full bg-transparent border-0 text-sm text-zinc-300 focus:ring-0 p-0 cursor-pointer"
+                                                >
+                                                    <option value="" disabled>Select Member</option>
+                                                    {associates.map(assoc => (
+                                                        <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="min-w-0 border-l border-zinc-800 pl-3">
+                                                <input
+                                                    type="text"
+                                                    value={assign.role}
+                                                    onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
+                                                    placeholder="Role (e.g. Lead)"
+                                                    className="w-full bg-transparent border-0 text-sm text-zinc-400 focus:text-zinc-200 focus:ring-0 p-0 placeholder-zinc-700"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => handleRemoveAssignment(index, aIndex)}
+                                                className="text-zinc-600 hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:bg-zinc-900"
+                                            >
+                                                <Icons.X className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {event.assignments.length === 0 && (
+                                        <div className="text-center py-6 border border-dashed border-zinc-800/50 rounded-lg bg-zinc-900/20">
+                                            <p className="text-xs text-zinc-500 italic">No team members assigned</p>
+                                            <button
+                                                onClick={() => handleAddAssignment(index)}
+                                                className="text-xs text-purple-400 hover:text-purple-300 mt-1.5"
+                                            >
+                                                + Assign someone
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 ))}
-
-                {events.length === 0 && (
-                    <div className="text-center py-6 border-2 border-dashed border-zinc-800 rounded-xl">
-                        <p className="text-zinc-500 text-sm">No events added yet</p>
-                        <button
-                            onClick={handleAddEvent}
-                            className="text-purple-400 hover:text-purple-300 text-sm mt-2"
-                        >
-                            Create your first event
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
@@ -805,7 +931,7 @@ const ProjectSlideOver = ({
             onClose={onClose}
             title="Add New Project"
             subtitle={`Create a new ${vertical} project`}
-            width="max-w-2xl"
+            width="max-w-4xl"
         >
             <div className="p-5 space-y-4">
                 {/* Client Selection */}
@@ -951,6 +1077,14 @@ const ProjectSlideOver = ({
                     </button>
                 </div>
             </div>
+            {/* Template Selection Modal */}
+            <TemplateModal
+                isOpen={showTemplateModal}
+                onClose={() => setShowTemplateModal(false)}
+                onSelect={handleImportTemplate}
+                mode="select"
+                initialVertical={vertical}
+            />
         </SlideOver>
     );
 };

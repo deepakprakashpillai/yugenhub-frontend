@@ -150,7 +150,7 @@ function App() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <AgencyConfigProvider>
-          <Toaster theme="dark" position="bottom-right" richColors />
+          <Toaster theme="dark" position="bottom-right" richColors closeButton />
           <AppRoutes />
         </AgencyConfigProvider>
       </AuthProvider>

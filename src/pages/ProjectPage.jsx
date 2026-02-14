@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 
 // Modals
-import { ConfirmDeleteModal, TeamMemberModal, MetadataModal, EventSlideOver, TaskModal } from '../components/modals';
+import { ConfirmDeleteModal, TeamMemberModal, MetadataModal, EventSlideOver, TaskModal, TemplateModal } from '../components/modals';
 import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
 
@@ -605,6 +605,7 @@ const ProjectPage = () => {
     const [teamMemberModal, setTeamMemberModal] = useState({ open: false, eventId: null, assignment: null });
     const [deleteTeamMemberModal, setDeleteTeamMemberModal] = useState({ open: false, eventId: null, assignment: null });
     const [metadataModal, setMetadataModal] = useState(false);
+    const [saveTemplateModal, setSaveTemplateModal] = useState(false); // NEW
     const [statusDropdown, setStatusDropdown] = useState(false);
 
     // Task Integration (Unified for both general tasks and deliverables)
@@ -656,6 +657,22 @@ const ProjectPage = () => {
         } finally {
             setActionLoading(false);
             setDeleteProjectModal(false);
+        }
+    };
+
+    // === SAVE AS TEMPLATE ===
+    const handleSaveTemplate = async (templateData) => {
+        setActionLoading(true);
+        try {
+            // Add project_id to the payload to tell backend to copy structure
+            await api.post('/templates', { ...templateData, project_id: id });
+            toast.success("Project saved as template!");
+            setSaveTemplateModal(false);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save template");
+        } finally {
+            setActionLoading(false);
         }
     };
 
@@ -926,13 +943,22 @@ const ProjectPage = () => {
                         <Icons.Edit className="w-4 h-4" />
                         Edit Details
                     </button>
-                    <button
-                        onClick={() => setDeleteProjectModal(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-medium"
-                    >
-                        <Icons.Trash className="w-4 h-4" />
-                        Delete
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setSaveTemplateModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                            <Icons.LayoutTemplate className="w-4 h-4" />
+                            Save as Template
+                        </button>
+                        <button
+                            onClick={() => setDeleteProjectModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            <Icons.Trash className="w-4 h-4" />
+                            Delete Project
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1099,6 +1125,16 @@ const ProjectPage = () => {
                 loading={actionLoading}
             />
 
+            {/* Template Modal */}
+            <TemplateModal
+                isOpen={saveTemplateModal}
+                onClose={() => setSaveTemplateModal(false)}
+                onSave={() => setSaveTemplateModal(false)}
+                mode="create"
+                initialVertical={project?.vertical}
+                projectId={id}
+            />
+
             {/* Metadata Modal */}
             <MetadataModal
                 isOpen={metadataModal}
@@ -1116,7 +1152,6 @@ const ProjectPage = () => {
                 onClose={() => setTeamMemberModal({ open: false, eventId: null, assignment: null })}
                 onSave={handleSaveTeamMember}
                 assignment={teamMemberModal.assignment}
-                loading={actionLoading}
             />
 
             {/* Delete Team Member Modal */}

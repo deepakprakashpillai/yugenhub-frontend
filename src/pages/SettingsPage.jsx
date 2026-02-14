@@ -5,6 +5,7 @@ import {
     Building2, Users, Workflow, Layers, Bell, Download, AlertTriangle,
     GripVertical
 } from 'lucide-react';
+import { Icons } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
 
 // Import extracted sections
@@ -14,12 +15,14 @@ import WorkflowSection from '../components/settings/WorkflowSection';
 import VerticalsSection from '../components/settings/VerticalsSection';
 import NotificationsSection from '../components/settings/NotificationsSection';
 import ExportSection from '../components/settings/ExportSection';
+import TemplatesSection from '../components/settings/TemplatesSection';
 
 const SECTIONS = [
     { id: 'org', label: 'Organisation', icon: Building2, roles: ['owner', 'admin', 'member'] },
     { id: 'team', label: 'Team', icon: Users, roles: ['owner', 'admin', 'member'] },
     { id: 'workflow', label: 'Workflow', icon: Workflow, roles: ['owner', 'admin', 'member'] },
     { id: 'verticals', label: 'Verticals', icon: Layers, roles: ['owner', 'admin'] },
+    { id: 'templates', label: 'Templates', icon: Icons.LayoutTemplate, roles: ['owner', 'admin'] },
     { id: 'notifications', label: 'Notifications', icon: Bell, roles: ['owner', 'admin', 'member'] },
     { id: 'export', label: 'Data Export', icon: Download, roles: ['owner', 'admin'] },
     { id: 'danger', label: 'Danger Zone', icon: AlertTriangle, roles: ['owner'] },
@@ -57,6 +60,7 @@ function SettingsPage() {
             case 'team': return <TeamSection role={role} />;
             case 'workflow': return <WorkflowSection role={role} />;
             case 'verticals': return <VerticalsSection role={role} />;
+            case 'templates': return <TemplatesSection />;
             case 'notifications': return <NotificationsSection />;
             case 'export': return <ExportSection />;
             case 'danger': return <DangerZone />;
