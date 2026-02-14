@@ -6,15 +6,14 @@ export const AGENCY_CONFIG = {
     suffix: "HUB",
     primaryColor: "#ef4444",
   },
-  
+
   // GLOBAL SETTINGS (From your old Schema)
   statusOptions: [
-    { id: 'enquiry', label: 'Enquiry', color: '#71717a' },
-    { id: 'booked', label: 'Booked', color: '#3b82f6' },
-    { id: 'production', label: 'Production', color: '#a855f7' },
-    { id: 'review', label: 'Review', color: '#eab308' },
-    { id: 'completed', label: 'Completed', color: '#22c55e' },
-    { id: 'cancelled', label: 'Cancelled', color: '#ef4444' }
+    { id: 'enquiry', label: 'Enquiry', color: '#71717a', fixed: true },
+    { id: 'booked', label: 'Booked', color: '#3b82f6', fixed: true },
+    { id: 'ongoing', label: 'Ongoing', color: '#a855f7', fixed: true },
+    { id: 'completed', label: 'Completed', color: '#22c55e', fixed: true },
+    { id: 'cancelled', label: 'Cancelled', color: '#ef4444', fixed: true }
   ],
 
   leadSources: ['Instagram', 'WhatsApp', 'Website', 'Referral', 'Event', 'Other'],

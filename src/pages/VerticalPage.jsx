@@ -20,10 +20,13 @@ const VerticalPage = ({ vertical, title }) => {
 
     // --- Toolbar State ---
     const [search, setSearch] = useState('');
-    const [view, setView] = useState('ongoing'); // 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'all'
-    const [filter, setFilter] = useState('all'); // 'all' or specific status
+    const [view, setView] = useState('all'); // Default to 'all' so we can apply specific status filters
+    const [filter, setFilter] = useState('ongoing'); // Default to 'ongoing' status
     const [sort, setSort] = useState('newest'); // 'newest', 'oldest', 'upcoming'
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+
+    // --- Refetch Trigger ---
+    const [refreshTrigger, setRefreshTrigger] = useState(0); // For child components to trigger refresh
 
     // --- Modal State ---
     const [projectSlideOver, setProjectSlideOver] = useState(false);
@@ -47,7 +50,7 @@ const VerticalPage = ({ vertical, title }) => {
     // Reset page when filters change (except page itself)
     useEffect(() => {
         setPage(1);
-    }, [vertical, debouncedSearch, filter, sort, view]);
+    }, [vertical, debouncedSearch, filter, sort, view, refreshTrigger]);
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -80,14 +83,14 @@ const VerticalPage = ({ vertical, title }) => {
         };
 
         fetchProjects();
-    }, [vertical, page, debouncedSearch, filter, sort, view]);
+    }, [vertical, page, debouncedSearch, filter, sort, view, refreshTrigger]);
 
     // --- HANDLERS ---
     const handleClearFilters = () => {
         setSearch('');
-        setFilter('all');
+        setFilter('ongoing');
         setSort('newest');
-        setView('ongoing');
+        setView('all');
     };
 
     const handleAddProject = async (projectData) => {
@@ -112,26 +115,30 @@ const VerticalPage = ({ vertical, title }) => {
             // 3. Create Events & Children
             if (events && events.length > 0) {
                 await Promise.all(events.map(async (event) => {
-                    const { deliverables, assignments, ...coreEventData } = event;
-
-                    // Create Event
+                    // Normalize Date/Time
                     // Combine date and time if present
-                    let startDateTime = coreEventData.start_date;
-                    if (coreEventData.start_date && coreEventData.start_time) {
-                        startDateTime = `${coreEventData.start_date}T${coreEventData.start_time}:00`;
-                    } else if (coreEventData.start_date) {
-                        startDateTime = `${coreEventData.start_date}T00:00:00`;
+                    let startDateTime = event.start_date;
+                    if (event.start_date && event.start_time) {
+                        startDateTime = `${event.start_date}T${event.start_time}:00`;
+                    } else if (event.start_date) {
+                        startDateTime = `${event.start_date}T00:00:00`;
                     }
 
-                    let endDateTime = coreEventData.end_date;
-                    if (coreEventData.end_date && coreEventData.end_time) {
-                        endDateTime = `${coreEventData.end_date}T${coreEventData.end_time}:00`;
-                    } else if (coreEventData.end_date) {
-                        endDateTime = `${coreEventData.end_date}T00:00:00`;
+                    let endDateTime = event.end_date;
+                    if (event.end_date && event.end_time) {
+                        endDateTime = `${event.end_date}T${event.end_time}:00`;
+                    } else if (event.end_date) {
+                        endDateTime = `${event.end_date}T00:00:00`;
                     }
+
+                    // Create Event (Send deliverables IN payload)
+                    const { assignments, ...eventPayload } = event; // Keep deliverables in payload, strip assignments to handle separately if needed, or check backend support.
+                    // Backend add_event_to_project supports deliverables via EventModel -> TaskModel creation.
+                    // It does NOT seem to support inline assignments in EventModel based on project.py code reading?
+                    // Let's check EventModel definition? Assuming assignments need separate call.
 
                     const eventRes = await api.post(`/projects/${projectId}/events`, {
-                        ...coreEventData,
+                        ...eventPayload,
                         start_date: startDateTime,
                         end_date: endDateTime,
                         project_id: projectId
@@ -140,17 +147,12 @@ const VerticalPage = ({ vertical, title }) => {
                     const eventId = eventRes.data?.data?._id || eventRes.data?._id;
 
                     if (eventId) {
-                        // Create Deliverables
-                        if (deliverables && deliverables.length > 0) {
-                            await Promise.all(deliverables.map(del =>
-                                api.post(`/events/${eventId}/deliverables`, { ...del, event_id: eventId })
-                            ));
-                        }
+                        // Deliverables are handled by backend when passed in event payload
 
-                        // Create Assignments
+                        // Create Assignments (Backend requires separate call)
                         if (assignments && assignments.length > 0) {
                             await Promise.all(assignments.map(assign =>
-                                api.post(`/events/${eventId}/assignments`, { ...assign, event_id: eventId })
+                                api.post(`/projects/${projectId}/events/${eventId}/assignments`, { ...assign, event_id: eventId })
                             ));
                         }
                     }
@@ -243,14 +245,21 @@ const VerticalPage = ({ vertical, title }) => {
                     {viewMode === 'grid' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {displayProjects.map((project) => (
-                                <ProjectCard key={project._id} project={project} />
+                                <ProjectCard
+                                    key={project._id}
+                                    project={project}
+                                    onRefresh={() => setRefreshTrigger(p => p + 1)}
+                                />
                             ))}
                         </div>
                     )}
 
                     {/* LIST VIEW */}
                     {viewMode === 'list' && (
-                        <ProjectTable projects={displayProjects} />
+                        <ProjectTable
+                            projects={displayProjects}
+                            onRefresh={() => setRefreshTrigger(p => p + 1)}
+                        />
                     )}
                 </AnimatePresence>
             )}

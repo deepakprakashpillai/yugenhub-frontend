@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 /**
  * DeliverableModal - Specialized for managing Event Deliverables.
@@ -17,6 +18,7 @@ const DeliverableModal = ({
 }) => {
     // State to toggle between View and Edit modes
     const [viewMode, setViewMode] = useState(false);
+    const { config } = useAgencyConfig();
 
     useEffect(() => {
         if (isOpen) {
@@ -168,17 +170,20 @@ const DeliverableModal = ({
             <div className="flex gap-4">
                 <div className="flex-1">
                     <label className="block text-xs uppercase text-zinc-500 font-bold mb-1.5">
-                        Deliverable Name <span className="text-red-500">*</span>
+                        Deliverable Type <span className="text-red-500">*</span>
                     </label>
-                    <input
-                        type="text"
+                    <select
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="e.g. Candid Photos, Wedding Film"
                         className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
                         autoFocus
-                    />
+                    >
+                        <option value="">Select Type</option>
+                        {(config?.deliverableTypes || []).map(dt => (
+                            <option key={dt} value={dt}>{dt}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="w-24">
                     <label className="block text-xs uppercase text-zinc-500 font-bold mb-1.5">Qty</label>

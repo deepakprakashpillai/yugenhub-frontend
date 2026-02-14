@@ -5,6 +5,7 @@ import api from '../../api/axios';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import clsx from 'clsx';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 const ProjectSlideOver = ({
     isOpen,
@@ -14,10 +15,12 @@ const ProjectSlideOver = ({
     vertical,
     loading = false
 }) => {
+    const { config } = useAgencyConfig();
     const [formData, setFormData] = useState({
         client_id: '',
         client_name: '',
         status: 'enquiry',
+        lead_source: 'Youtube',
         notes: ''
     });
 
@@ -69,6 +72,7 @@ const ProjectSlideOver = ({
                 client_id: '',
                 client_name: '',
                 status: 'enquiry',
+                lead_source: 'Youtube',
                 notes: ''
             });
             setMetadata({});
@@ -147,7 +151,7 @@ const ProjectSlideOver = ({
             const newEvents = [...prev];
             newEvents[eventIndex].deliverables.push({
                 id: uuidv4(),
-                type: 'Cinematography', // Default
+                type: '', // User selects from config
                 quantity: 1,
                 status: 'Pending',
                 due_date: '',
@@ -256,11 +260,79 @@ const ProjectSlideOver = ({
         onSave(projectData);
     };
 
+    // System Fields Configuration
+    const SYSTEM_FIELDS = {
+        wedding: [
+            'client_side', 'religion', 'groom_name', 'groom_number', 'bride_name',
+            'bride_number', 'groom_age', 'bride_age', 'wedding_style',
+            'groom_location', 'bride_location'
+        ],
+        children: [
+            'child_name', 'child_age', 'occasion_type', 'mother_name',
+            'father_name', 'address'
+        ]
+    };
+
+    // Helper to render dynamic custom fields
+    const renderCustomFields = (fields, type) => {
+        if (!fields || fields.length === 0) return null;
+
+        // Filter out system fields to avoid duplicates
+        const systemFields = SYSTEM_FIELDS[type] || [];
+        const filteredFields = fields.filter(f => !systemFields.includes(f.name));
+
+        if (filteredFields.length === 0) return null;
+
+        return (
+            <div className="space-y-3 mt-4">
+                {filteredFields.map(field => (
+                    <div key={field.name}>
+                        <label className="block text-xs text-zinc-400 mb-1">{field.label}</label>
+                        {field.type === 'select' ? (
+                            <select
+                                name={field.name}
+                                value={metadata[field.name] || ''}
+                                onChange={handleMetadataChange}
+                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                            >
+                                <option value="">Select {field.label}</option>
+                                {field.options?.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : field.type === 'date' ? 'date' : 'text'}
+                                name={field.name}
+                                value={metadata[field.name] || ''}
+                                onChange={handleMetadataChange}
+                                placeholder={field.label}
+                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                            />
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     // Vertical-specific fields
     const renderVerticalFields = () => {
-        const v = vertical?.toLowerCase();
+        const vId = vertical?.toLowerCase();
+        // Find config for this vertical
+        const configVertical = config?.verticals?.find(v => v.id === vId);
 
-        if (v === 'knots') {
+        // Determine type with fallback for migration
+        let verticalType = configVertical?.type;
+        if (!verticalType) {
+            if (vId === 'knots') verticalType = 'wedding';
+            else if (vId === 'pluto') verticalType = 'children';
+            else verticalType = 'general';
+        }
+
+        const customFields = configVertical?.fields || [];
+
+        if (verticalType === 'wedding') {
             return (
                 <>
                     <h4 className="text-sm uppercase tracking-widest text-zinc-500 font-medium mt-6 mb-3 flex items-center gap-2">
@@ -408,11 +480,14 @@ const ProjectSlideOver = ({
                             />
                         </div>
                     </div>
+
+                    {/* Render Custom Fields defined in Config */}
+                    {renderCustomFields(customFields, verticalType)}
                 </>
             );
         }
 
-        if (v === 'pluto') {
+        if (verticalType === 'children') {
             return (
                 <>
                     <h4 className="text-sm uppercase tracking-widest text-zinc-500 font-medium mt-6 mb-3 flex items-center gap-2">
@@ -496,63 +571,37 @@ const ProjectSlideOver = ({
                             className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                         />
                     </div>
+
+                    {/* Render Custom Fields defined in Config */}
+                    {renderCustomFields(customFields, verticalType)}
                 </>
             );
         }
 
-        if (v === 'festia') {
-            return (
-                <>
-                    <h4 className="text-sm uppercase tracking-widest text-zinc-500 font-medium mt-6 mb-3 flex items-center gap-2">
-                        <Icons.Calendar className="w-4 h-4" />
-                        Event Details
-                    </h4>
-                    <div className="mb-3">
-                        <label className="block text-xs text-zinc-400 mb-1">Scale</label>
-                        <select
-                            name="event_scale"
-                            value={metadata.event_scale || 'private'}
-                            onChange={handleMetadataChange}
-                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                        >
-                            <option value="private">Private</option>
-                            <option value="corporate">Corporate</option>
-                            <option value="mass">Mass</option>
-                        </select>
-                    </div>
-                    <div className="mb-3">
-                        <label className="block text-xs text-zinc-400 mb-1">Company Name</label>
-                        <input
-                            type="text"
-                            name="company_name"
-                            value={metadata.company_name || ''}
-                            onChange={handleMetadataChange}
-                            placeholder="Company Name (if applicable)"
-                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                        />
-                    </div>
-                </>
-            );
-        }
-
-        // Default / Thryv
+        // General / Other
         return (
             <>
                 <h4 className="text-sm uppercase tracking-widest text-zinc-500 font-medium mt-6 mb-3 flex items-center gap-2">
                     <Icons.Briefcase className="w-4 h-4" />
                     Project Details
                 </h4>
-                <div>
-                    <label className="block text-xs text-zinc-400 mb-1">Project Type</label>
-                    <input
-                        type="text"
-                        name="project_type"
-                        value={metadata.project_type || ''}
-                        onChange={handleMetadataChange}
-                        placeholder="e.g., Corporate Video, Product Shoot"
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                    />
-                </div>
+
+                {/* Render Custom Fields defined in Config */}
+                {renderCustomFields(customFields, verticalType)}
+
+                {(!customFields || customFields.length === 0) && (
+                    <div>
+                        <label className="block text-xs text-zinc-400 mb-1">Project Type</label>
+                        <input
+                            type="text"
+                            name="project_type"
+                            value={metadata.project_type || ''}
+                            onChange={handleMetadataChange}
+                            placeholder="e.g., Corporate Video, Product Shoot"
+                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                        />
+                    </div>
+                )}
             </>
         );
     };
@@ -665,13 +714,15 @@ const ProjectSlideOver = ({
                             <div className="space-y-2">
                                 {event.deliverables.map((del, dIndex) => (
                                     <div key={del.id} className="flex items-start gap-2">
-                                        <input
-                                            type="text"
+                                        <select
                                             value={del.type}
                                             onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                            placeholder="Type (e.g. Photo)"
                                             className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs text-white"
-                                        />
+                                        >
+                                            {(config?.deliverableTypes || []).map(dt => (
+                                                <option key={dt} value={dt}>{dt}</option>
+                                            ))}
+                                        </select>
                                         <input
                                             type="number"
                                             value={del.quantity}
@@ -828,10 +879,28 @@ const ProjectSlideOver = ({
                         onChange={handleChange}
                         className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
                     >
-                        <option value="enquiry">Enquiry</option>
-                        <option value="booked">Booked</option>
-                        <option value="production">Production</option>
-                        <option value="completed">Completed</option>
+                        {(config?.statusOptions || []).map(option => (
+                            <option key={option.id} value={option.id}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Lead Source */}
+                <div>
+                    <label className="block text-sm text-zinc-400 mb-1">Lead Source</label>
+                    <select
+                        name="lead_source"
+                        value={formData.lead_source}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                    >
+                        {(config?.leadSources || []).map(source => (
+                            <option key={source} value={source}>
+                                {source}
+                            </option>
+                        ))}
                     </select>
                 </div>
 

@@ -10,17 +10,20 @@ import {
   MoreVertical,
   Code,
   Bell,
-  Calendar
+  Calendar,
+  Settings
 } from 'lucide-react';
 import { AGENCY_CONFIG } from '../config';
 import { THEME_CONFIG } from '../theme';
 import { useAuth } from '../context/AuthContext';
+import { useAgencyConfig } from '../context/AgencyConfigContext';
 import api from '../api/axios';
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, notificationCount } = useAuth();
+  const { config: agencyConfig } = useAgencyConfig();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef(null);
   const currentPath = location.pathname;
@@ -41,7 +44,10 @@ export default function Sidebar() {
     navigate('/login');
   };
 
-  if (!AGENCY_CONFIG || !THEME_CONFIG) return null;
+  if (!THEME_CONFIG) return null;
+
+  // Use dynamic config from context, fall back to static AGENCY_CONFIG
+  const currentConfig = agencyConfig || AGENCY_CONFIG;
 
   const opsItems = [
     { id: 'tasks', label: 'Tasks', icon: ClipboardList },
@@ -99,9 +105,9 @@ export default function Sidebar() {
 
       <div className="p-6 pb-4">
         <h1 className={(THEME_CONFIG.text?.heading || "") + " text-white"}>
-          {AGENCY_CONFIG.brand?.name}
+          {currentConfig.brand?.name || AGENCY_CONFIG?.brand?.name}
           <span style={{ color: THEME_CONFIG.accents?.default?.primary }}>
-            {AGENCY_CONFIG.brand?.suffix}
+            {currentConfig.brand?.suffix || AGENCY_CONFIG?.brand?.suffix}
           </span>
         </h1>
       </div>
@@ -123,25 +129,37 @@ export default function Sidebar() {
           </NavLink>
         </div>
 
-        {renderNavGroup("Verticals", AGENCY_CONFIG.verticals || [], true)}
+        {renderNavGroup("Verticals", currentConfig.verticals || AGENCY_CONFIG?.verticals || [], true)}
         {renderNavGroup("Operations", opsItems)}
         {renderNavGroup("Directory", managementItems)}
       </nav>
 
-      {/* NOTIFICATIONS - Fixed at bottom of nav area */}
-      <div className="px-4 mb-2 pt-2 border-t border-zinc-900">
+      {/* NOTIFICATIONS & SETTINGS - Fixed at bottom of nav area */}
+      <div className="px-4 mb-2 pt-2 border-t border-zinc-900 space-y-1">
         <button
           onClick={() => navigate('/notifications')}
           className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-zinc-500 hover:bg-zinc-900/50 hover:text-white group transition-all"
         >
           <Bell size={14} className="text-zinc-700 group-hover:text-zinc-400" />
-          <span className={THEME_CONFIG.text?.nav || ""}>NOTIFICATIONS</span>
+          <span className={THEME_CONFIG.text?.nav || ""}>{"NOTIFICATIONS"}</span>
           {notificationCount > 0 && (
             <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               {notificationCount}
             </span>
           )}
         </button>
+        <NavLink
+          to="/settings"
+          className={`
+            ${THEME_CONFIG.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+            ${currentPath === '/settings'
+              ? 'bg-white text-black font-black'
+              : 'text-zinc-500 hover:bg-zinc-900/50 hover:text-white group'}
+          `}
+        >
+          <Settings size={14} className={currentPath === '/settings' ? 'text-black' : 'text-zinc-700 group-hover:text-zinc-400'} />
+          SETTINGS
+        </NavLink>
       </div>
 
       {/* USER FOOTER */}

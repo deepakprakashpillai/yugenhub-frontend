@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -17,27 +18,22 @@ import { WeddingTemplate, KidsTemplate, EventsTemplate, GenericTemplate } from '
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
-    const statusConfig = {
-        'Pending': { bg: 'bg-zinc-700', text: 'text-zinc-300', icon: Icons.Clock },
-        'In Progress': { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: Icons.Loader },
-        'Completed': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: Icons.CheckCircle },
-        'Delivered': { bg: 'bg-blue-500/20', text: 'text-blue-400', icon: Icons.Package },
-        'enquiry': { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: Icons.AlertCircle },
-        'booked': { bg: 'bg-cyan-500/20', text: 'text-cyan-400', icon: Icons.CheckCircle },
-        'ongoing': { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: Icons.Loader },
-        'completed': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', icon: Icons.CheckCircle },
-    };
-
-    const config = statusConfig[status] || statusConfig['Pending'];
-    const Icon = config.icon;
+    const { config } = useAgencyConfig();
+    const statusConfig = config?.statusOptions?.find(s => s.id === status);
+    const color = statusConfig?.color || '#71717a';
+    const label = statusConfig?.label || status;
 
     return (
-        <span className={clsx(
-            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize",
-            config.bg, config.text
-        )}>
-            <Icon className="w-3 h-3" />
-            {status}
+        <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize border"
+            style={{
+                borderColor: `${color}33`,
+                color: color,
+                backgroundColor: `${color}15`,
+            }}
+        >
+            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+            {label}
         </span>
     );
 };
@@ -64,19 +60,221 @@ const ProgressBar = ({ total, completed, className }) => {
 
 // Template Switcher Component
 const VerticalTemplate = ({ project }) => {
-    const vertical = project?.vertical?.toLowerCase();
+    const { config } = useAgencyConfig();
+    const verticalId = project?.vertical?.toLowerCase();
 
-    switch (vertical) {
-        case 'knots':
-            return <WeddingTemplate project={project} />;
-        case 'pluto':
-            return <KidsTemplate project={project} />;
-        case 'festia':
-            return <EventsTemplate project={project} />;
-        case 'thryv':
-        default:
-            return <GenericTemplate project={project} />;
+    // Find config for this vertical
+    const configVertical = config?.verticals?.find(v => v.id === verticalId);
+
+    // Determine type with fallback
+    let verticalType = configVertical?.type;
+    if (!verticalType) {
+        if (verticalId === 'knots') verticalType = 'wedding';
+        else if (verticalId === 'pluto') verticalType = 'children';
+        else verticalType = 'general';
     }
+
+    // System Fields Configuration
+    const SYSTEM_FIELDS = {
+        wedding: [
+            'client_side', 'religion', 'groom_name', 'groom_number', 'bride_name',
+            'bride_number', 'groom_age', 'bride_age', 'wedding_style',
+            'groom_location', 'bride_location'
+        ],
+        children: [
+            'child_name', 'child_age', 'occasion_type', 'mother_name',
+            'father_name', 'address'
+        ]
+    };
+
+    const customFields = configVertical?.fields || [];
+    const metadata = project?.metadata || {};
+
+    // Helper to render custom fields
+    const renderCustomFields = () => {
+        if (!customFields.length) return null;
+
+        // Filter out system fields
+        const systemFields = SYSTEM_FIELDS[verticalType] || [];
+        const filteredFields = customFields.filter(f => !systemFields.includes(f.name));
+
+        if (filteredFields.length === 0) return null;
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-zinc-800">
+                {filteredFields.map(field => (
+                    <div key={field.name}>
+                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{field.label}</h4>
+                        <p className="text-white font-medium">{metadata[field.name] || '—'}</p>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    if (verticalType === 'wedding') {
+        return (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <Icons.Heart className="w-5 h-5 text-pink-500" />
+                    Wedding Details
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Groom Side */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
+                                <span className="text-lg">🤵</span>
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white">Groom</h4>
+                                <p className="text-xs text-zinc-500">Side</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-zinc-500 mb-1">Name</label>
+                            <p className="text-white text-lg">{metadata.groom_name || '—'}</p>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-zinc-500 mb-1">Contact</label>
+                            <p className="text-white font-mono">{metadata.groom_number || '—'}</p>
+                        </div>
+                    </div>
+
+                    {/* Bride Side */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
+                                <span className="text-lg">👰</span>
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white">Bride</h4>
+                                <p className="text-xs text-zinc-500">Side</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-zinc-500 mb-1">Name</label>
+                            <p className="text-white text-lg">{metadata.bride_name || '—'}</p>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-zinc-500 mb-1">Contact</label>
+                            <p className="text-white font-mono">{metadata.bride_number || '—'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-zinc-800">
+                    <div>
+                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Style</h4>
+                        <p className="text-white">{metadata.wedding_style || '—'}</p>
+                    </div>
+                    <div>
+                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Religion</h4>
+                        <p className="text-white">{metadata.religion || '—'}</p>
+                    </div>
+                    <div>
+                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Client Side</h4>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 capitalize">
+                            {metadata.side || 'both'}
+                        </span>
+                    </div>
+                </div>
+
+                {renderCustomFields()}
+            </div>
+        );
+    }
+
+    if (verticalType === 'children') {
+        return (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <Icons.Star className="w-5 h-5 text-yellow-500" />
+                    Event Details
+                </h3>
+
+                <div className="flex items-start gap-6">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
+                        👶
+                    </div>
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Child's Name</h4>
+                            <p className="text-2xl font-bold text-white">{metadata.child_name || '—'}</p>
+                        </div>
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Occasion</h4>
+                            <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-sm font-medium capitalize">
+                                    {metadata.occasion_type || 'Birthday'}
+                                </span>
+                                {metadata.child_age && (
+                                    <span className="px-3 py-1 rounded-full bg-zinc-800 text-white text-sm">
+                                        Turned {metadata.child_age}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Parents</h4>
+                            <p className="text-white">
+                                {metadata.father_name && metadata.mother_name
+                                    ? `${metadata.father_name} & ${metadata.mother_name}`
+                                    : (metadata.father_name || metadata.mother_name || '—')}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Address</h4>
+                            <p className="text-white text-sm line-clamp-2">{metadata.address || '—'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {renderCustomFields()}
+            </div>
+        );
+    }
+
+    // General / Other
+    return (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <Icons.Briefcase className="w-5 h-5 text-blue-500" />
+                Project Details
+            </h3>
+
+            {(customFields.length > 0 || metadata.project_type || metadata.company_name) ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {metadata.project_type && (
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Project Type</h4>
+                            <p className="text-white font-medium">{metadata.project_type}</p>
+                        </div>
+                    )}
+                    {/* Fallback for Festia migration */}
+                    {metadata.company_name && (
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Company</h4>
+                            <p className="text-white font-medium">{metadata.company_name}</p>
+                        </div>
+                    )}
+                    {metadata.event_scale && (
+                        <div>
+                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Scale</h4>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 capitalize">
+                                {metadata.event_scale}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <p className="text-zinc-500 italic">No additional details.</p>
+            )}
+
+            {renderCustomFields()}
+        </div>
+    );
 };
 
 // Task Item Component (for Deliverables display)
@@ -379,6 +577,7 @@ const EventSection = ({
 const ProjectPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { config } = useAgencyConfig();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -595,7 +794,8 @@ const ProjectPage = () => {
         try {
             await api.patch(`/projects/${id}`, { status: newStatus });
             await fetchProject();
-            toast.success(`Project moved to ${newStatus}`);
+            const statusLabel = config?.statusOptions?.find(s => s.id === newStatus)?.label || newStatus;
+            toast.success(`Project moved to ${statusLabel}`);
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.detail || 'Failed to change status');
@@ -678,14 +878,14 @@ const ProjectPage = () => {
                         </button>
                         {statusDropdown && (
                             <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                {STATUS_FLOW.filter(s => s !== project.status).map(status => (
+                                {(config?.statusOptions || []).filter(s => s.id !== project.status).map(status => (
                                     <button
-                                        key={status}
-                                        onClick={() => handleStatusChange(status)}
+                                        key={status.id}
+                                        onClick={() => handleStatusChange(status.id)}
                                         className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white capitalize transition-colors flex items-center gap-2 group"
                                     >
-                                        <Icons.ArrowRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-purple-400 transition-colors" />
-                                        {status}
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
+                                        {status.label}
                                     </button>
                                 ))}
                             </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 // Field type definitions for different verticals
 const VERTICAL_FIELDS = {
@@ -45,6 +46,7 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
     const fields = VERTICAL_FIELDS[vertical] || VERTICAL_FIELDS.thryv;
 
     const [formData, setFormData] = useState({});
+    const { config } = useAgencyConfig();
 
     useEffect(() => {
         if (isOpen && project?.metadata) {
@@ -129,6 +131,26 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Edit Project Details" size="lg">
             <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Common Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-zinc-800">
+                    <div>
+                        <label className="block text-sm text-zinc-400 mb-1.5">Lead Source</label>
+                        <select
+                            name="lead_source"
+                            value={formData.lead_source || ''}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                        >
+                            <option value="">Select Source...</option>
+                            {(config?.leadSources || []).map(source => (
+                                <option key={source} value={source}>
+                                    {source}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fields.map(field => (
                         <div key={field.name} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>

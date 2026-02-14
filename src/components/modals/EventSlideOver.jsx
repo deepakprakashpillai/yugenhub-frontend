@@ -3,6 +3,7 @@ import SlideOver from './SlideOver';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -22,6 +23,7 @@ const StatusBadge = ({ status }) => {
 
 // Inline Editable Deliverable Row
 const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
+    const { config } = useAgencyConfig();
     const [editing, setEditing] = useState(false);
     const [data, setData] = useState(deliverable);
 
@@ -34,13 +36,15 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
         return (
             <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 space-y-2">
                 <div className="grid grid-cols-2 gap-2">
-                    <input
-                        type="text"
+                    <select
                         value={data.type}
                         onChange={(e) => setData({ ...data, type: e.target.value })}
-                        placeholder="Type (e.g., Photos)"
                         className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                    />
+                    >
+                        {(config?.deliverableTypes || []).map(dt => (
+                            <option key={dt} value={dt}>{dt}</option>
+                        ))}
+                    </select>
                     <input
                         type="number"
                         value={data.quantity}
@@ -189,6 +193,7 @@ const EventSlideOver = ({
     loading = false
 }) => {
     const isEditing = !!event?.id;
+    const { config } = useAgencyConfig();
 
     const [formData, setFormData] = useState({
         type: '',
@@ -441,13 +446,16 @@ const EventSlideOver = ({
                         {showAddDeliverable && (
                             <div className="p-3 bg-zinc-800/50 rounded-lg border border-purple-500/30 space-y-2">
                                 <div className="grid grid-cols-2 gap-2">
-                                    <input
-                                        type="text"
+                                    <select
                                         value={newDeliverable.type}
                                         onChange={(e) => setNewDeliverable({ ...newDeliverable, type: e.target.value })}
-                                        placeholder="Type (e.g., Photos)"
                                         className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                                    />
+                                    >
+                                        <option value="">Select Type</option>
+                                        {(config?.deliverableTypes || []).map(dt => (
+                                            <option key={dt} value={dt}>{dt}</option>
+                                        ))}
+                                    </select>
                                     <input
                                         type="number"
                                         value={newDeliverable.quantity}

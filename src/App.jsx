@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AgencyConfigProvider, useAgencyConfig } from './context/AgencyConfigContext';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import DashboardPage from './pages/DashboardPage';
@@ -13,6 +14,7 @@ import ProjectPage from './pages/ProjectPage';
 import TasksPage from './pages/TasksPage';
 import NotificationsPage from './pages/NotificationsPage';
 import CalendarPage from './pages/CalendarPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Placeholder for Client ID - In production use ENV
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
@@ -38,6 +40,8 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppRoutes() {
+  const { config } = useAgencyConfig();
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -49,27 +53,21 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
 
-      {/* Verticals */}
-      <Route path="/knots" element={
-        <ProtectedRoute>
-          <VerticalPage vertical="knots" title="Knots (Weddings)" />
-        </ProtectedRoute>
-      } />
-      <Route path="/pluto" element={
-        <ProtectedRoute>
-          <VerticalPage vertical="pluto" title="Pluto (Kids)" />
-        </ProtectedRoute>
-      } />
-      <Route path="/festia" element={
-        <ProtectedRoute>
-          <VerticalPage vertical="festia" title="Festia (Events)" />
-        </ProtectedRoute>
-      } />
-      <Route path="/thryv" element={
-        <ProtectedRoute>
-          <VerticalPage vertical="thryv" title="Thryv (Marketing)" />
-        </ProtectedRoute>
-      } />
+      {/* Verticals - Dynamic Routing */}
+      {config?.verticals?.map(vertical => (
+        <Route
+          key={vertical.id}
+          path={`/${vertical.id}`}
+          element={
+            <ProtectedRoute>
+              <VerticalPage
+                vertical={vertical.id}
+                title={vertical.label}
+              />
+            </ProtectedRoute>
+          }
+        />
+      ))}
 
       {/* Operations (Placeholders for now) */}
       <Route path="/tasks" element={
@@ -111,6 +109,13 @@ function AppRoutes() {
           <ProjectPage />
         </ProtectedRoute>
       } />
+
+      {/* Settings */}
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }
@@ -119,8 +124,10 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <AuthProvider>
-        <Toaster theme="dark" position="bottom-right" richColors />
-        <AppRoutes />
+        <AgencyConfigProvider>
+          <Toaster theme="dark" position="bottom-right" richColors />
+          <AppRoutes />
+        </AgencyConfigProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   );

@@ -27,6 +27,11 @@ export const PERMISSIONS = {
     // Projects
     CREATE_PROJECT: 'create_project',
     DELETE_PROJECT: 'delete_project',
+
+    // Settings
+    MANAGE_SETTINGS: 'manage_settings',
+    MANAGE_WORKFLOW: 'manage_workflow',
+    EXPORT_DATA: 'export_data',
 };
 
 /**
@@ -40,6 +45,9 @@ export const ROLE_PERMISSIONS = {
         PERMISSIONS.MANAGE_USERS,
         PERMISSIONS.CREATE_PROJECT,
         PERMISSIONS.DELETE_PROJECT,
+        PERMISSIONS.MANAGE_SETTINGS,
+        PERMISSIONS.MANAGE_WORKFLOW,
+        PERMISSIONS.EXPORT_DATA,
     ],
     [ROLES.ADMIN]: [
         PERMISSIONS.VIEW_ALL_CALENDAR,
@@ -47,6 +55,7 @@ export const ROLE_PERMISSIONS = {
         PERMISSIONS.MANAGE_USERS,
         PERMISSIONS.CREATE_PROJECT,
         PERMISSIONS.DELETE_PROJECT,
+        PERMISSIONS.EXPORT_DATA,
     ],
     [ROLES.MEMBER]: [
         PERMISSIONS.CREATE_PROJECT,

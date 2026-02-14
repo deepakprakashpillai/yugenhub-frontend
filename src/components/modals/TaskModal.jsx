@@ -5,15 +5,18 @@ import api from '../../api/axios';
 import clsx from 'clsx';
 import Select from '../ui/Select';
 import { useAuth } from '../../context/AuthContext';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 /**
  * TaskModal - For general project tasks (non-deliverable).
  * Simplified form without Quantity or Category toggles.
  * JIRA-style inline editing.
  */
-const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId = null, loading = false }) => {
+const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId = null, eventId = null, loading = false }) => {
     // Current User Context (for fallback assignee info)
     const { user: currentUser } = useAuth();
+    const { config } = useAgencyConfig();
+    const isDeliverable = !!eventId;
 
     // Determine initial "isNew" state for title display logic
     const isNewTask = !task;
@@ -107,10 +110,14 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
             ...formData,
             due_date: formData.due_date || null,
             assigned_to: formData.assigned_to || null,
-            category: 'general', // Auto-set for tasks
+            category: isDeliverable ? 'deliverable' : 'general',
             type: 'project',
             project_id: projectId,
         };
+
+        if (isDeliverable) {
+            payload.event_id = eventId;
+        }
 
         onSave(payload);
     };
@@ -150,7 +157,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
 
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isNewTask ? 'New Task' : 'Task Details'}>
+        <Modal isOpen={isOpen} onClose={onClose} title={isNewTask ? (isDeliverable ? 'New Deliverable' : 'New Task') : (isDeliverable ? 'Deliverable Details' : 'Task Details')}>
             <form onSubmit={handleSubmit} className="space-y-6">
 
                 {/* Header Section: Title & Status */}
@@ -158,15 +165,30 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                     <div className="flex flex-col gap-2">
                         {/* Status (Top Right or inline for mobile) */}
                         <div className="flex justify-between items-start">
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                placeholder="Task Title"
-                                className="text-2xl font-black bg-transparent border-none p-0 text-white placeholder:text-zinc-600 focus:ring-0 w-full"
-                                autoFocus={isNewTask}
-                            />
+                            {isDeliverable ? (
+                                <select
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    className="text-2xl font-black bg-transparent border-none p-0 text-white focus:ring-0 w-full"
+                                    autoFocus={isNewTask}
+                                >
+                                    <option value="">Select Deliverable Type</option>
+                                    {(config?.deliverableTypes || []).map(dt => (
+                                        <option key={dt} value={dt}>{dt}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    placeholder="Task Title"
+                                    className="text-2xl font-black bg-transparent border-none p-0 text-white placeholder:text-zinc-600 focus:ring-0 w-full"
+                                    autoFocus={isNewTask}
+                                />
+                            )}
                         </div>
                     </div>
 

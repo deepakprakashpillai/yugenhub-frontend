@@ -1,12 +1,59 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { Icons } from './Icons';
+import { useAgencyConfig } from '../context/AgencyConfigContext';
+import api from '../api/axios';
+import { toast } from 'sonner';
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, onRefresh }) => {
     const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
+    const { config } = useAgencyConfig();
+    const [statusOpen, setStatusOpen] = useState(false);
+    const statusRef = useRef(null);
+    const [updating, setUpdating] = useState(false);
+
+    // Close status dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (statusRef.current && !statusRef.current.contains(event.target)) {
+                setStatusOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Handle Status Update
+    const handleStatusUpdate = async (newStatusId) => {
+        if (newStatusId === project.status) {
+            setStatusOpen(false);
+            return;
+        }
+
+        setUpdating(true);
+        const originalStatus = project.status; // Optimistic rollback not implemented, but safer to just load
+
+        try {
+            await api.patch(`/projects/${project._id}`, { status: newStatusId });
+            const statusLabel = config?.statusOptions?.find(s => s.id === newStatusId)?.label || newStatusId;
+            toast.success(`Status updated to ${statusLabel}`);
+            setStatusOpen(false);
+            if (onRefresh) onRefresh();
+        } catch (err) {
+            console.error("Failed to update status", err);
+            toast.error("Failed to update status");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    // Look up status config dynamically
+    const statusConfig = config?.statusOptions?.find(s => s.id === project.status);
+    const statusLabel = statusConfig?.label || project.status;
+    const statusColor = statusConfig?.color || '#71717a';
 
     // Determine next event for "Upcoming" badge
     const nextEvent = project.events?.find(e => new Date(e.start_date) > new Date()) || null;
@@ -73,23 +120,42 @@ const ProjectCard = ({ project }) => {
                     <span className="font-mono text-[10px] text-zinc-500 tracking-widest uppercase bg-zinc-950/50 px-2 py-1 rounded border border-zinc-800/50">
                         {project.code}
                     </span>
-                    {/* Status Dot */}
-                    <div className={clsx(
-                        "flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wide",
-                        project.status === 'enquiry' && "border-zinc-700 text-zinc-400 bg-zinc-800/20",
-                        project.status === 'booked' && "border-blue-900/50 text-blue-400 bg-blue-900/10",
-                        project.status === 'booked' && "border-blue-900/50 text-blue-400 bg-blue-900/10",
-                        project.status === 'ongoing' && "border-purple-900/50 text-purple-400 bg-purple-900/10",
-                        project.status === 'completed' && "border-green-900/50 text-green-400 bg-green-900/10",
-                        project.status === 'cancelled' && "border-red-900/50 text-red-400 bg-red-900/10",
-                    )}>
-                        <div className={clsx("w-1.5 h-1.5 rounded-full",
-                            project.status === 'enquiry' ? "bg-zinc-400" :
-                                project.status === 'booked' ? "bg-blue-400 animate-pulse" :
-                                    project.status === 'ongoing' ? "bg-purple-400 animate-pulse" :
-                                        project.status === 'completed' ? "bg-green-400" : "bg-red-400"
-                        )} />
-                        {project.status}
+                    {/* Status Dropdown */}
+                    <div className="relative" ref={statusRef} onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setStatusOpen(!statusOpen)}
+                            disabled={updating}
+                            className={clsx(
+                                "flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wide transition-all hover:brightness-110",
+                                updating && "opacity-50 cursor-wait"
+                            )}
+                            style={{
+                                borderColor: `${statusColor}33`,
+                                color: statusColor,
+                                backgroundColor: `${statusColor}15`,
+                            }}
+                        >
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
+                            {statusLabel}
+                            <Icons.ChevronDown className="w-3 h-3 opacity-50 ml-1" />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {statusOpen && (
+                            <div className="absolute top-full right-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-30 animate-in fade-in slide-in-from-top-1">
+                                {(config?.statusOptions || []).map(option => (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => handleStatusUpdate(option.id)}
+                                        className="w-full text-left px-3 py-2 text-xs hover:bg-zinc-900 flex items-center gap-2 transition-colors text-zinc-300 hover:text-white"
+                                    >
+                                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: option.color }} />
+                                        {option.label}
+                                        {option.id === project.status && <Icons.Check className="w-3 h-3 ml-auto text-emerald-500" />}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 

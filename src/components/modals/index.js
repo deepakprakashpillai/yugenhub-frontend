@@ -10,3 +10,5 @@ export { default as ClientModal } from './ClientModal';
 export { default as AssociateModal } from './AssociateModal';
 export { default as ProjectSlideOver } from './ProjectSlideOver';
 export { default as TaskModal } from './TaskModal';
+export { default as InviteUserModal } from './InviteUserModal';
+export { default as EditUserModal } from './EditUserModal';

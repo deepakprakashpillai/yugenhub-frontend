@@ -2,9 +2,13 @@ import { useState, Fragment } from 'react';
 import clsx from 'clsx';
 import { Icons } from './Icons';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAgencyConfig } from '../context/AgencyConfigContext';
+import api from '../api/axios';
+import { toast } from 'sonner';
 
-const ProjectTable = ({ projects }) => {
+const ProjectTable = ({ projects, onRefresh }) => {
     const [expandedId, setExpandedId] = useState(null);
+    const { config } = useAgencyConfig();
 
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
@@ -50,16 +54,53 @@ const ProjectTable = ({ projects }) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={clsx(
-                                            "text-xs px-2 py-1 rounded-full font-medium capitalize border",
-                                            project.status === 'enquiry' && "bg-zinc-800/50 text-zinc-300 border-zinc-700",
-                                            project.status === 'booked' && "bg-blue-900/20 text-blue-400 border-blue-900/50",
-                                            project.status === 'ongoing' && "bg-purple-900/20 text-purple-400 border-purple-900/50",
-                                            project.status === 'completed' && "bg-green-900/20 text-green-400 border-green-900/50",
-                                            project.status === 'cancelled' && "bg-red-900/20 text-red-400 border-red-900/50",
-                                        )}>
-                                            {project.status}
-                                        </span>
+                                        {(() => {
+                                            const sc = config?.statusOptions?.find(s => s.id === project.status);
+                                            const color = sc?.color || '#71717a';
+                                            // const label = sc?.label || project.status; // Label shown in select
+
+                                            const handleStatusChange = async (e) => {
+                                                const newStatus = e.target.value;
+                                                e.stopPropagation(); // Prevent row expand
+                                                if (newStatus === project.status) return;
+
+                                                try {
+                                                    await api.patch(`/projects/${project._id}`, { status: newStatus });
+                                                    const statusLabel = config?.statusOptions?.find(s => s.id === newStatus)?.label || newStatus;
+                                                    toast.success(`Status updated to ${statusLabel}`);
+                                                    if (onRefresh) onRefresh();
+                                                } catch (err) {
+                                                    console.error("Failed to update status", err);
+                                                    toast.error("Failed to update status");
+                                                }
+                                            };
+
+                                            return (
+                                                <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
+                                                    <select
+                                                        value={project.status}
+                                                        onChange={handleStatusChange}
+                                                        className="appearance-none text-xs px-2 py-1 pr-6 rounded-full font-medium capitalize border cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/20"
+                                                        style={{
+                                                            borderColor: `${color}55`,
+                                                            color: color,
+                                                            backgroundColor: `${color}20`,
+                                                        }}
+                                                    >
+                                                        {(config?.statusOptions || []).map(opt => (
+                                                            <option key={opt.id} value={opt.id} className="bg-zinc-900 text-zinc-300">
+                                                                {opt.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    {/* Custom Chevron for Select */}
+                                                    <Icons.ChevronDown
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none opacity-50"
+                                                        style={{ color: color }}
+                                                    />
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4">
                                         {nextEvent ? (
