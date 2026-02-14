@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AgencyConfigProvider, useAgencyConfig } from './context/AgencyConfigContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import DashboardPage from './pages/DashboardPage';
@@ -21,12 +22,23 @@ import { Skeleton } from './components/ui/Skeleton';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
+  const { theme } = useTheme();
+
+  // Helper to get hex background based on current theme mode
+  const getBgColor = () => {
+    // These must match theme.js values
+    if (theme.mode === 'light') return '#fdf4ff';
+    return '#000000';
+  };
 
   if (loading) return (
-    <div className="flex h-screen w-full bg-black">
+    <div
+      className={`flex h-screen w-full`}
+      style={{ backgroundColor: getBgColor() }}
+    >
       {/* Sidebar Skeleton */}
-      <div className="w-64 border-r border-zinc-800 p-6 space-y-8 hidden md:block">
-        <div className="h-8 w-32 bg-zinc-800 rounded-lg animate-pulse" />
+      <div className={`w-64 border-r ${theme.canvas.sidebar} ${theme.canvas.border} p-6 space-y-8 hidden md:block`}>
+        <div className={`h-8 w-32 ${theme.canvas.card} rounded-lg animate-pulse`} />
         <div className="space-y-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} className="h-6 w-full" />
@@ -51,7 +63,7 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) return <Navigate to="/login" />;
 
   return (
-    <div className="flex bg-black min-h-screen text-white">
+    <div className={`flex min-h-screen ${theme.canvas.bg} ${theme.text.primary}`}>
       <CommandPalette />
       {/* 1. SIDEBAR: Always stays on the left */}
       <Sidebar />
@@ -150,8 +162,10 @@ function App() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <AgencyConfigProvider>
-          <Toaster theme="dark" position="bottom-right" richColors closeButton />
-          <AppRoutes />
+          <ThemeProvider>
+            <Toaster theme="system" position="bottom-right" richColors closeButton />
+            <AppRoutes />
+          </ThemeProvider>
         </AgencyConfigProvider>
       </AuthProvider>
     </GoogleOAuthProvider>

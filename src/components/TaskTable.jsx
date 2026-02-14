@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { Icons } from './Icons';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const statusColors = {
     todo: 'bg-zinc-800/50 text-zinc-300 border-zinc-700',
@@ -19,16 +20,17 @@ const priorityIcons = {
 };
 
 const TaskTable = ({ tasks, onTaskClick }) => {
+    const { theme } = useTheme();
     if (!tasks.length) return null;
 
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/30 backdrop-blur-sm"
+            className={`overflow-hidden rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-30 backdrop-blur-sm`}
         >
-            <table className="w-full text-left text-sm text-zinc-400">
-                <thead className="bg-zinc-950/50 text-xs uppercase font-medium text-zinc-500 border-b border-zinc-800">
+            <table className={`w-full text-left text-sm ${theme.text.secondary}`}>
+                <thead className={`${theme.canvas.card} bg-opacity-50 text-xs uppercase font-medium ${theme.text.secondary} border-b ${theme.canvas.border}`}>
                     <tr>
                         <th className="px-6 py-4 w-10"></th>
                         <th className="px-6 py-4">Task</th>
@@ -38,7 +40,7 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                         <th className="px-6 py-4">Project</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/50">
+                <tbody className={`divide-y ${theme.canvas.border}`}>
                     {tasks.map((task) => {
                         const PriorityIcon = priorityIcons[task.priority]?.icon || Icons.Minus;
                         const priorityColor = priorityIcons[task.priority]?.color || 'text-zinc-500';
@@ -47,7 +49,7 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                             <tr
                                 key={task.id}
                                 onClick={() => onTaskClick?.(task)}
-                                className="hover:bg-zinc-900/50 transition-colors cursor-pointer group"
+                                className={`hover:${theme.canvas.hover} transition-colors cursor-pointer group`}
                             >
                                 {/* Checkbox placeholder */}
                                 <td className="px-6 py-4">
@@ -55,7 +57,7 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                                         task.status === 'done'
                                             ? "bg-emerald-500 border-emerald-500"
-                                            : "border-zinc-700 group-hover:border-zinc-500"
+                                            : `border-zinc-700 group-hover:${theme.text.primary}` // Keep zinc border for unchecked, generic
                                     )}>
                                         {task.status === 'done' && (
                                             <Icons.Check className="w-3 h-3 text-white" />
@@ -67,12 +69,12 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                                 <td className="px-6 py-4">
                                     <div className={clsx(
                                         "font-medium",
-                                        task.status === 'done' ? "text-zinc-500 line-through" : "text-white"
+                                        task.status === 'done' ? `${theme.text.secondary} line-through` : `${theme.text.primary}`
                                     )}>
                                         {task.title}
                                     </div>
                                     {task.description && (
-                                        <div className="text-xs text-zinc-600 truncate max-w-xs">
+                                        <div className={`text-xs ${theme.text.secondary} truncate max-w-xs`}>
                                             {task.description}
                                         </div>
                                     )}
@@ -82,7 +84,7 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                                 <td className="px-6 py-4">
                                     <span className={clsx(
                                         "text-xs px-2 py-1 rounded-full font-medium capitalize border",
-                                        statusColors[task.status] || statusColors.todo
+                                        statusColors[task.status] || `${theme.canvas.card} ${theme.text.secondary} border-zinc-700` // Fallback
                                     )}>
                                         {task.status?.replace('_', ' ')}
                                     </span>
@@ -99,8 +101,8 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                                 {/* Due Date */}
                                 <td className="px-6 py-4">
                                     {task.due_date ? (
-                                        <div className="flex items-center gap-2 text-zinc-300">
-                                            <Icons.Calendar className="w-3 h-3 text-zinc-600" />
+                                        <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
+                                            <Icons.Calendar className={`w-3 h-3 ${theme.text.secondary}`} />
                                             <span className="text-xs">
                                                 {new Date(task.due_date).toLocaleDateString()}
                                             </span>
@@ -116,12 +118,12 @@ const TaskTable = ({ tasks, onTaskClick }) => {
                                         <Link
                                             to={`/projects/${task.project_id}`}
                                             onClick={(e) => e.stopPropagation()}
-                                            className="text-xs text-zinc-400 bg-zinc-800/50 hover:bg-zinc-700/50 hover:text-white transition-colors px-2 py-1 rounded inline-block"
+                                            className={`text-xs ${theme.text.secondary} ${theme.canvas.card} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors px-2 py-1 rounded inline-block`}
                                         >
                                             {task.project_name || task.project_code}
                                         </Link>
                                     ) : (
-                                        <span className="text-zinc-600 text-xs">Internal</span>
+                                        <span className={`${theme.text.secondary} text-xs`}>Internal</span>
                                     )}
                                 </td>
                             </tr>

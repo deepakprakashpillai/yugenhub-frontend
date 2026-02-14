@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
+import { useTheme } from '../context/ThemeContext';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -41,17 +42,19 @@ const StatusBadge = ({ status }) => {
 
 // Progress Bar Component
 const ProgressBar = ({ total, completed, className }) => {
+    const { theme } = useTheme();
     if (total === 0) return null;
     const percent = Math.round((completed / total) * 100);
     return (
         <div className={clsx("w-full max-w-xs", className)}>
-            <div className="flex justify-between text-xs text-zinc-500 mb-1">
+            <div className={`flex justify-between text-xs ${theme.text.secondary} mb-1`}>
                 <span>Progress</span>
                 <span>{percent}% ({completed}/{total})</span>
             </div>
-            <div className="h-1.5 bg-zinc-700/50 rounded-full overflow-hidden">
+            <div className={`h-1.5 ${theme.canvas.border} rounded-full overflow-hidden bg-opacity-30 bg-zinc-700 relative`}>
+                <div className={`w-full h-full absolute top-0 left-0 opacity-20 ${theme.text.secondary} bg-current`}></div>
                 <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500 relative z-10"
                     style={{ width: `${percent}%` }}
                 />
             </div>
@@ -62,6 +65,7 @@ const ProgressBar = ({ total, completed, className }) => {
 // Template Switcher Component
 const VerticalTemplate = ({ project }) => {
     const { config } = useAgencyConfig();
+    const { theme } = useTheme();
     const verticalId = project?.vertical?.toLowerCase();
 
     // Find config for this vertical
@@ -102,11 +106,11 @@ const VerticalTemplate = ({ project }) => {
         if (filteredFields.length === 0) return null;
 
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-zinc-800">
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t ${theme.canvas.border}`}>
                 {filteredFields.map(field => (
                     <div key={field.name}>
-                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{field.label}</h4>
-                        <p className="text-white font-medium">{metadata[field.name] || '—'}</p>
+                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>{field.label}</h4>
+                        <p className={`${theme.text.primary} font-medium`}>{metadata[field.name] || '—'}</p>
                     </div>
                 ))}
             </div>
@@ -115,8 +119,8 @@ const VerticalTemplate = ({ project }) => {
 
     if (verticalType === 'wedding') {
         return (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
+                <h3 className={`text-lg font-bold ${theme.text.primary} mb-6 flex items-center gap-2`}>
                     <Icons.Heart className="w-5 h-5 text-pink-500" />
                     Wedding Details
                 </h3>
@@ -125,57 +129,57 @@ const VerticalTemplate = ({ project }) => {
                     {/* Groom Side */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
-                                <span className="text-lg">🤵</span>
+                            <div className={`w-10 h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
+                                <span className="text-lg">👰</span>
                             </div>
                             <div>
-                                <h4 className="text-sm font-bold text-white">Groom</h4>
-                                <p className="text-xs text-zinc-500">Side</p>
+                                <h4 className={`text-sm font-bold ${theme.text.primary}`}>Groom</h4>
+                                <p className={`text-xs ${theme.text.secondary}`}>Side</p>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-zinc-500 mb-1">Name</label>
-                            <p className="text-white text-lg">{metadata.groom_name || '—'}</p>
+                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Name</label>
+                            <p className={`${theme.text.primary} text-lg`}>{metadata.groom_name || '—'}</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-zinc-500 mb-1">Contact</label>
-                            <p className="text-white font-mono">{metadata.groom_number || '—'}</p>
+                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Contact</label>
+                            <p className={`${theme.text.primary} font-mono`}>{metadata.groom_number || '—'}</p>
                         </div>
                     </div>
 
                     {/* Bride Side */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
-                                <span className="text-lg">👰</span>
+                            <div className={`w-10 h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
+                                <span className="text-lg">🤵</span>
                             </div>
                             <div>
-                                <h4 className="text-sm font-bold text-white">Bride</h4>
-                                <p className="text-xs text-zinc-500">Side</p>
+                                <h4 className={`text-sm font-bold ${theme.text.primary}`}>Bride</h4>
+                                <p className={`text-xs ${theme.text.secondary}`}>Side</p>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs text-zinc-500 mb-1">Name</label>
-                            <p className="text-white text-lg">{metadata.bride_name || '—'}</p>
+                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Name</label>
+                            <p className={`${theme.text.primary} text-lg`}>{metadata.bride_name || '—'}</p>
                         </div>
                         <div>
-                            <label className="block text-xs text-zinc-500 mb-1">Contact</label>
-                            <p className="text-white font-mono">{metadata.bride_number || '—'}</p>
+                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Contact</label>
+                            <p className={`${theme.text.primary} font-mono`}>{metadata.bride_number || '—'}</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-zinc-800">
+                <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t ${theme.canvas.border}`}>
                     <div>
-                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Style</h4>
-                        <p className="text-white">{metadata.wedding_style || '—'}</p>
+                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Style</h4>
+                        <p className={`${theme.text.primary}`}>{metadata.wedding_style || '—'}</p>
                     </div>
                     <div>
-                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Religion</h4>
-                        <p className="text-white">{metadata.religion || '—'}</p>
+                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Religion</h4>
+                        <p className={`${theme.text.primary}`}>{metadata.religion || '—'}</p>
                     </div>
                     <div>
-                        <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Client Side</h4>
+                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Client Side</h4>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 capitalize">
                             {metadata.side || 'both'}
                         </span>
@@ -189,8 +193,8 @@ const VerticalTemplate = ({ project }) => {
 
     if (verticalType === 'children') {
         return (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
+                <h3 className={`text-lg font-bold ${theme.text.primary} mb-6 flex items-center gap-2`}>
                     <Icons.Star className="w-5 h-5 text-yellow-500" />
                     Event Details
                 </h3>
@@ -201,33 +205,33 @@ const VerticalTemplate = ({ project }) => {
                     </div>
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Child's Name</h4>
-                            <p className="text-2xl font-bold text-white">{metadata.child_name || '—'}</p>
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Child's Name</h4>
+                            <p className={`text-2xl font-bold ${theme.text.primary}`}>{metadata.child_name || '—'}</p>
                         </div>
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Occasion</h4>
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Occasion</h4>
                             <div className="flex items-center gap-2">
                                 <span className="px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-sm font-medium capitalize">
                                     {metadata.occasion_type || 'Birthday'}
                                 </span>
                                 {metadata.child_age && (
-                                    <span className="px-3 py-1 rounded-full bg-zinc-800 text-white text-sm">
+                                    <span className={`px-3 py-1 rounded-full ${theme.canvas.hover || "bg-zinc-800"} ${theme.text.primary} text-sm`}>
                                         Turned {metadata.child_age}
                                     </span>
                                 )}
                             </div>
                         </div>
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Parents</h4>
-                            <p className="text-white">
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Parents</h4>
+                            <p className={`${theme.text.primary}`}>
                                 {metadata.father_name && metadata.mother_name
                                     ? `${metadata.father_name} & ${metadata.mother_name}`
                                     : (metadata.father_name || metadata.mother_name || '—')}
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Address</h4>
-                            <p className="text-white text-sm line-clamp-2">{metadata.address || '—'}</p>
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Address</h4>
+                            <p className={`${theme.text.primary} text-sm line-clamp-2`}>{metadata.address || '—'}</p>
                         </div>
                     </div>
                 </div>
@@ -239,8 +243,8 @@ const VerticalTemplate = ({ project }) => {
 
     // General / Other
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+        <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
+            <h3 className={`text-lg font-bold ${theme.text.primary} mb-6 flex items-center gap-2`}>
                 <Icons.Briefcase className="w-5 h-5 text-blue-500" />
                 Project Details
             </h3>
@@ -249,20 +253,20 @@ const VerticalTemplate = ({ project }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {metadata.project_type && (
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Project Type</h4>
-                            <p className="text-white font-medium">{metadata.project_type}</p>
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Project Type</h4>
+                            <p className={`${theme.text.primary} font-medium`}>{metadata.project_type}</p>
                         </div>
                     )}
                     {/* Fallback for Festia migration */}
                     {metadata.company_name && (
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Company</h4>
-                            <p className="text-white font-medium">{metadata.company_name}</p>
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Company</h4>
+                            <p className={`${theme.text.primary} font-medium`}>{metadata.company_name}</p>
                         </div>
                     )}
                     {metadata.event_scale && (
                         <div>
-                            <h4 className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Scale</h4>
+                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Scale</h4>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 capitalize">
                                 {metadata.event_scale}
                             </span>
@@ -270,7 +274,7 @@ const VerticalTemplate = ({ project }) => {
                     )}
                 </div>
             ) : (
-                <p className="text-zinc-500 italic">No additional details.</p>
+                <p className={`${theme.text.secondary} italic`}>No additional details.</p>
             )}
 
             {renderCustomFields()}
@@ -280,6 +284,7 @@ const VerticalTemplate = ({ project }) => {
 
 // Task Item Component (for Deliverables display)
 const TaskItem = ({ task, onEdit, onDelete }) => {
+    const { theme } = useTheme();
     const formatDate = (dateStr) => {
         if (!dateStr) return 'No Due Date';
         return new Date(dateStr).toLocaleDateString('en-IN', {
@@ -288,14 +293,14 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-zinc-800/50 rounded-xl border border-zinc-700/50 group">
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group`}>
             <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-zinc-700 flex items-center justify-center">
-                    <Icons.Package className="w-4 h-4 text-zinc-400" />
+                <div className={`w-8 h-8 rounded-lg ${theme.canvas.card} flex items-center justify-center`}>
+                    <Icons.Package className={`w-4 h-4 ${theme.text.secondary}`} />
                 </div>
                 <div>
-                    <h5 className="text-white font-medium">{task.title}</h5>
-                    <div className="flex items-center gap-3 text-xs text-zinc-500 mt-1">
+                    <h5 className={`${theme.text.primary} font-medium`}>{task.title}</h5>
+                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1`}>
                         {task.quantity && <span>Qty: {task.quantity}</span>}
                         {task.quantity && <span>•</span>}
                         <span className="flex items-center gap-1">
@@ -304,7 +309,7 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
                         </span>
                     </div>
                     {task.description && (
-                        <p className="text-zinc-500 text-xs mt-2 italic">"{task.description}"</p>
+                        <p className={`${theme.text.secondary} text-xs mt-2 italic`}>"{task.description}"</p>
                     )}
                 </div>
             </div>
@@ -313,13 +318,13 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                        className={`p-1.5 rounded-lg hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
                     >
                         <Icons.Edit className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        className="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors"
+                        className={`p-1.5 rounded-lg hover:bg-red-500/20 ${theme.text.secondary} hover:text-red-400 transition-colors`}
                     >
                         <Icons.Trash className="w-4 h-4" />
                     </button>
@@ -331,33 +336,34 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
 
 // Assignment Item Component with Edit/Delete
 const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
+    const { theme } = useTheme();
     const name = assignment.associate_name || assignment.name || 'Unknown';
 
     return (
-        <div className="flex items-center justify-between gap-3 p-3 bg-zinc-800/50 rounded-xl border border-zinc-700/50 group">
+        <div className={`flex items-center justify-between gap-3 p-3 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group`}>
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
                     {name.charAt(0)}
                 </div>
                 <div>
-                    <p className="text-white text-sm font-medium">{name}</p>
-                    <p className="text-zinc-500 text-xs">{assignment.role}</p>
+                    <p className={`${theme.text.primary} text-sm font-medium`}>{name}</p>
+                    <p className={`${theme.text.secondary} text-xs`}>{assignment.role}</p>
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-1 rounded-full bg-zinc-700 text-zinc-300">
+                <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.card} ${theme.text.secondary}`}>
                     {assignment.role}
                 </span>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                        className={`p-1.5 rounded-lg hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
                     >
                         <Icons.Edit className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        className="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors"
+                        className={`p-1.5 rounded-lg hover:bg-red-500/20 ${theme.text.secondary} hover:text-red-400 transition-colors`}
                     >
                         <Icons.Trash className="w-4 h-4" />
                     </button>
@@ -383,6 +389,7 @@ const EventSection = ({
     onEditTeamMember,
     onDeleteTeamMember
 }) => {
+    const { theme } = useTheme();
     const formatDate = (dateStr) => {
         if (!dateStr) return 'TBD';
         const date = new Date(dateStr);
@@ -417,16 +424,16 @@ const EventSection = ({
     const eventTotal = eventTasks.length;
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden`}>
             {/* Event Header (Clickable) */}
-            <div className="flex items-center justify-between p-5 hover:bg-zinc-800/50 transition-colors">
+            <div className={`flex items-center justify-between p-5 hover:${theme.canvas.hover} transition-colors`}>
                 <button onClick={onToggle} className="flex items-center gap-4 text-left flex-1">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-black text-lg">
                         {index + 1}
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">{event.type}</h3>
-                        <div className="flex items-center gap-3 text-sm text-zinc-400 mt-1 flex-wrap">
+                        <h3 className={`text-xl font-bold ${theme.text.primary}`}>{event.type}</h3>
+                        <div className={`flex items-center gap-3 text-sm ${theme.text.secondary} mt-1 flex-wrap`}>
                             <span className="flex items-center gap-1">
                                 <Icons.Calendar className="w-4 h-4" />
                                 {formatDate(event.start_date)}
@@ -449,23 +456,23 @@ const EventSection = ({
                         <ProgressBar total={eventTotal} completed={eventCompleted} />
                     </div>
                     <div className="text-right text-sm hidden sm:block">
-                        <span className="text-zinc-500">{event.assignments?.length || 0} Team</span>
+                        <span className={`${theme.text.secondary} mr-1`}>{event.assignments?.length || 0} Team</span>
                     </div>
                     <button
                         onClick={(e) => { e.stopPropagation(); onEditEvent(); }}
-                        className="p-2 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                        className={`p-2 rounded-lg hover:${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
                     >
                         <Icons.Edit className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); onDeleteEvent(); }}
-                        className="p-2 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition-colors"
+                        className={`p-2 rounded-lg hover:bg-red-500/20 ${theme.text.secondary} hover:text-red-400 transition-colors`}
                     >
                         <Icons.Trash className="w-4 h-4" />
                     </button>
                     <button onClick={onToggle} className="p-2">
                         <Icons.ChevronDown className={clsx(
-                            "w-5 h-5 text-zinc-500 transition-transform",
+                            `w-5 h-5 ${theme.text.secondary} transition-transform`,
                             isExpanded && "rotate-180"
                         )} />
                     </button>
@@ -485,32 +492,32 @@ const EventSection = ({
                         <div className="px-5 pb-5 pt-0 border-t border-zinc-800">
                             {/* Venue Info */}
                             {(event.venue_name || event.venue_location) && (
-                                <div className="flex items-center gap-2 mb-4 mt-4 text-sm text-zinc-400">
+                                <div className={`flex items-center gap-2 mb-4 mt-4 text-sm ${theme.text.secondary}`}>
                                     <Icons.MapPin className="w-4 h-4" />
-                                    <span className="text-white">{event.venue_name || 'Unnamed Venue'}</span>
+                                    <span className={`${theme.text.primary}`}>{event.venue_name || 'Unnamed Venue'}</span>
                                     {event.venue_location && (
-                                        <span className="text-zinc-500">— {event.venue_location}</span>
+                                        <span className={`${theme.text.secondary}`}>— {event.venue_location}</span>
                                     )}
                                 </div>
                             )}
 
                             {/* Event Notes */}
                             {event.notes && (
-                                <div className="mb-4 p-3 bg-zinc-800/50 rounded-lg border-l-4 border-amber-500/50">
-                                    <p className="text-sm text-zinc-400 italic">"{event.notes}"</p>
+                                <div className={`mb-4 p-3 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-lg border-l-4 border-amber-500/50`}>
+                                    <p className={`text-sm ${theme.text.secondary} italic`}>"{event.notes}"</p>
                                 </div>
                             )}
 
                             {/* Deliverables Section */}
                             <div className="mb-6">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h4 className="flex items-center gap-2 text-sm uppercase tracking-widest text-zinc-500 font-medium">
+                                    <h4 className={`flex items-center gap-2 text-sm uppercase tracking-widest ${theme.text.secondary} font-medium`}>
                                         <Icons.Package className="w-4 h-4" />
                                         Deliverables ({eventTasks?.length || 0})
                                     </h4>
                                     <button
                                         onClick={onAddDeliverable}
-                                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors"
+                                        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.secondary} text-xs font-medium transition-colors`}
                                     >
                                         <Icons.Plus className="w-3 h-3" />
                                         Add
@@ -543,13 +550,13 @@ const EventSection = ({
                             {/* Team/Assignments Section */}
                             <div>
                                 <div className="flex items-center justify-between mb-3">
-                                    <h4 className="flex items-center gap-2 text-sm uppercase tracking-widest text-zinc-500 font-medium">
+                                    <h4 className={`flex items-center gap-2 text-sm uppercase tracking-widest ${theme.text.secondary} font-medium`}>
                                         <Icons.Users className="w-4 h-4" />
                                         Team ({event.assignments?.length || 0})
                                     </h4>
                                     <button
                                         onClick={onAddTeamMember}
-                                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors"
+                                        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.secondary} text-xs font-medium transition-colors`}
                                     >
                                         <Icons.Plus className="w-3 h-3" />
                                         Add
@@ -849,41 +856,41 @@ const ProjectPage = () => {
         }
     };
 
+    const { theme } = useTheme();
+
     if (loading) {
-        if (loading) {
-            return (
-                <div className="p-8 max-w-[1400px] mx-auto space-y-8">
-                    <div className="flex justify-between items-center">
-                        <Skeleton className="h-10 w-32" />
-                        <div className="flex gap-4">
-                            <Skeleton className="h-10 w-48" />
-                            <Skeleton className="h-10 w-24" />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-8">
-                            <Skeleton className="h-64 rounded-2xl" />
-                            <Skeleton className="h-48 rounded-2xl" />
-                        </div>
-                        <div className="space-y-8">
-                            <Skeleton className="h-32 rounded-2xl" />
-                            <Skeleton className="h-96 rounded-2xl" />
-                        </div>
+        return (
+            <div className="p-8 max-w-[1400px] mx-auto space-y-8">
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-10 w-32" />
+                    <div className="flex gap-4">
+                        <Skeleton className="h-10 w-48" />
+                        <Skeleton className="h-10 w-24" />
                     </div>
                 </div>
-            );
-        }
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-8">
+                        <Skeleton className="h-64 rounded-2xl" />
+                        <Skeleton className="h-48 rounded-2xl" />
+                    </div>
+                    <div className="space-y-8">
+                        <Skeleton className="h-32 rounded-2xl" />
+                        <Skeleton className="h-96 rounded-2xl" />
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
         return (
             <div className="p-8 max-w-[1400px] mx-auto">
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition-colors">
+                <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} mb-8 transition-colors`}>
                     <Icons.ArrowLeft className="w-5 h-5" /> Back
                 </button>
                 <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
                     <Icons.AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-white mb-2">Error Loading Project</h2>
+                    <h2 className={`text-xl font-bold ${theme.text.primary} mb-2`}>Error Loading Project</h2>
                     <p className="text-red-400">{error}</p>
                 </div>
             </div>
@@ -902,11 +909,11 @@ const ProjectPage = () => {
         <div className="p-8 pb-20 max-w-[1400px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+                <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
                     <Icons.ArrowLeft className="w-5 h-5" /> Back
                 </button>
                 <div className="flex items-center gap-3">
-                    <span className="text-zinc-500 font-mono text-sm">{project.code}</span>
+                    <span className={`${theme.text.secondary} font-mono text-sm`}>{project.code}</span>
                     <div className="w-48 ml-4">
                         <ProgressBar total={projectTotal} completed={projectCompleted} />
                     </div>
@@ -918,15 +925,15 @@ const ProjectPage = () => {
                             className="flex items-center gap-2"
                         >
                             <StatusBadge status={project.status} />
-                            <Icons.ChevronDown className="w-4 h-4 text-zinc-400" />
+                            <Icons.ChevronDown className={`w-4 h-4 ${theme.text.secondary}`} />
                         </button>
                         {statusDropdown && (
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className={`absolute top-full left-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
                                 {(config?.statusOptions || []).filter(s => s.id !== project.status).map(status => (
                                     <button
                                         key={status.id}
                                         onClick={() => handleStatusChange(status.id)}
-                                        className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white capitalize transition-colors flex items-center gap-2 group"
+                                        className={`w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} capitalize transition-colors flex items-center gap-2 group`}
                                     >
                                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
                                         {status.label}
@@ -938,7 +945,7 @@ const ProjectPage = () => {
 
                     <button
                         onClick={() => setMetadataModal(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white text-sm font-medium transition-colors"
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${theme.canvas.card} hover:${theme.canvas.hover} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} text-sm font-medium transition-colors`}
                     >
                         <Icons.Edit className="w-4 h-4" />
                         Edit Details
@@ -946,7 +953,7 @@ const ProjectPage = () => {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSaveTemplateModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} rounded-lg text-sm font-medium transition-colors border ${theme.canvas.border}`}
                         >
                             <Icons.LayoutTemplate className="w-4 h-4" />
                             Save as Template
@@ -963,15 +970,16 @@ const ProjectPage = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-6 mb-8 border-b border-zinc-800">
+            <div className={`flex items-center gap-6 mb-8 border-b ${theme.canvas.border}`}>
                 {['overview', 'tasks'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={clsx(
                             "pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2",
-                            activeTab === tab ? "text-white border-white" : "text-zinc-500 border-transparent hover:text-zinc-300"
+                            activeTab === tab ? `${theme.text.primary} border-current` : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
                         )}
+                        style={activeTab === tab ? { borderColor: theme.accents?.default?.primary, color: theme.accents?.default?.primary } : {}}
                     >
                         {tab}
                     </button>
@@ -991,14 +999,14 @@ const ProjectPage = () => {
                     {/* 1. Deliverables Section */}
                     <div>
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                                <Icons.Package className="w-5 h-5 text-zinc-500" />
+                            <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2`}>
+                                <Icons.Package className={`w-5 h-5 ${theme.text.secondary}`} />
                                 Deliverables ({deliverables.length})
                             </h3>
                             {/* We don't usually add deliverables here directly, but could if needed */}
                         </div>
                         {deliverables.length === 0 ? (
-                            <p className="text-zinc-600 italic">No deliverables tracked.</p>
+                            <p className={`${theme.text.secondary} italic`}>No deliverables tracked.</p>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {deliverables.map(task => (
@@ -1011,13 +1019,13 @@ const ProjectPage = () => {
                     {/* 2. Other Tasks Section */}
                     <div>
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                                <Icons.ClipboardList className="w-5 h-5 text-zinc-500" />
+                            <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2`}>
+                                <Icons.ClipboardList className={`w-5 h-5 ${theme.text.secondary}`} />
                                 Other Tasks ({generalTasks.length})
                             </h3>
                             <button
                                 onClick={() => setTaskModal({ open: true, task: null })}
-                                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg font-bold text-sm hover:bg-zinc-200 transition-colors"
+                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} border ${theme.canvas.border} rounded-lg font-bold text-sm transition-colors`}
                             >
                                 <Icons.Plus className="w-4 h-4" /> Add Task
                             </button>
@@ -1042,8 +1050,8 @@ const ProjectPage = () => {
 
             {/* Events Section */}
             <div className="mb-8">
-                <h3 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2 mb-4">
-                    <Icons.Calendar className="w-5 h-5 text-zinc-500" />
+                <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2 mb-4`}>
+                    <Icons.Calendar className={`w-5 h-5 ${theme.text.secondary}`} />
                     Events ({project.events?.length || 0})
                 </h3>
 
@@ -1078,13 +1086,13 @@ const ProjectPage = () => {
                 {/* Skeleton Add Event Button */}
                 <button
                     onClick={() => setEventModal({ open: true, event: null, eventId: null })}
-                    className="w-full mt-4 border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 text-zinc-500 hover:text-zinc-300 transition-all group hover:bg-zinc-900/50"
+                    className={`w-full mt-4 border-2 border-dashed ${theme.canvas.border} hover:border-zinc-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 ${theme.text.secondary} hover:${theme.text.primary} transition-all group hover:${theme.canvas.hover}`}
                 >
-                    <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center transition-colors">
+                    <div className={`w-12 h-12 rounded-xl ${theme.canvas.card} group-hover:${theme.canvas.hover} flex items-center justify-center transition-colors`}>
                         <Icons.Plus className="w-6 h-6" />
                     </div>
                     <span className="text-lg font-medium">Add New Event</span>
-                    <span className="text-sm text-zinc-600">Click to add a new event to this project</span>
+                    <span className={`text-sm ${theme.text.secondary}`}>Click to add a new event to this project</span>
                 </button>
             </div>
 
@@ -1129,7 +1137,7 @@ const ProjectPage = () => {
             <TemplateModal
                 isOpen={saveTemplateModal}
                 onClose={() => setSaveTemplateModal(false)}
-                onSave={() => setSaveTemplateModal(false)}
+                onSave={handleSaveTemplate}
                 mode="create"
                 initialVertical={project?.vertical}
                 projectId={id}

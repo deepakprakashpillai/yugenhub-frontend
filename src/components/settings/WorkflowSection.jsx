@@ -6,8 +6,10 @@ import api from '../../api/axios';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import EditableTagList from '../ui/EditableTagList';
 import StatusDeleteModal from './StatusDeleteModal';
+import { useTheme } from '../../context/ThemeContext';
 
 function WorkflowSection({ role }) {
+    const { theme } = useTheme();
     const { refreshConfig } = useAgencyConfig();
     const [workflow, setWorkflow] = useState({ status_options: [], lead_sources: [], deliverable_types: [] });
     const [editing, setEditing] = useState(false);
@@ -112,28 +114,28 @@ function WorkflowSection({ role }) {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">Workflow Configuration</h2>
-                    <p className="text-sm text-zinc-500 mt-1">Customize project statuses, lead sources, and deliverable types</p>
+                    <h2 className={`text-2xl font-bold ${theme.text.primary}`}>Workflow Configuration</h2>
+                    <p className={`text-sm ${theme.text.secondary} mt-1`}>Customize project statuses, lead sources, and deliverable types</p>
                 </div>
                 {isOwner && !editing && (
-                    <button onClick={() => setEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors">
+                    <button onClick={() => setEditing(true)} className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl text-sm ${theme.text.secondary} hover:${theme.text.primary} hover:border-zinc-600 transition-colors`}>
                         <Edit3 size={14} /> Edit
                     </button>
                 )}
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-6">
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6 space-y-6`}>
                 {/* Status Options */}
                 <div>
-                    <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 block">Project Statuses</label>
+                    <label className={`text-[10px] font-bold ${theme.text.secondary} uppercase tracking-widest mb-3 block`}>Project Statuses</label>
                     <div className="flex flex-wrap gap-2">
                         {(displayOptions || []).map((status, i) => {
                             const isFixed = status.fixed;
                             return (
-                                <span key={status.id || i} className={`inline-flex items-center gap-2 border rounded-lg px-3 py-1.5 text-sm ${isFixed ? 'bg-zinc-800/50 border-zinc-700/50 text-zinc-400' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}`}>
+                                <span key={status.id || i} className={`inline-flex items-center gap-2 border rounded-lg px-3 py-1.5 text-sm ${isFixed ? `${theme.canvas.bg} opacity-70 ${theme.canvas.border} ${theme.text.secondary}` : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.primary}`}`}>
                                     {editing && !isFixed && (
                                         <span className="flex gap-0.5 mr-0.5">
-                                            <button onClick={() => moveStatus(i, -1)} className="text-zinc-700 hover:text-white"><ArrowUp size={10} className="rotate-[-90deg]" /></button>
-                                            <button onClick={() => moveStatus(i, 1)} className="text-zinc-700 hover:text-white"><ArrowDown size={10} className="rotate-[-90deg]" /></button>
+                                            <button onClick={() => moveStatus(i, -1)} className={`${theme.text.secondary} hover:${theme.text.primary}`}><ArrowUp size={10} className="rotate-[-90deg]" /></button>
+                                            <button onClick={() => moveStatus(i, 1)} className={`${theme.text.secondary} hover:${theme.text.primary}`}><ArrowDown size={10} className="rotate-[-90deg]" /></button>
                                         </span>
                                     )}
 
@@ -150,7 +152,7 @@ function WorkflowSection({ role }) {
                                             type="text"
                                             value={status.label}
                                             onChange={e => updateStatusLabel(i, e.target.value)}
-                                            className="bg-transparent border-none text-sm text-white focus:outline-none w-24"
+                                            className={`bg-transparent border-none text-sm ${theme.text.primary} focus:outline-none w-24`}
                                         />
                                     ) : (
                                         <span>{status.label}</span>
@@ -158,10 +160,10 @@ function WorkflowSection({ role }) {
 
                                     {/* Fixed lock / Delete button */}
                                     {isFixed && (
-                                        <Lock size={10} className="text-zinc-600 ml-1" title="Fixed status" />
+                                        <Lock size={10} className={`${theme.text.secondary} ml-1`} title="Fixed status" />
                                     )}
                                     {editing && !isFixed && (
-                                        <button onClick={() => removeStatusFromDraft(i)} className="text-zinc-600 hover:text-red-400 ml-1"><X size={12} /></button>
+                                        <button onClick={() => removeStatusFromDraft(i)} className={`${theme.text.secondary} hover:text-red-400 ml-1`}><X size={12} /></button>
                                     )}
                                 </span>
                             );
@@ -169,7 +171,7 @@ function WorkflowSection({ role }) {
 
                         {/* Add new custom status */}
                         {editing && (
-                            <span className="inline-flex items-center gap-1 border border-dashed border-zinc-700 rounded-lg overflow-hidden">
+                            <span className={`inline-flex items-center gap-1 border border-dashed ${theme.canvas.border} rounded-lg overflow-hidden`}>
                                 <input type="color" value={newStatusColor} onChange={e => setNewStatusColor(e.target.value)} className="w-6 h-6 ml-2 rounded cursor-pointer bg-transparent border-0 p-0" />
                                 <input
                                     type="text"
@@ -177,25 +179,25 @@ function WorkflowSection({ role }) {
                                     onChange={e => setNewStatusLabel(e.target.value)}
                                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addStatus(); } }}
                                     placeholder="New status..."
-                                    className="bg-transparent border-none px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none w-28"
+                                    className={`bg-transparent border-none px-2 py-1.5 text-sm ${theme.text.primary} placeholder:${theme.text.secondary} focus:outline-none w-28`}
                                 />
-                                <button onClick={addStatus} className="px-2 py-1.5 text-zinc-500 hover:text-white"><Plus size={14} /></button>
+                                <button onClick={addStatus} className={`px-2 py-1.5 ${theme.text.secondary} hover:${theme.text.primary}`}><Plus size={14} /></button>
                             </span>
                         )}
                     </div>
 
                     {/* Saved custom statuses — delete buttons (only shown when NOT in edit mode) */}
                     {!editing && isOwner && (workflow.status_options || []).some(s => !s.fixed) && (
-                        <div className="mt-3 pt-3 border-t border-zinc-800/50">
-                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2">Custom Statuses</p>
+                        <div className={`mt-3 pt-3 border-t ${theme.canvas.border}`}>
+                            <p className={`text-[10px] font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Custom Statuses</p>
                             <div className="flex flex-wrap gap-2">
                                 {(workflow.status_options || []).filter(s => !s.fixed).map(status => (
-                                    <span key={status.id} className="inline-flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-zinc-300">
+                                    <span key={status.id} className={`inline-flex items-center gap-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-3 py-1.5 text-sm ${theme.text.primary}`}>
                                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: status.color }} />
                                         {status.label}
                                         <button
                                             onClick={() => handleDeleteClick(status)}
-                                            className="text-zinc-600 hover:text-red-400 ml-1 transition-colors"
+                                            className={`${theme.text.secondary} hover:text-red-400 ml-1 transition-colors`}
                                             title="Delete status"
                                         >
                                             <Trash2 size={12} />
@@ -223,10 +225,10 @@ function WorkflowSection({ role }) {
 
                 {editing && (
                     <div className="flex gap-3 pt-2">
-                        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-white text-black font-bold text-sm rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50">
+                        <button onClick={handleSave} disabled={saving} className={`flex items-center gap-2 px-5 py-2.5 ${theme.text.inverse} bg-black dark:bg-white font-bold text-sm rounded-xl hover:opacity-90 transition-colors disabled:opacity-50`}>
                             <Check size={14} /> {saving ? 'Saving...' : 'Save Changes'}
                         </button>
-                        <button onClick={() => { setDraft(workflow); setEditing(false); }} className="flex items-center gap-2 px-5 py-2.5 bg-zinc-800 text-zinc-400 text-sm rounded-xl hover:text-white transition-colors">
+                        <button onClick={() => { setDraft(workflow); setEditing(false); }} className={`flex items-center gap-2 px-5 py-2.5 ${theme.canvas.bg} ${theme.text.secondary} text-sm rounded-xl hover:${theme.text.primary} transition-colors border ${theme.canvas.border}`}>
                             <X size={14} /> Cancel
                         </button>
                     </div>

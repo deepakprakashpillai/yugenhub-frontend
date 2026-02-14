@@ -2,7 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { Icons } from '../Icons';
 import { Badge } from '../ui/badge';
 
+import { useTheme } from '../../context/ThemeContext';
+
 const AttentionSection = ({ items, scope = 'global' }) => {
+    const { theme } = useTheme();
     const navigate = useNavigate();
 
     if (!items || items.length === 0) {
@@ -18,7 +21,7 @@ const AttentionSection = ({ items, scope = 'global' }) => {
 
     return (
         <div className="space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className={`text-lg font-bold ${theme.text.primary} flex items-center gap-2`}>
                 <Icons.AlertCircle className="w-5 h-5 text-red-500" />
                 {scope === 'global' ? 'Attention Required' : 'My Focus'}
             </h2>
@@ -27,20 +30,20 @@ const AttentionSection = ({ items, scope = 'global' }) => {
                     <div
                         key={idx}
                         onClick={() => navigate(item.link)}
-                        className="p-4 rounded-xl bg-zinc-900/60 border border-red-500/20 hover:border-red-500/50 cursor-pointer transition-all group relative overflow-hidden"
+                        className={`p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} hover:border-red-500/50 cursor-pointer transition-all group relative overflow-hidden`}
                     >
                         <div className="absolute top-0 left-0 w-1 h-full bg-red-500/50" />
                         <div className="flex justify-between items-start mb-2">
-                            <Badge variant="outline" className="border-red-500/30 text-red-400 text-xs bg-red-900/10">
+                            <Badge variant="outline" className="border-red-500/30 text-red-500 text-xs bg-red-500/5">
                                 {item.reason}
                             </Badge>
                             {item.type === 'task' ? (
-                                <Icons.CheckSquare className="w-4 h-4 text-zinc-500" />
+                                <Icons.CheckSquare className={`w-4 h-4 ${theme.text.secondary}`} />
                             ) : (
-                                <Icons.Calendar className="w-4 h-4 text-zinc-500" />
+                                <Icons.Calendar className={`w-4 h-4 ${theme.text.secondary}`} />
                             )}
                         </div>
-                        <h3 className="text-white font-medium truncate pr-2 group-hover:text-red-400 transition-colors">
+                        <h3 className={`${theme.text.primary} font-medium truncate pr-2 group-hover:text-red-500 transition-colors`}>
                             {item.title}
                         </h3>
                     </div>

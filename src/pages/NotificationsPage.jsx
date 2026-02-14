@@ -4,10 +4,12 @@ import api from '../api/axios';
 import { Icons } from '../components/Icons';
 import { Bell, CheckCircle, Loader, ArrowLeft } from 'lucide-react';
 import clsx from 'clsx';
+import { useTheme } from '../context/ThemeContext';
 
 import { useAuth } from '../context/AuthContext';
 
 const NotificationsPage = () => {
+    const { theme } = useTheme();
     const navigate = useNavigate();
     const { refreshNotifications } = useAuth();
     const [notifications, setNotifications] = useState([]);
@@ -75,7 +77,7 @@ const NotificationsPage = () => {
         const parts = text.split(/(\*\*.*?\*\*)/g);
         return parts.map((part, index) => {
             if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={index} className="text-white font-bold">{part.slice(2, -2)}</strong>;
+                return <strong key={index} className={`${theme.text.primary} font-bold`}>{part.slice(2, -2)}</strong>;
             }
             return part;
         });
@@ -90,16 +92,16 @@ const NotificationsPage = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors"
+                        className={`p-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-colors`}
                     >
-                        <ArrowLeft size={16} className="text-zinc-400" />
+                        <ArrowLeft size={16} className={theme.text.secondary} />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
+                        <h1 className={`text-3xl font-black ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
                             <Bell size={24} />
                             Notifications
                         </h1>
-                        <p className="text-zinc-500 text-sm mt-1">
+                        <p className={`${theme.text.secondary} text-sm mt-1`}>
                             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
                         </p>
                     </div>
@@ -107,7 +109,7 @@ const NotificationsPage = () => {
                 {unreadCount > 0 && (
                     <button
                         onClick={handleMarkAllRead}
-                        className="px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-bold text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2"
+                        className={`px-4 py-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} text-xs font-bold ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors flex items-center gap-2`}
                     >
                         <CheckCircle size={14} />
                         Mark all as read
@@ -118,12 +120,12 @@ const NotificationsPage = () => {
             {/* Content */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
-                    <Loader className="w-6 h-6 animate-spin text-zinc-500" />
+                    <Loader className={`w-6 h-6 animate-spin ${theme.text.secondary}`} />
                 </div>
             ) : notifications.length === 0 ? (
                 <div className="text-center py-20">
-                    <Bell size={48} className="mx-auto text-zinc-700 mb-4" />
-                    <p className="text-zinc-500">No notifications yet.</p>
+                    <Bell size={48} className={`mx-auto ${theme.text.secondary} mb-4`} />
+                    <p className={theme.text.secondary}>No notifications yet.</p>
                 </div>
             ) : (
                 <div className="space-y-2">
@@ -134,31 +136,31 @@ const NotificationsPage = () => {
                             className={clsx(
                                 "w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4",
                                 notification.read
-                                    ? "bg-zinc-900/30 border-zinc-800/50 hover:bg-zinc-900"
-                                    : "bg-zinc-900 border-zinc-700 hover:border-zinc-600"
+                                    ? `${theme.canvas.bg} border-transparent hover:${theme.canvas.hover} opacity-70`
+                                    : `${theme.canvas.card} ${theme.canvas.border} hover:border-${theme.accent?.primary || 'purple-500'}`
                             )}
                         >
                             {/* Indicator */}
                             <div className={clsx(
                                 "w-2 h-2 rounded-full mt-2 shrink-0",
-                                notification.read ? "bg-zinc-700" : "bg-emerald-500"
-                            )} />
+                                notification.read ? theme.text.secondary : "bg-emerald-500"
+                            )} style={{ backgroundColor: notification.read ? undefined : '#10b981' }} />
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <p className={clsx(
                                     "text-sm font-bold",
-                                    notification.read ? "text-zinc-500" : "text-white"
+                                    notification.read ? theme.text.secondary : theme.text.primary
                                 )}>
                                     {notification.title}
                                 </p>
                                 <p className={clsx(
                                     "text-xs mt-1",
-                                    notification.read ? "text-zinc-600" : "text-zinc-400"
+                                    notification.read ? theme.text.secondary : theme.text.secondary
                                 )}>
                                     {renderMessage(notification.message)}
                                 </p>
-                                <p className="text-[10px] text-zinc-600 mt-2">
+                                <p className={`text-[10px] ${theme.text.secondary} mt-2`}>
                                     {new Date(notification.created_at).toLocaleString()}
                                 </p>
                             </div>

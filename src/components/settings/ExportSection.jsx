@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../api/axios';
+import { useTheme } from '../../context/ThemeContext';
 
 function ExportSection() {
+    const { theme } = useTheme();
     const [exporting, setExporting] = useState(null);
 
     const exportData = async (type) => {
@@ -79,20 +81,20 @@ function ExportSection() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white">Data Export</h2>
-                <p className="text-sm text-zinc-500 mt-1">Download your data as CSV files</p>
+                <h2 className={`text-2xl font-bold ${theme.text.primary}`}>Data Export</h2>
+                <p className={`text-sm ${theme.text.secondary} mt-1`}>Download your data as CSV files</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {exports.map(e => (
-                    <div key={e.type} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 flex items-center justify-between">
+                    <div key={e.type} className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-5 flex items-center justify-between`}>
                         <div>
-                            <p className="text-sm font-bold text-white">{e.label}</p>
-                            <p className="text-xs text-zinc-500 mt-1">{e.desc}</p>
+                            <p className={`text-sm font-bold ${theme.text.primary}`}>{e.label}</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-1`}>{e.desc}</p>
                         </div>
                         <button
                             onClick={() => exportData(e.type)}
                             disabled={exporting !== null}
-                            className="p-2 bg-zinc-800 text-zinc-400 rounded-lg hover:text-white hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                            className={`p-2 ${theme.canvas.bg} ${theme.text.secondary} rounded-lg hover:${theme.text.primary} hover:${theme.canvas.hover} transition-colors disabled:opacity-50`}
                         >
                             {exporting === e.type ? <span className="text-[10px] animate-pulse">Running...</span> : <Download size={16} />}
                         </button>

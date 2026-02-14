@@ -14,9 +14,9 @@ import {
   Settings
 } from 'lucide-react';
 import { AGENCY_CONFIG } from '../config';
-import { THEME_CONFIG } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
 
 export default function Sidebar() {
@@ -24,6 +24,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { user, logout, notificationCount } = useAuth();
   const { config: agencyConfig } = useAgencyConfig();
+  const { theme } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef(null);
   const currentPath = location.pathname;
@@ -44,7 +45,7 @@ export default function Sidebar() {
     navigate('/login');
   };
 
-  if (!THEME_CONFIG) return null;
+  if (!theme) return null;
 
   // Use dynamic config from context, fall back to static AGENCY_CONFIG
   const currentConfig = agencyConfig || AGENCY_CONFIG;
@@ -62,10 +63,10 @@ export default function Sidebar() {
 
   const renderNavGroup = (title, items, isVertical = false) => (
     <div className="mb-6">
-      <p className={(THEME_CONFIG.text?.label || "") + " px-4 mb-3"}>{title}</p>
+      <p className={(theme.text?.label || "") + " px-4 mb-3"}>{title}</p>
       <div className="space-y-1">
         {items.map((item) => {
-          const accent = THEME_CONFIG.accents?.[item.id] || THEME_CONFIG.accents?.default;
+          const accent = theme.accents?.[item.id] || theme.accents?.default;
           const Icon = item.icon;
           const isActivePath = currentPath === `/${item.id}`;
 
@@ -74,14 +75,16 @@ export default function Sidebar() {
               key={item.id}
               to={`/${item.id}`}
               style={{
+                backgroundColor: isActivePath ? `${accent.primary}1A` : undefined,
+                color: isActivePath ? accent.primary : undefined,
                 boxShadow: isActivePath ? `0 0 20px ${accent.glow}` : 'none',
                 border: isActivePath ? `1px solid ${accent.primary}44` : '1px solid transparent'
               }}
               className={`
-                ${THEME_CONFIG.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+                ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
                 ${isActivePath
-                  ? 'bg-white text-black font-black'
-                  : 'text-zinc-500 hover:bg-zinc-900/50 hover:text-white group'}
+                  ? `font-black`
+                  : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
               `}
             >
               {isVertical ? (
@@ -90,7 +93,7 @@ export default function Sidebar() {
                   style={{ backgroundColor: accent.primary }}
                 />
               ) : (
-                <Icon size={14} className={isActivePath ? 'text-black' : 'text-zinc-700 group-hover:text-zinc-400'} />
+                <Icon size={14} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
               )}
               {item.label}
             </NavLink>
@@ -101,12 +104,12 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className={`w-64 border-r ${THEME_CONFIG.canvas?.border || "border-zinc-800"} flex flex-col h-screen sticky top-0 ${THEME_CONFIG.canvas?.sidebar || "bg-black"}`}>
+    <aside className={`w-64 border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen sticky top-0 ${theme.canvas?.sidebar || "bg-black"}`}>
 
       <div className="p-6 pb-4">
-        <h1 className={(THEME_CONFIG.text?.heading || "") + " text-white"}>
+        <h1 className={(theme.text?.heading || "") + ` ${theme.text.primary}`}>
           {currentConfig.brand?.name || AGENCY_CONFIG?.brand?.name}
-          <span style={{ color: THEME_CONFIG.accents?.default?.primary }}>
+          <span style={{ color: theme.accents?.default?.primary }}>
             {currentConfig.brand?.suffix || AGENCY_CONFIG?.brand?.suffix}
           </span>
         </h1>
@@ -117,14 +120,20 @@ export default function Sidebar() {
         <div className="mb-6">
           <NavLink
             to="/"
+            style={{
+              backgroundColor: currentPath === '/' ? `${theme.accents?.default?.primary}1A` : undefined, // ~10% opacity
+              color: currentPath === '/' ? theme.accents?.default?.primary : undefined,
+              boxShadow: currentPath === '/' ? `0 0 20px ${theme.accents?.default?.glow}` : 'none',
+              border: currentPath === '/' ? `1px solid ${theme.accents?.default?.primary}44` : '1px solid transparent'
+            }}
             className={`
-              ${THEME_CONFIG.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+              ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
               ${currentPath === '/'
-                ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-                : 'text-zinc-500 hover:bg-zinc-900/50 hover:text-white group'}
+                ? `font-black`
+                : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
             `}
           >
-            <LayoutDashboard size={14} className={currentPath === '/' ? 'text-black' : 'text-zinc-700 group-hover:text-zinc-400'} />
+            <LayoutDashboard size={14} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
             DASHBOARD
           </NavLink>
         </div>
@@ -135,13 +144,13 @@ export default function Sidebar() {
       </nav>
 
       {/* NOTIFICATIONS & SETTINGS - Fixed at bottom of nav area */}
-      <div className="px-4 mb-2 pt-2 border-t border-zinc-900 space-y-1">
+      <div className={`px-4 mb-2 pt-2 border-t ${theme.canvas.border} space-y-1`}>
         <button
           onClick={() => navigate('/notifications')}
-          className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-zinc-500 hover:bg-zinc-900/50 hover:text-white group transition-all"
+          className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
         >
-          <Bell size={14} className="text-zinc-700 group-hover:text-zinc-400" />
-          <span className={THEME_CONFIG.text?.nav || ""}>{"NOTIFICATIONS"}</span>
+          <Bell size={14} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className={theme.text?.nav || ""}>{"NOTIFICATIONS"}</span>
           {notificationCount > 0 && (
             <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               {notificationCount}
@@ -150,35 +159,41 @@ export default function Sidebar() {
         </button>
         <NavLink
           to="/settings"
+          style={{
+            backgroundColor: currentPath === '/settings' ? `${theme.accents?.default?.primary}1A` : undefined,
+            color: currentPath === '/settings' ? theme.accents?.default?.primary : undefined,
+            boxShadow: currentPath === '/settings' ? `0 0 20px ${theme.accents?.default?.glow}` : 'none',
+            border: currentPath === '/settings' ? `1px solid ${theme.accents?.default?.primary}44` : '1px solid transparent'
+          }}
           className={`
-            ${THEME_CONFIG.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+            ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
             ${currentPath === '/settings'
-              ? 'bg-white text-black font-black'
-              : 'text-zinc-500 hover:bg-zinc-900/50 hover:text-white group'}
+              ? `font-black`
+              : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
           `}
         >
-          <Settings size={14} className={currentPath === '/settings' ? 'text-black' : 'text-zinc-700 group-hover:text-zinc-400'} />
+          <Settings size={14} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
           SETTINGS
         </NavLink>
       </div>
 
       {/* USER FOOTER */}
-      <div className="p-4 bg-zinc-950/50 border-t border-zinc-900 mt-auto relative" ref={userMenuRef}>
+      <div className={`p-4 ${theme.canvas.card} border-t ${theme.canvas.border} mt-auto relative`} ref={userMenuRef}>
 
         {/* User Menu Popup */}
         {showUserMenu && (
-          <div className="absolute bottom-full left-4 right-4 mb-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+          <div className={`absolute bottom-full left-4 right-4 mb-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 z-50`}>
             <button
               onClick={() => navigate('/dev-login')}
-              className="w-full px-4 py-3 text-left text-xs font-bold text-amber-500 hover:bg-zinc-800/50 flex items-center gap-2 transition-colors"
+              className={`w-full px-4 py-3 text-left text-xs font-bold text-amber-500 ${theme.canvas.hover} flex items-center gap-2 transition-colors`}
             >
               <Code size={14} />
               DEV LOGIN
             </button>
-            <div className="h-px bg-zinc-800" />
+            <div className={`h-px ${theme.canvas.border}`} />
             <button
               onClick={handleLogout}
-              className="w-full px-4 py-3 text-left text-xs font-bold text-red-400 hover:bg-zinc-800/50 flex items-center gap-2 transition-colors"
+              className={`w-full px-4 py-3 text-left text-xs font-bold text-red-400 ${theme.canvas.hover} flex items-center gap-2 transition-colors`}
             >
               <LogOut size={14} />
               LOGOUT
@@ -188,9 +203,9 @@ export default function Sidebar() {
 
         <button
           onClick={() => setShowUserMenu(!showUserMenu)}
-          className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-zinc-900 transition-colors text-left relative cursor-pointer"
+          className={`flex items-center gap-3 w-full p-2 rounded-xl ${theme.canvas.hover} transition-colors text-left relative cursor-pointer`}
         >
-          <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-black text-white shrink-0">
+          <div className={`w-9 h-9 rounded-full ${theme.canvas.card} border ${theme.canvas.border} flex items-center justify-center text-[10px] font-black ${theme.text.primary} shrink-0`}>
             {user?.picture ? (
               <img src={user.picture} alt="" className="w-full h-full rounded-full object-cover" />
             ) : (
@@ -198,10 +213,10 @@ export default function Sidebar() {
             )}
           </div>
           <div className="overflow-hidden min-w-0 flex-1">
-            <p className="text-[10px] font-black uppercase text-white truncate">{user?.name || 'User'}</p>
-            <p className="text-[9px] text-zinc-600 italic truncate">{user?.email || 'No Email'}</p>
+            <p className={`text-[10px] font-black uppercase ${theme.text.primary} truncate`}>{user?.name || 'User'}</p>
+            <p className={`text-[9px] ${theme.text.secondary} italic truncate`}>{user?.email || 'No Email'}</p>
           </div>
-          <MoreVertical size={14} className="text-zinc-600 shrink-0" />
+          <MoreVertical size={14} className={`${theme.text.secondary} shrink-0`} />
         </button>
       </div>
     </aside>

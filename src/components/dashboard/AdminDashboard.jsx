@@ -7,7 +7,10 @@ import VerticalList from './VerticalList';
 import EventTimeline from './EventTimeline';
 import RecentActivity from './RecentActivity';
 
+import { useTheme } from '../../context/ThemeContext';
+
 const AdminDashboard = () => {
+    const { theme } = useTheme();
     const [loading, setLoading] = useState(true);
     const [attention, setAttention] = useState([]);
     const [workload, setWorkload] = useState([]);
@@ -44,19 +47,19 @@ const AdminDashboard = () => {
     if (loading) return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Attention Section Skeleton */}
-            <div className="h-48 w-full bg-zinc-900/40 rounded-3xl border border-zinc-800/50 p-6 space-y-4">
+            <div className={`h-48 w-full ${theme.canvas.card} rounded-3xl border ${theme.canvas.border} p-6 space-y-4`}>
                 <div className="flex gap-4">
-                    <div className="h-12 w-12 bg-zinc-800 rounded-xl animate-pulse" />
+                    <div className={`h-12 w-12 ${theme.canvas.bg} rounded-xl animate-pulse`} />
                     <div className="space-y-2">
-                        <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
-                        <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
+                        <div className={`h-6 w-48 ${theme.canvas.bg} rounded animate-pulse`} />
+                        <div className={`h-4 w-32 ${theme.canvas.bg} rounded animate-pulse`} />
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="md:col-span-2 h-64 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 animate-pulse" />
-                <div className="h-64 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 animate-pulse" />
+                <div className={`md:col-span-2 h-64 ${theme.canvas.card} rounded-3xl border ${theme.canvas.border} animate-pulse`} />
+                <div className={`h-64 ${theme.canvas.card} rounded-3xl border ${theme.canvas.border} animate-pulse`} />
             </div>
         </div>
     );
@@ -71,8 +74,8 @@ const AdminDashboard = () => {
                 <div className="md:col-span-2">
                     <WorkloadSection type="team" data={workload} />
                 </div>
-                <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-3xl p-6">
-                    <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-3xl p-6`}>
+                    <h2 className={`text-lg font-bold ${theme.text.primary} mb-4 flex items-center gap-2`}>
                         <Icons.BarChart className="w-5 h-5 text-purple-500" />
                         Active Projects
                     </h2>
@@ -82,21 +85,21 @@ const AdminDashboard = () => {
 
             {/* 3. Bottom Section: Schedule & Activity */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <div className="xl:col-span-2 bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-3xl p-8 hover:border-zinc-700/50 transition-colors">
+                <div className={`xl:col-span-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-3xl p-8 hover:${theme.canvas.hover} transition-colors`}>
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <h2 className={`text-xl font-bold ${theme.text.primary} flex items-center gap-2`}>
                                 Upcoming Schedule
                             </h2>
-                            <p className="text-zinc-500 text-sm mt-1">Next 14 days of events and shoots</p>
+                            <p className={`${theme.text.secondary} text-sm mt-1`}>Next 14 days of events and shoots</p>
                         </div>
                     </div>
                     <EventTimeline events={schedule} />
                 </div>
 
-                <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-3xl p-8 h-fit sticky top-8">
+                <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-3xl p-8 h-fit sticky top-8`}>
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <h2 className={`text-xl font-bold ${theme.text.primary} flex items-center gap-2`}>
                             Recent Activity
                         </h2>
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Icons } from '../components/Icons';
 import { Link } from 'react-router-dom';
 import AdminDashboard from '../components/dashboard/AdminDashboard';
@@ -6,6 +7,7 @@ import MemberDashboard from '../components/dashboard/MemberDashboard';
 
 const DashboardPage = () => {
     const { user } = useAuth();
+    const { theme } = useTheme();
 
     // Greeting Logic
     const getGreeting = () => {
@@ -16,7 +18,7 @@ const DashboardPage = () => {
     };
 
     return (
-        <div className="relative min-h-screen bg-black text-white selection:bg-purple-500/30">
+        <div className={`relative min-h-screen ${theme.canvas.bg} ${theme.text.primary} selection:bg-purple-500/30`}>
             {/* Ambient Background Glows */}
             <div className="fixed top-0 left-0 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[128px] pointer-events-none -translate-x-1/2 -translate-y-1/2 mix-blend-screen" />
             <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[128px] pointer-events-none translate-x-1/2 translate-y-1/2 mix-blend-screen" />
@@ -25,24 +27,24 @@ const DashboardPage = () => {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/50 border border-zinc-800 text-xs font-medium text-zinc-400 mb-4 backdrop-blur-md">
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${theme.canvas.card} border ${theme.canvas.border} text-xs font-medium ${theme.text.secondary} mb-4 backdrop-blur-md`}>
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                             System Operational
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">
+                        <h1 className={`text-4xl md:text-5xl font-black ${theme.text.primary} mb-2 tracking-tight`}>
                             {getGreeting()}, <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 animate-gradient-x bg-[length:200%_auto]">
                                 {user?.name?.split(' ')[0]}
                             </span>
                         </h1>
-                        <p className="text-zinc-400 text-lg max-w-xl">
+                        <p className={`${theme.text.secondary} text-lg max-w-xl`}>
                             {user?.role === 'member'
                                 ? "Here's your personal mission briefing."
                                 : "Mission control ready. Ecosystem looks stable."}
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Link to="/tasks" className="px-6 py-3 bg-white text-black hover:bg-zinc-200 rounded-xl text-sm font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                        <Link to="/tasks" className={`px-6 py-3 ${theme.canvas.fg} ${theme.text.inverse || "text-black"} hover:opacity-90 rounded-xl text-sm font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)]`}>
                             <Icons.Plus className="w-4 h-4" /> New Task
                         </Link>
                     </div>

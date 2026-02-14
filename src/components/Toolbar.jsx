@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Icons } from './Icons';
 import clsx from 'clsx';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Toolbar = ({
     search, setSearch,
@@ -21,6 +22,8 @@ const Toolbar = ({
     const [activeDropdown, setActiveDropdown] = useState(null); // 'filter', 'sort' or null
     const toolbarRef = useRef(null);
     const { config } = useAgencyConfig();
+    const { theme } = useTheme();
+    const accent = theme.accents?.default || { primary: '#ef4444', glow: '#ef4444' };
 
     // Helper to get current label
     const getCurrentFilterLabel = () => {
@@ -47,7 +50,7 @@ const Toolbar = ({
     };
 
     return (
-        <div ref={toolbarRef} className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 backdrop-blur-sm sticky top-0 z-10 transition-all">
+        <div ref={toolbarRef} className={`flex flex-col md:flex-row justify-between items-center mb-8 gap-4 ${theme.canvas.card} p-4 rounded-xl border ${theme.canvas.border} backdrop-blur-sm sticky top-0 z-10 transition-all`}>
 
             {/* 1. Search Bar */}
             <div className="relative w-full md:w-1/3">
@@ -57,7 +60,12 @@ const Toolbar = ({
                     placeholder="Search projects..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 text-white rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-red-500 transition-colors"
+                    className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} ${theme.text.primary} rounded-lg pl-10 pr-4 py-2 focus:outline-none transition-colors`}
+                    style={{
+                        outlineColor: activeDropdown ? 'transparent' : accent.primary // Use accent for focus ring if possible, or just border
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = accent.primary}
+                    onBlur={(e) => e.target.style.borderColor = ''}
                 />
             </div>
 
@@ -70,9 +78,13 @@ const Toolbar = ({
                     <button
                         onClick={() => toggleDropdown('filter')}
                         className={clsx(
-                            "flex items-center gap-2 bg-zinc-950 border px-3 py-2 rounded-lg text-sm transition-colors",
-                            activeDropdown === 'filter' ? "border-purple-500 text-white" : "border-zinc-800 text-zinc-300 hover:text-white"
+                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors",
+                            activeDropdown === 'filter' ? "" : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary} ${theme.canvas.hover}`
                         )}
+                        style={activeDropdown === 'filter' ? {
+                            borderColor: accent.primary,
+                            color: accent.primary
+                        } : {}}
                     >
                         <Icons.Filter className="w-4 h-4" />
                         <span className="capitalize">{getCurrentFilterLabel()}</span>
@@ -80,14 +92,18 @@ const Toolbar = ({
                     </button>
 
                     {activeDropdown === 'filter' && (
-                        <div className="absolute top-full right-0 mt-2 w-56 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className={`absolute top-full right-0 mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {/* Special Views */}
                             <button
                                 onClick={() => { setView('all'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
-                                    "w-full text-left px-4 py-2 text-sm hover:bg-zinc-900 flex items-center gap-3 transition-colors",
-                                    (view === 'all' && filter === 'all') ? "text-purple-500 font-medium bg-purple-500/10" : "text-zinc-400"
+                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    (view === 'all' && filter === 'all') ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
+                                style={(view === 'all' && filter === 'all') ? {
+                                    color: accent.primary,
+                                    backgroundColor: `${accent.primary}1A`
+                                } : {}}
                             >
                                 <Icons.Grid className="w-4 h-4" />
                                 All Projects
@@ -95,9 +111,13 @@ const Toolbar = ({
                             <button
                                 onClick={() => { setView('upcoming'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
-                                    "w-full text-left px-4 py-2 text-sm hover:bg-zinc-900 flex items-center gap-3 transition-colors",
-                                    view === 'upcoming' ? "text-purple-500 font-medium bg-purple-500/10" : "text-zinc-400"
+                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    view === 'upcoming' ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
+                                style={view === 'upcoming' ? {
+                                    color: accent.primary,
+                                    backgroundColor: `${accent.primary}1A`
+                                } : {}}
                             >
                                 <Icons.Calendar className="w-4 h-4" />
                                 Upcoming Events
@@ -118,9 +138,13 @@ const Toolbar = ({
                                         setActiveDropdown(null);
                                     }}
                                     className={clsx(
-                                        "w-full text-left px-4 py-2 text-sm hover:bg-zinc-900 flex items-center gap-2 transition-colors",
-                                        filter === status.id ? "text-purple-500 font-medium bg-purple-500/10" : "text-zinc-400"
+                                        "w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors",
+                                        filter === status.id ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                     )}
+                                    style={filter === status.id ? {
+                                        color: accent.primary,
+                                        backgroundColor: `${accent.primary}1A`
+                                    } : {}}
                                 >
                                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: status.color }} />
                                     {status.label}
@@ -135,16 +159,20 @@ const Toolbar = ({
                     <button
                         onClick={() => toggleDropdown('sort')}
                         className={clsx(
-                            "flex items-center gap-2 bg-zinc-950 border px-3 py-2 rounded-lg text-sm transition-colors",
-                            activeDropdown === 'sort' ? "border-red-500 text-white" : "border-zinc-800 text-zinc-300 hover:text-white"
+                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors",
+                            activeDropdown === 'sort' ? "" : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary} ${theme.canvas.hover}`
                         )}
+                        style={activeDropdown === 'sort' ? {
+                            borderColor: accent.primary,
+                            color: accent.primary
+                        } : {}}
                     >
                         <Icons.Sort className="w-4 h-4" />
                         <span>Sort</span>
                     </button>
 
                     {activeDropdown === 'sort' && (
-                        <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {[
                                 { id: 'newest', label: 'Newest First' },
                                 { id: 'oldest', label: 'Oldest First' },
@@ -157,9 +185,12 @@ const Toolbar = ({
                                         setActiveDropdown(null);
                                     }}
                                     className={clsx(
-                                        "block w-full text-left px-4 py-2 text-sm hover:bg-zinc-900 transition-colors",
-                                        sort === opt.id ? "text-red-500 font-medium" : "text-zinc-400"
+                                        "block w-full text-left px-4 py-2 text-sm transition-colors",
+                                        sort === opt.id ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                     )}
+                                    style={sort === opt.id ? {
+                                        color: accent.primary
+                                    } : {}}
                                 >
                                     {opt.label}
                                 </button>
@@ -169,13 +200,17 @@ const Toolbar = ({
                 </div>
 
                 {/* 4. View Toggle */}
-                <div className="flex bg-zinc-950 border border-zinc-800 rounded-lg p-1">
+                <div className={`flex ${theme.canvas.card} border ${theme.canvas.border} rounded-lg p-1`}>
                     <button
                         onClick={() => setViewMode('grid')}
                         className={clsx(
                             "p-2 rounded-md transition-colors",
-                            viewMode === 'grid' ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
+                            viewMode === 'grid' ? "" : `${theme.text.secondary} ${theme.canvas.hover}`
                         )}
+                        style={viewMode === 'grid' ? {
+                            backgroundColor: `${accent.primary}25`, // Slightly stronger opacity for toggle
+                            color: accent.primary
+                        } : {}}
                     >
                         <Icons.Grid className="w-4 h-4" />
                     </button>
@@ -183,8 +218,12 @@ const Toolbar = ({
                         onClick={() => setViewMode('list')}
                         className={clsx(
                             "p-2 rounded-md transition-colors",
-                            viewMode === 'list' ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
+                            viewMode === 'list' ? "" : `${theme.text.secondary} ${theme.canvas.hover}`
                         )}
+                        style={viewMode === 'list' ? {
+                            backgroundColor: `${accent.primary}25`,
+                            color: accent.primary
+                        } : {}}
                     >
                         <Icons.List className="w-4 h-4" />
                     </button>

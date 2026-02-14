@@ -1,26 +1,30 @@
+import { useTheme } from '../../context/ThemeContext';
 import { Icons } from '../Icons';
 
-const MyWorkload = ({ stats }) => (
-    <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800 flex flex-col items-center justify-center text-center">
-            <span className="text-3xl font-bold text-white mb-1">{stats?.due_today || 0}</span>
-            <span className="text-xs text-zinc-500 font-medium">Due Today</span>
+const MyWorkload = ({ stats }) => {
+    const { theme } = useTheme();
+    return (
+        <div className="grid grid-cols-3 gap-4">
+            <div className={`p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} flex flex-col items-center justify-center text-center`}>
+                <span className={`text-3xl font-bold ${theme.text.primary} mb-1`}>{stats?.due_today || 0}</span>
+                <span className={`text-xs ${theme.text.secondary} font-medium`}>Due Today</span>
+            </div>
+            <div className={`p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} flex flex-col items-center justify-center text-center`}>
+                <span className={`text-3xl font-bold ${theme.text.primary} mb-1`}>{stats?.due_week || 0}</span>
+                <span className={`text-xs ${theme.text.secondary} font-medium`}>This Week</span>
+            </div>
+            <div className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center ${stats?.overdue > 0 ? 'bg-red-500/10 border-red-500/30' : `${theme.canvas.card} ${theme.canvas.border}`
+                }`}>
+                <span className={`text-3xl font-bold mb-1 ${stats?.overdue > 0 ? 'text-red-500' : theme.text.secondary}`}>
+                    {stats?.overdue || 0}
+                </span>
+                <span className={`text-xs font-medium ${stats?.overdue > 0 ? 'text-red-400' : theme.text.secondary}`}>
+                    Overdue
+                </span>
+            </div>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800 flex flex-col items-center justify-center text-center">
-            <span className="text-3xl font-bold text-white mb-1">{stats?.due_week || 0}</span>
-            <span className="text-xs text-zinc-500 font-medium">This Week</span>
-        </div>
-        <div className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center ${stats?.overdue > 0 ? 'bg-red-900/10 border-red-900/30' : 'bg-zinc-900/40 border-zinc-800'
-            }`}>
-            <span className={`text-3xl font-bold mb-1 ${stats?.overdue > 0 ? 'text-red-500' : 'text-zinc-500'}`}>
-                {stats?.overdue || 0}
-            </span>
-            <span className={`text-xs font-medium ${stats?.overdue > 0 ? 'text-red-400' : 'text-zinc-500'}`}>
-                Overdue
-            </span>
-        </div>
-    </div>
-);
+    );
+};
 
 const TeamWorkload = ({ alerts }) => (
     <div className="space-y-3">
@@ -31,13 +35,13 @@ const TeamWorkload = ({ alerts }) => (
             </div>
         ) : (
             alerts.map((alert, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-red-900/10 border border-red-900/20">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/20">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-400">
+                        <div className="w-8 h-8 rounded-full bg-zinc-500/20 flex items-center justify-center text-xs font-bold text-zinc-500">
                             {alert.user_name.charAt(0)}
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-white">{alert.user_name}</p>
+                            <p className="text-sm font-medium text-red-500">{alert.user_name}</p>
                             <p className="text-xs text-red-400">{alert.overload_summary}</p>
                         </div>
                     </div>
@@ -48,14 +52,16 @@ const TeamWorkload = ({ alerts }) => (
 );
 
 const WorkloadSection = ({ type = 'me', data }) => {
+    const { theme } = useTheme();
+
     return (
-        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-3xl p-6 h-full">
+        <div className={`${theme.canvas.card} backdrop-blur-xl border ${theme.canvas.border} rounded-3xl p-6 h-full`}>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h2 className={`text-lg font-bold ${theme.text.primary} flex items-center gap-2`}>
                         {type === 'me' ? 'Task Pressure' : 'Team Load Alerts'}
                     </h2>
-                    <p className="text-zinc-500 text-xs mt-1">
+                    <p className={`${theme.text.secondary} text-xs mt-1`}>
                         {type === 'me' ? 'Your delivery velocity' : 'Members needing assistance'}
                     </p>
                 </div>

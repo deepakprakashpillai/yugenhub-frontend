@@ -30,6 +30,10 @@ export const AgencyConfigProvider = ({ children }) => {
                     suffix: FALLBACK_CONFIG.brand?.suffix || 'HUB',
                     primaryColor: FALLBACK_CONFIG.brand?.primaryColor || '#ef4444',
                 },
+                // Theme settings from org config
+                theme_mode: orgRes.data.theme_mode,
+                accent_color: orgRes.data.accent_color,
+
                 org: orgRes.data,
                 statusOptions: workflowRes.data.status_options || FALLBACK_CONFIG.statusOptions,
                 leadSources: workflowRes.data.lead_sources || FALLBACK_CONFIG.leadSources,

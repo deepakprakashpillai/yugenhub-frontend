@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
 import StatsHeader from '../components/StatsHeader';
 import { Icons } from '../components/Icons';
@@ -10,28 +11,28 @@ import FloatingActionButton from '../components/FloatingActionButton';
 import { AssociateModal } from '../components/modals';
 import { v4 as uuidv4 } from 'uuid';
 
-const AssociateCard = ({ associate }) => (
+const AssociateCard = ({ associate, theme }) => (
     <motion.div
         layout
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors group flex flex-col h-full"
+        className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-6 hover:${theme.canvas.hover} transition-colors group flex flex-col h-full`}
     >
         <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg">
                 {associate.name.charAt(0)}
             </div>
             <span className={`text-xs px-2 py-1 rounded-full border ${associate.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                'bg-zinc-800 text-zinc-500 border-zinc-700'
+                `${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border}`
                 }`}>
                 {associate.primary_role}
             </span>
         </div>
-        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">{associate.name}</h3>
-        <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">{associate.employment_type}</span>
+        <h3 className={`text-xl font-bold ${theme.text.primary} mb-1 group-hover:text-purple-400 transition-colors`}>{associate.name}</h3>
+        <span className={`text-xs font-mono ${theme.text.secondary} uppercase tracking-widest`}>{associate.employment_type}</span>
 
-        <div className="space-y-2 mt-4 text-sm text-zinc-400 flex-1">
+        <div className={`space-y-2 mt-4 text-sm ${theme.text.secondary} flex-1`}>
             <div className="flex items-center gap-2">
                 <Icons.Phone className="w-4 h-4" />
                 {associate.phone_number}
@@ -50,12 +51,12 @@ const AssociateCard = ({ associate }) => (
             )}
         </div>
 
-        <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-between items-center gap-2">
+        <div className={`mt-6 pt-4 border-t ${theme.canvas.border} flex justify-between items-center gap-2`}>
             <div className="flex gap-2">
-                <a href={`tel:${associate.phone_number}`} className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors" title="Call">
+                <a href={`tel:${associate.phone_number}`} className={`p-2 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`} title="Call">
                     <Icons.Phone className="w-4 h-4" />
                 </a>
-                <a href={`https://wa.me/${associate.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-green-900/30 hover:text-green-500 transition-colors" title="WhatsApp">
+                <a href={`https://wa.me/${associate.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-green-900/30 hover:text-green-500 transition-colors`} title="WhatsApp">
                     <Icons.WhatsApp className="w-4 h-4" />
                 </a>
             </div>
@@ -64,10 +65,10 @@ const AssociateCard = ({ associate }) => (
     </motion.div>
 );
 
-const AssociateTable = ({ associates }) => (
-    <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full text-left text-sm text-zinc-400 bg-zinc-900/50">
-            <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-500 font-medium">
+const AssociateTable = ({ associates, theme }) => (
+    <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border}`}>
+        <table className={`w-full text-left text-sm ${theme.text.secondary} ${theme.canvas.bg} bg-opacity-50`}>
+            <thead className={`text-xs uppercase ${theme.canvas.bg} bg-opacity-80 ${theme.text.secondary} font-medium`}>
                 <tr>
                     <th className="px-6 py-4">Name</th>
                     <th className="px-6 py-4">Role</th>
@@ -77,9 +78,9 @@ const AssociateTable = ({ associates }) => (
                     <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800">
+            <tbody className={`divide-y ${theme.canvas.border}`}>
                 {associates.map((assoc) => (
-                    <tr key={assoc._id} className="hover:bg-zinc-900 transition-colors">
+                    <tr key={assoc._id} className={`hover:${theme.canvas.hover} transition-colors`}>
                         <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-xs">
@@ -89,15 +90,15 @@ const AssociateTable = ({ associates }) => (
                             </div>
                         </td>
                         <td className="px-6 py-4">
-                            <span className="text-xs px-2 py-1 rounded-full border bg-zinc-800 text-zinc-400 border-zinc-700">
+                            <span className={`text-xs px-2 py-1 rounded-full border ${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border}`}>
                                 {assoc.primary_role}
                             </span>
                         </td>
-                        <td className="px-6 py-4 text-zinc-400">
+                        <td className={`px-6 py-4 ${theme.text.secondary}`}>
                             {assoc.employment_type}
                         </td>
                         <td className="px-6 py-4 space-y-1">
-                            <div className="flex items-center gap-2 text-zinc-300">
+                            <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
                                 <Icons.Phone className="w-3 h-3" /> {assoc.phone_number}
                             </div>
                             {assoc.email_id && (
@@ -111,8 +112,8 @@ const AssociateTable = ({ associates }) => (
                         </td>
                         <td className="px-6 py-4 text-right">
                             <div className="flex justify-end gap-2">
-                                <a href={`tel:${assoc.phone_number}`} className="p-1.5 rounded bg-zinc-800 text-zinc-400 hover:text-white" title="Call"><Icons.Phone className="w-3 h-3" /></a>
-                                <a href={`https://wa.me/${assoc.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded bg-zinc-800 text-zinc-400 hover:text-green-500" title="WhatsApp"><Icons.WhatsApp className="w-3 h-3" /></a>
+                                <a href={`tel:${assoc.phone_number}`} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.text.primary}`} title="Call"><Icons.Phone className="w-3 h-3" /></a>
+                                <a href={`https://wa.me/${assoc.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:text-green-500`} title="WhatsApp"><Icons.WhatsApp className="w-3 h-3" /></a>
                             </div>
                         </td>
                     </tr>
@@ -123,6 +124,7 @@ const AssociateTable = ({ associates }) => (
 );
 
 const AssociatesPage = () => {
+    const { theme } = useTheme();
     const [associates, setAssociates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -130,6 +132,7 @@ const AssociatesPage = () => {
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [viewMode, setViewMode] = useState('grid');
+    const accent = theme.accents?.default || { primary: '#ef4444', glow: '#ef4444' };
 
     // Filters
     const [roleFilter, setRoleFilter] = useState('');
@@ -227,20 +230,25 @@ const AssociatesPage = () => {
                 />
             )}
 
-            <h1 className="text-4xl font-black mb-8 text-white uppercase tracking-tighter">Associates</h1>
+            <h1 className={`text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter`}>Associates</h1>
 
             <StatsHeader type="associates" />
 
             {/* Toolbar - Z-50 to stay above overlay when active filters needed, but needs interaction */}
-            <div className="flex flex-col xl:flex-row justify-between items-center mb-8 gap-4 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800 backdrop-blur-sm sticky top-0 z-50">
+            <div className={`flex flex-col xl:flex-row justify-between items-center mb-8 gap-4 ${theme.canvas.bg} bg-opacity-50 p-3 rounded-2xl border ${theme.canvas.border} backdrop-blur-sm sticky top-0 z-50`}>
                 <div className="relative w-full xl:w-1/3">
-                    <Icons.Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                    <Icons.Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${theme.text.secondary}`} />
                     <input
                         type="text"
                         placeholder="Search team by name, city or phone..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-zinc-900 text-white pl-12 pr-4 py-3 rounded-xl border border-zinc-800 focus:border-white/20 focus:outline-none placeholder:text-zinc-600"
+                        className={`w-full ${theme.canvas.input || theme.canvas.card} ${theme.text.primary} pl-12 pr-4 py-3 rounded-xl border ${theme.canvas.border} focus:border-white/20 focus:outline-none placeholder:${theme.text.secondary}`}
+                        style={{
+                            outlineColor: activeDropdown ? 'transparent' : accent.primary
+                        }}
+                        onFocus={(e) => e.target.style.borderColor = accent.primary}
+                        onBlur={(e) => e.target.style.borderColor = ''}
                     />
                 </div>
 
@@ -251,18 +259,23 @@ const AssociatesPage = () => {
                             onClick={() => toggleDropdown('role')}
                             className={clsx(
                                 "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap relative z-50",
-                                roleFilter || activeDropdown === 'role' ? "bg-zinc-800 border-zinc-600 text-white" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                                roleFilter || activeDropdown === 'role' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
+                            style={roleFilter || activeDropdown === 'role' ? {
+                                borderColor: accent.primary,
+                                color: accent.primary,
+                                backgroundColor: roleFilter ? `${accent.primary}1A` : undefined
+                            } : {}}
                         >
                             <Icons.Briefcase className="w-4 h-4" />
                             {roleFilter || 'All Roles'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'role' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'role' && (
-                            <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-2 z-50">
-                                <button onClick={() => { setRoleFilter(''); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">All Roles</button>
+                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setRoleFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Roles</button>
                                 {['Photographer', 'Cinematographer', 'Editor', 'Drone Pilot'].map(role => (
-                                    <button key={role} onClick={() => { setRoleFilter(role); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">{role}</button>
+                                    <button key={role} onClick={() => { setRoleFilter(role); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{role}</button>
                                 ))}
                             </div>
                         )}
@@ -274,18 +287,23 @@ const AssociatesPage = () => {
                             onClick={() => toggleDropdown('type')}
                             className={clsx(
                                 "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap relative z-50",
-                                typeFilter || activeDropdown === 'type' ? "bg-zinc-800 border-zinc-600 text-white" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                                typeFilter || activeDropdown === 'type' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
+                            style={typeFilter || activeDropdown === 'type' ? {
+                                borderColor: accent.primary,
+                                color: accent.primary,
+                                backgroundColor: typeFilter ? `${accent.primary}1A` : undefined
+                            } : {}}
                         >
                             <Icons.Filter className="w-4 h-4" />
                             {typeFilter || 'Employment Type'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'type' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'type' && (
-                            <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-2 z-50">
-                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">All Types</button>
+                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Types</button>
                                 {['Freelance', 'In-house'].map(type => (
-                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">{type}</button>
+                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
                                 ))}
                             </div>
                         )}
@@ -297,30 +315,39 @@ const AssociatesPage = () => {
                             onClick={() => toggleDropdown('status')}
                             className={clsx(
                                 "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap relative z-50",
-                                statusFilter || activeDropdown === 'status' ? "bg-zinc-800 border-zinc-600 text-white" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                                statusFilter || activeDropdown === 'status' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
+                            style={statusFilter || activeDropdown === 'status' ? {
+                                borderColor: accent.primary,
+                                color: accent.primary,
+                                backgroundColor: statusFilter ? `${accent.primary}1A` : undefined
+                            } : {}}
                         >
-                            <div className={`w-2 h-2 rounded-full ${statusFilter === 'active' ? 'bg-emerald-500' : statusFilter === 'inactive' ? 'bg-red-500' : 'bg-zinc-500'}`} />
+                            <div className={`w-2 h-2 rounded-full ${statusFilter === 'active' ? 'bg-emerald-500' : statusFilter === 'inactive' ? 'bg-red-500' : `${theme.text.secondary}`}`} />
                             {statusFilter ? (statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)) : 'All Status'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'status' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'status' && (
-                            <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl py-2 z-50">
-                                <button onClick={() => { setStatusFilter(''); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">All Status</button>
-                                <button onClick={() => { setStatusFilter('active'); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">Active</button>
-                                <button onClick={() => { setStatusFilter('inactive'); setActiveDropdown(null); }} className="block w-full text-left px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white">Inactive</button>
+                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setStatusFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Status</button>
+                                <button onClick={() => { setStatusFilter('active'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Active</button>
+                                <button onClick={() => { setStatusFilter('inactive'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Inactive</button>
                             </div>
                         )}
                     </div>
 
                     {/* View Toggle */}
-                    <div className="flex bg-zinc-950 border border-zinc-800 rounded-lg p-1 ml-auto xl:ml-0">
+                    <div className={`flex ${theme.canvas.card} border ${theme.canvas.border} rounded-lg p-1 ml-auto xl:ml-0`}>
                         <button
                             onClick={() => setViewMode('grid')}
                             className={clsx(
                                 "p-2 rounded-md transition-colors",
-                                viewMode === 'grid' ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
+                                viewMode === 'grid' ? "" : `${theme.text.secondary} hover:${theme.text.primary}`
                             )}
+                            style={viewMode === 'grid' ? {
+                                backgroundColor: `${accent.primary}25`,
+                                color: accent.primary
+                            } : {}}
                         >
                             <Icons.Grid className="w-4 h-4" />
                         </button>
@@ -328,8 +355,12 @@ const AssociatesPage = () => {
                             onClick={() => setViewMode('list')}
                             className={clsx(
                                 "p-2 rounded-md transition-colors",
-                                viewMode === 'list' ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
+                                viewMode === 'list' ? "" : `${theme.text.secondary} hover:${theme.text.primary}`
                             )}
+                            style={viewMode === 'list' ? {
+                                backgroundColor: `${accent.primary}25`,
+                                color: accent.primary
+                            } : {}}
                         >
                             <Icons.List className="w-4 h-4" />
                         </button>
@@ -352,7 +383,7 @@ const AssociatesPage = () => {
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                         >
                             {associates.map(assoc => (
-                                <AssociateCard key={assoc._id} associate={assoc} />
+                                <AssociateCard key={assoc._id} associate={assoc} theme={theme} />
                             ))}
                         </motion.div>
                     ) : (
@@ -360,29 +391,28 @@ const AssociatesPage = () => {
                             key="list"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         >
-                            <AssociateTable associates={associates} />
+                            <AssociateTable associates={associates} theme={theme} />
                         </motion.div>
                     )}
                 </AnimatePresence>
             )}
 
-            {/* PAGINATION CONTROLS */}
             {!loading && totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-12 bg-zinc-900/50 py-3 px-6 rounded-full w-fit mx-auto border border-zinc-800 backdrop-blur-sm shadow-2xl">
+                <div className={`flex justify-center items-center gap-4 mt-12 ${theme.canvas.bg} bg-opacity-50 py-3 px-6 rounded-full w-fit mx-auto border ${theme.canvas.border} backdrop-blur-sm shadow-2xl`}>
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(p => Math.max(1, p - 1))}
-                        className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95"
+                        className={`p-2 rounded-full hover:${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95`}
                     >
                         <Icons.ChevronLeft className="w-5 h-5" />
                     </button>
-                    <span className="text-zinc-500 font-mono text-xs uppercase tracking-widest px-4 border-l border-r border-zinc-800/50">
-                        Page <span className="text-white font-bold text-sm mx-1">{page}</span> of {totalPages}
+                    <span className={`${theme.text.secondary} font-mono text-xs uppercase tracking-widest px-4 border-l border-r ${theme.canvas.border}`}>
+                        Page <span className={`${theme.text.primary} font-bold text-sm mx-1`}>{page}</span> of {totalPages}
                     </span>
                     <button
                         disabled={page === totalPages}
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95"
+                        className={`p-2 rounded-full hover:${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95`}
                     >
                         <Icons.ChevronRight className="w-5 h-5" />
                     </button>

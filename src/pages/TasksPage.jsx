@@ -11,8 +11,10 @@ import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 import { usePermission } from '../hooks/usePermissions';
 import { PERMISSIONS } from '../config/permissions';
+import { useTheme } from '../context/ThemeContext';
 
 const TasksPage = () => {
+    const { theme } = useTheme();
     const { user } = useAuth();
     const canViewAll = usePermission(PERMISSIONS.VIEW_ALL_TASKS);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -134,20 +136,25 @@ const TasksPage = () => {
         <div className="p-8 pb-32 max-w-[1600px] mx-auto min-h-screen relative">
             {/* Header + Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+
                 <div>
-                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter">Tasks</h1>
-                    <p className="text-zinc-500 text-sm mt-1">Manage your deliverables and to-dos</p>
+                    <h1 className={`text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Tasks</h1>
+                    <p className={`${theme.text.secondary} text-sm mt-1`}>Manage your deliverables and to-dos</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4">
                     {/* View Mode Toggle */}
-                    <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                    <div className={`flex gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border}`}>
                         <button
                             onClick={() => setViewMode('cards')}
                             className={clsx(
                                 "p-2 rounded-lg transition-colors",
-                                viewMode === 'cards' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-white"
+                                viewMode === 'cards' ? `shadow-sm` : `${theme.text.secondary} ${theme.canvas.hover}`
                             )}
+                            style={viewMode === 'cards' ? {
+                                backgroundColor: `${theme.accents?.default?.primary}1A`,
+                                color: theme.accents?.default?.primary
+                            } : {}}
                             title="Card View"
                         >
                             <Icons.Grid className="w-4 h-4" />
@@ -156,8 +163,12 @@ const TasksPage = () => {
                             onClick={() => setViewMode('list')}
                             className={clsx(
                                 "p-2 rounded-lg transition-colors",
-                                viewMode === 'list' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-white"
+                                viewMode === 'list' ? `shadow-sm` : `${theme.text.secondary} ${theme.canvas.hover}`
                             )}
+                            style={viewMode === 'list' ? {
+                                backgroundColor: `${theme.accents?.default?.primary}1A`,
+                                color: theme.accents?.default?.primary
+                            } : {}}
                             title="List View"
                         >
                             <Icons.List className="w-4 h-4" />
@@ -165,13 +176,17 @@ const TasksPage = () => {
                     </div>
 
                     {/* Tab Toggle */}
-                    <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                    <div className={`flex gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border}`}>
                         <button
                             onClick={() => setTab('my_tasks')}
                             className={clsx(
                                 "px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all",
-                                tab === 'my_tasks' ? "bg-white text-black shadow" : "text-zinc-500 hover:text-white"
+                                tab === 'my_tasks' ? `shadow` : `${theme.text.secondary} ${theme.canvas.hover}`
                             )}
+                            style={tab === 'my_tasks' ? {
+                                backgroundColor: `${theme.accents?.default?.primary}1A`,
+                                color: theme.accents?.default?.primary
+                            } : {}}
                         >
                             My Tasks
                         </button>
@@ -180,8 +195,12 @@ const TasksPage = () => {
                                 onClick={() => setTab('all_tasks')}
                                 className={clsx(
                                     "px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all",
-                                    tab === 'all_tasks' ? "bg-white text-black shadow" : "text-zinc-500 hover:text-white"
+                                    tab === 'all_tasks' ? `shadow` : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
+                                style={tab === 'all_tasks' ? {
+                                    backgroundColor: `${theme.accents?.default?.primary}1A`,
+                                    color: theme.accents?.default?.primary
+                                } : {}}
                             >
                                 All Tasks
                             </button>

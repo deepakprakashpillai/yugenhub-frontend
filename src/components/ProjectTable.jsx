@@ -4,11 +4,13 @@ import { Icons } from './Icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import api from '../api/axios';
+import { useTheme } from '../context/ThemeContext';
 import { toast } from 'sonner';
 
 const ProjectTable = ({ projects, onRefresh }) => {
     const [expandedId, setExpandedId] = useState(null);
     const { config } = useAgencyConfig();
+    const { theme } = useTheme();
 
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
@@ -17,9 +19,9 @@ const ProjectTable = ({ projects, onRefresh }) => {
     if (!projects.length) return null;
 
     return (
-        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/30 backdrop-blur-sm">
-            <table className="w-full text-left text-sm text-zinc-400">
-                <thead className="bg-zinc-950/50 text-xs uppercase font-medium text-zinc-500 border-b border-zinc-800">
+        <div className={`overflow-hidden rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} backdrop-blur-sm bg-opacity-30`}>
+            <table className={`w-full text-left text-sm ${theme.text.secondary}`}>
+                <thead className={`${theme.canvas.card} text-xs uppercase font-medium ${theme.text.secondary} border-b ${theme.canvas.border}`}>
                     <tr>
                         <th className="px-6 py-4">Code</th>
                         <th className="px-6 py-4">Title / Client</th>
@@ -28,7 +30,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
                         <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/50">
+                <tbody className={`divide-y ${theme.canvas.border}`}>
                     {projects.map((project) => {
                         const nextEvent = project.events?.find(e => new Date(e.start_date) > new Date()) || null;
                         const isExpanded = expandedId === project._id;
@@ -37,17 +39,17 @@ const ProjectTable = ({ projects, onRefresh }) => {
                             <Fragment key={project._id}>
                                 <tr
                                     onClick={() => toggleExpand(project._id)}
-                                    className="hover:bg-zinc-900/50 transition-colors group cursor-pointer"
+                                    className={`hover:${theme.canvas.hover} transition-colors group cursor-pointer`}
                                 >
-                                    <td className="px-6 py-4 font-mono text-zinc-300">
+                                    <td className={`px-6 py-4 font-mono ${theme.text.primary}`}>
                                         {project.code}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-white">{project.title}</div>
-                                        <div className="text-xs text-zinc-500 flex items-center gap-2">
+                                        <div className={`font-medium ${theme.text.primary}`}>{project.title}</div>
+                                        <div className={`text-xs ${theme.text.secondary} flex items-center gap-2`}>
                                             <span>{project.metadata?.client_name}</span>
                                             {project.vertical === 'knots' && project.metadata?.religion && (
-                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${theme.canvas.card} ${theme.text.secondary} border ${theme.canvas.border}`}>
                                                     {project.metadata.religion}
                                                 </span>
                                             )}
@@ -88,7 +90,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                                         }}
                                                     >
                                                         {(config?.statusOptions || []).map(opt => (
-                                                            <option key={opt.id} value={opt.id} className="bg-zinc-900 text-zinc-300">
+                                                            <option key={opt.id} value={opt.id} className={`${theme.canvas.card} ${theme.text.primary}`}>
                                                                 {opt.label}
                                                             </option>
                                                         ))}
@@ -104,20 +106,20 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                     </td>
                                     <td className="px-6 py-4">
                                         {nextEvent ? (
-                                            <div className="flex items-center gap-2 text-zinc-300">
+                                            <div className={`flex items-center gap-2 ${theme.text.primary}`}>
                                                 <Icons.Calendar className="w-3 h-3 text-red-500" />
                                                 <span>{new Date(nextEvent.start_date).toLocaleDateString()}</span>
                                                 <span className="text-xs opacity-50">({nextEvent.type})</span>
                                             </div>
                                         ) : (
-                                            <span className="text-zinc-600">-</span>
+                                            <span className={`${theme.text.secondary}`}>-</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
                                             className={clsx(
-                                                "p-2 hover:bg-zinc-800 rounded-full transition-all duration-300",
-                                                isExpanded ? "rotate-90 text-white" : "text-zinc-500 hover:text-white"
+                                                `p-2 hover:${theme.canvas.hover} rounded-full transition-all duration-300`,
+                                                isExpanded ? `rotate-90 ${theme.text.primary}` : `${theme.text.secondary} hover:${theme.text.primary}`
                                             )}
                                         >
                                             <Icons.ChevronRight className="w-4 h-4" />
@@ -129,7 +131,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                 <AnimatePresence>
                                     {isExpanded && (
                                         <tr>
-                                            <td colSpan="5" className="p-0 border-b border-zinc-800/30 bg-zinc-900/20 shadow-inner">
+                                            <td colSpan="5" className={`p-0 border-b ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-20 shadow-inner`}>
                                                 <motion.div
                                                     initial={{ opacity: 0, height: 0 }}
                                                     animate={{ opacity: 1, height: 'auto' }}
@@ -140,36 +142,36 @@ const ProjectTable = ({ projects, onRefresh }) => {
 
                                                         {/* SECTION 1: Events */}
                                                         <div className="col-span-2 space-y-3">
-                                                            <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Event Schedule</h4>
+                                                            <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Event Schedule</h4>
 
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                 {project.events?.map((evt, idx) => (
-                                                                    <div key={idx} className="bg-zinc-950/50 border border-zinc-800 p-3 rounded-lg flex items-start gap-3">
-                                                                        <div className="bg-zinc-800 p-2 rounded-md">
-                                                                            <Icons.Calendar className="w-4 h-4 text-zinc-400" />
+                                                                    <div key={idx} className={`${theme.canvas.card} border ${theme.canvas.border} p-3 rounded-lg flex items-start gap-3`}>
+                                                                        <div className={`${theme.canvas.bg} p-2 rounded-md`}>
+                                                                            <Icons.Calendar className={`w-4 h-4 ${theme.text.secondary}`} />
                                                                         </div>
                                                                         <div>
-                                                                            <p className="text-sm font-medium text-white">{evt.type}</p>
-                                                                            <p className="text-xs text-zinc-500">{new Date(evt.start_date).toLocaleDateString()} • {evt.venue_name || 'TBD'}</p>
+                                                                            <p className={`text-sm font-medium ${theme.text.primary}`}>{evt.type}</p>
+                                                                            <p className={`text-xs ${theme.text.secondary}`}>{new Date(evt.start_date).toLocaleDateString()} • {evt.venue_name || 'TBD'}</p>
                                                                         </div>
                                                                     </div>
                                                                 ))}
                                                                 {(!project.events || project.events.length === 0) && (
-                                                                    <p className="text-sm text-zinc-600 italic">No events found.</p>
+                                                                    <p className={`text-sm ${theme.text.secondary} italic`}>No events found.</p>
                                                                 )}
                                                             </div>
                                                         </div>
 
                                                         {/* SECTION 2: Quick Actions or Info */}
-                                                        <div className="border-l border-zinc-800 pl-6 space-y-4">
-                                                            <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Client Details</h4>
+                                                        <div className={`border-l ${theme.canvas.border} pl-6 space-y-4`}>
+                                                            <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Client Details</h4>
                                                             <div className="space-y-1">
-                                                                <p className="text-sm text-white font-medium">{project.metadata?.client_name || "Unknown"}</p>
-                                                                <p className="text-xs text-zinc-500">Source: {project.lead_source}</p>
-                                                                <p className="text-xs text-zinc-500">ID: {project._id}</p>
+                                                                <p className={`text-sm ${theme.text.primary} font-medium`}>{project.metadata?.client_name || "Unknown"}</p>
+                                                                <p className={`text-xs ${theme.text.secondary}`}>Source: {project.lead_source}</p>
+                                                                <p className={`text-xs ${theme.text.secondary}`}>ID: {project._id}</p>
                                                             </div>
 
-                                                            <button className="w-full mt-4 bg-white text-black py-2 rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors">
+                                                            <button className={`w-full mt-4 ${theme.canvas.fg || 'bg-white'} ${theme.text.inverse || 'text-black'} py-2 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity`}>
                                                                 Manage Project
                                                             </button>
                                                         </div>

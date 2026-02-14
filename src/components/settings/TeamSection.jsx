@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import api from '../../api/axios';
 import { InviteUserModal, EditUserModal } from '../modals';
 import RemoveUserModal from '../modals/RemoveUserModal';
+import { useTheme } from '../../context/ThemeContext';
 
 const ROLE_BADGE = {
     owner: { label: 'Owner', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Crown },
@@ -13,6 +14,7 @@ const ROLE_BADGE = {
 };
 
 function TeamSection({ role }) {
+    const { theme } = useTheme();
     const [team, setTeam] = useState([]);
     const [loading, setLoading] = useState(true);
     const [inviteModal, setInviteModal] = useState(false);
@@ -58,7 +60,7 @@ function TeamSection({ role }) {
 
     if (loading) return (
         <div className="flex items-center justify-center py-20">
-            <RefreshCw size={24} className="animate-spin text-zinc-600" />
+            <RefreshCw size={24} className={`animate-spin ${theme.text.secondary}`} />
         </div>
     );
 
@@ -67,17 +69,17 @@ function TeamSection({ role }) {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                    <h2 className={`text-3xl font-bold ${theme.text.primary} flex items-center gap-3`}>
                         Team & Permissions
                     </h2>
-                    <p className="text-zinc-400 mt-2 max-w-xl">
+                    <p className={`${theme.text.secondary} mt-2 max-w-xl`}>
                         Manage your workspace members, assign roles, and control access permissions.
                     </p>
                 </div>
                 {canManage && (
                     <button
                         onClick={() => setInviteModal(true)}
-                        className="px-6 py-3 bg-white text-black rounded-xl font-bold text-sm hover:bg-zinc-200 hover:shadow-lg hover:shadow-white/10 transition-all flex items-center gap-2"
+                        className={`px-6 py-3 bg-black dark:bg-white ${theme.text.inverse} rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2`}
                     >
                         <Plus size={18} /> Invite Member
                     </button>
@@ -100,10 +102,10 @@ function TeamSection({ role }) {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.05 }}
-                            className="bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-5 flex flex-col group transition-all hover:bg-zinc-900 relative"
+                            className={`${theme.canvas.card} border ${theme.canvas.border} hover:border-zinc-500 rounded-2xl p-5 flex flex-col group transition-all hover:${theme.canvas.hover} relative`}
                         >
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-lg font-bold text-zinc-300 overflow-hidden shadow-inner shrink-0">
+                                <div className={`w-12 h-12 rounded-xl ${theme.canvas.bg} border ${theme.canvas.border} flex items-center justify-center text-lg font-bold ${theme.text.secondary} overflow-hidden shadow-inner shrink-0`}>
                                     {member.picture ? (
                                         <img src={member.picture} alt="" className="w-full h-full object-cover" />
                                     ) : (
@@ -111,17 +113,17 @@ function TeamSection({ role }) {
                                     )}
                                 </div>
                                 <div className="overflow-hidden w-full">
-                                    <h3 className="text-white font-bold truncate pr-20" title={member.name}>{member.name}</h3>
+                                    <h3 className={`${theme.text.primary} font-bold truncate pr-20`} title={member.name}>{member.name}</h3>
                                     <StatusBadge status={member.status} />
                                 </div>
                             </div>
 
                             {/* Actions - Absolute Positioned */}
-                            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900/80 backdrop-blur-sm rounded-lg p-1 border border-zinc-800/50 shadow-lg z-10">
+                            <div className={`absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${theme.canvas.bg} backdrop-blur-sm rounded-lg p-1 border ${theme.canvas.border} shadow-lg z-10`}>
                                 {canEditThisUser && (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setEditUser(member); }}
-                                        className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                                        className={`p-1.5 rounded-md ${theme.text.secondary} hover:${theme.text.primary} hover:bg-zinc-800 transition-colors`}
                                         title="Edit Details"
                                     >
                                         <Edit2 size={14} />
@@ -130,7 +132,7 @@ function TeamSection({ role }) {
                                 {canManage && member.role !== 'owner' && (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setRemoveUser(member); }}
-                                        className="p-1.5 rounded-md text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                        className={`p-1.5 rounded-md ${theme.text.secondary} hover:text-red-400 hover:bg-red-500/10 transition-colors`}
                                         title="Remove Member"
                                     >
                                         <Trash2 size={14} />
@@ -139,19 +141,19 @@ function TeamSection({ role }) {
                             </div>
 
                             <div className="space-y-3 mt-auto">
-                                <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-950/50 p-2 rounded-lg border border-zinc-800/50 truncate">
+                                <div className={`flex items-center gap-2 text-xs ${theme.text.secondary} ${theme.canvas.bg} p-2 rounded-lg border ${theme.canvas.border} truncate`}>
                                     <Mail size={12} className="shrink-0" />
                                     <span className="truncate">{member.email}</span>
                                 </div>
 
                                 {member.phone && (
-                                    <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-950/50 p-2 rounded-lg border border-zinc-800/50 truncate">
+                                    <div className={`flex items-center gap-2 text-xs ${theme.text.secondary} ${theme.canvas.bg} p-2 rounded-lg border ${theme.canvas.border} truncate`}>
                                         <Phone size={12} className="shrink-0" />
                                         <span className="truncate">{member.phone}</span>
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+                                <div className={`flex items-center justify-between pt-2 border-t ${theme.canvas.border}`}>
                                     <div className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border ${badge.color}`}>
                                         <BadgeIcon size={12} /> {badge.label}
                                     </div>
@@ -160,7 +162,7 @@ function TeamSection({ role }) {
                                         <select
                                             value={member.role}
                                             onChange={e => handleRoleChange(member.id, e.target.value)}
-                                            className="bg-zinc-800/50 border border-zinc-800 rounded-lg px-2 py-1 text-xs text-zinc-400 focus:outline-none focus:border-zinc-600 cursor-pointer hover:bg-zinc-800 transition-colors"
+                                            className={`${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-2 py-1 text-xs ${theme.text.secondary} focus:outline-none focus:border-zinc-500 cursor-pointer hover:${theme.canvas.hover} transition-colors`}
                                         >
                                             <option value="member">Member</option>
                                             <option value="admin">Admin</option>

@@ -14,8 +14,10 @@ import SkeletonCard from '../components/SkeletonCard';
 import TaskModal from '../components/modals/TaskModal';
 import { usePermission } from '../hooks/usePermissions';
 import { PERMISSIONS } from '../config/permissions';
+import { useTheme } from '../context/ThemeContext';
 
 const CalendarPage = () => {
+    const { theme } = useTheme();
     const navigate = useNavigate();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [view, setView] = useState('month'); // 'month' | 'week' (future scope)
@@ -136,9 +138,6 @@ const CalendarPage = () => {
     };
 
     // Helper: Render Event Tooltip
-    // Adjusted to accept positioning classes or styles if needed, but defaults work well.
-    // Helper: Render Event Tooltip
-    // Adjusted to accept positioning classes or styles if needed, but defaults work well.
     const renderEventTooltip = (evt, isOverflowItem = false) => {
         const isHovered = hoveredEvent?.id === evt.id;
 
@@ -150,7 +149,7 @@ const CalendarPage = () => {
                 exit={{ opacity: 0, y: 5, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
                 className={clsx(
-                    "fixed z-[9999] bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl min-w-[240px] p-3 pointer-events-none",
+                    `fixed z-[9999] ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl min-w-[240px] p-3 pointer-events-none`,
                     isOverflowItem && (!tooltipPos.placement || tooltipPos.placement === 'right') && "ml-2",
                     isOverflowItem && tooltipPos.placement === 'left' && "mr-2",
                     !isOverflowItem && "-translate-y-full -mt-2"
@@ -168,8 +167,8 @@ const CalendarPage = () => {
                         }
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-white leading-tight">{evt.title}</p>
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">
+                        <p className={`text-xs font-bold ${theme.text.primary} leading-tight`}>{evt.title}</p>
+                        <p className={`text-[10px] ${theme.text.secondary} uppercase tracking-wider mt-0.5`}>
                             {evt.type === 'event' ? 'Event / Shoot' : 'Deliverable'}
                         </p>
                     </div>
@@ -177,31 +176,31 @@ const CalendarPage = () => {
 
                 <div className="space-y-1.5 text-[11px]">
                     {evt.project_code && (
-                        <div className="flex items-center gap-2 text-zinc-400">
-                            <Icons.Package className="w-3 h-3 text-zinc-600" />
+                        <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
+                            <Icons.Package className="w-3 h-3 opacity-70" />
                             <span>{evt.project_code}</span>
                         </div>
                     )}
                     {evt.details?.venue && (
-                        <div className="flex items-center gap-2 text-zinc-400">
-                            <Icons.MapPin className="w-3 h-3 text-zinc-600" />
+                        <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
+                            <Icons.MapPin className="w-3 h-3 opacity-70" />
                             <span>{evt.details.venue}</span>
                         </div>
                     )}
                     {evt.details?.status && (
-                        <div className="flex items-center gap-2 text-zinc-400">
-                            <Icons.Clock className="w-3 h-3 text-zinc-600" />
+                        <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
+                            <Icons.Clock className="w-3 h-3 opacity-70" />
                             <span className="capitalize">{evt.details.status}</span>
                         </div>
                     )}
                     {evt.details?.assignee && (
-                        <div className="flex items-center gap-2 text-zinc-400">
-                            <Icons.Users className="w-3 h-3 text-zinc-600" />
+                        <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
+                            <Icons.Users className="w-3 h-3 opacity-70" />
                             <span>{evt.details.assignee}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-2 text-zinc-400">
-                        <Icons.Calendar className="w-3 h-3 text-zinc-600" />
+                    <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
+                        <Icons.Calendar className="w-3 h-3 opacity-70" />
                         <span>{evt.date}</span>
                     </div>
                 </div>
@@ -209,9 +208,9 @@ const CalendarPage = () => {
                 {/* Arrow (Dynamic position based on type) */}
                 <div className={clsx(
                     "absolute w-0 h-0 border-8 border-transparent",
-                    (!tooltipPos.placement || tooltipPos.placement === 'right') && "right-full top-3 border-r-zinc-900 border-r-[8px] -translate-x-[1px]",
-                    tooltipPos.placement === 'left' && "left-full top-3 border-l-zinc-900 border-l-[8px] translate-x-[1px]",
-                    tooltipPos.placement === 'top' && "left-4 bottom-0 translate-y-full border-t-zinc-900 border-t-[8px] -translate-y-[1px]"
+                    (!tooltipPos.placement || tooltipPos.placement === 'right') && `right-full top-3 border-r-current -translate-x-[1px] ${themeMode === 'light' ? 'text-white' : 'text-zinc-950'}`,
+                    tooltipPos.placement === 'left' && `left-full top-3 border-l-current translate-x-[1px] ${themeMode === 'light' ? 'text-white' : 'text-zinc-950'}`,
+                    tooltipPos.placement === 'top' && `left-4 bottom-0 translate-y-full border-t-current -translate-y-[1px] ${themeMode === 'light' ? 'text-white' : 'text-zinc-950'}`
                 )} />
             </motion.div>
         );
@@ -224,15 +223,18 @@ const CalendarPage = () => {
         );
     };
 
+    // Need themeMode for tooltip arrow color
+    const { themeMode } = useTheme();
+
     return (
         <div className="p-8 pb-20 max-w-[1600px] mx-auto min-h-screen relative">
             {/* ... Header ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter">Calendar</h1>
-                    <p className="text-zinc-500 text-sm mt-1">Global schedule of shoots and deadlines.</p>
+                    <h1 className={`text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Calendar</h1>
+                    <p className={`${theme.text.secondary} text-sm mt-1`}>Global schedule of shoots and deadlines.</p>
                 </div>
-                {/* ... Filter Controls (unchanged) ... */}
+                {/* ... Filter Controls ... */}
                 <div className="flex items-center gap-3 flex-wrap">
                     {(canViewAll || showType !== 'task') && (
                         <button
@@ -241,7 +243,7 @@ const CalendarPage = () => {
                                 "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all",
                                 assignedOnly
                                     ? "bg-purple-500/20 text-purple-400 border-purple-500/50"
-                                    : "bg-zinc-900/50 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"
+                                    : `${theme.canvas.card} ${theme.text.secondary} ${theme.canvas.border} ${theme.canvas.hover}`
                             )}
                         >
                             <Icons.User className="w-3.5 h-3.5" />
@@ -249,28 +251,34 @@ const CalendarPage = () => {
                             {assignedOnly && <Icons.Check className="w-3.5 h-3.5" />}
                         </button>
                     )}
-                    <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-xl border border-zinc-800">
-                        <button onClick={() => setShowType('all')} className={clsx("px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all", showType === 'all' ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300")}>All</button>
-                        <button onClick={() => setShowType('event')} className={clsx("px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5", showType === 'event' ? "bg-blue-500/20 text-blue-400" : "text-zinc-500 hover:text-zinc-300")}><Icons.Video className="w-3.5 h-3.5" />Events</button>
-                        <button onClick={() => setShowType('task')} className={clsx("px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5", showType === 'task' ? "bg-amber-500/20 text-amber-400" : "text-zinc-500 hover:text-zinc-300")}><Icons.CheckSquare className="w-3.5 h-3.5" />Tasks</button>
+                    <div className={`flex items-center gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border}`}>
+                        <button
+                            onClick={() => setShowType('all')}
+                            className={clsx("px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all", showType === 'all' ? "text-white" : `${theme.text.secondary} ${theme.canvas.hover}`)}
+                            style={showType === 'all' ? { backgroundColor: theme.accents?.default?.primary } : {}}
+                        >
+                            All
+                        </button>
+                        <button onClick={() => setShowType('event')} className={clsx("px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5", showType === 'event' ? "bg-blue-500/20 text-blue-400" : `${theme.text.secondary} ${theme.canvas.hover}`)}><Icons.Video className="w-3.5 h-3.5" />Events</button>
+                        <button onClick={() => setShowType('task')} className={clsx("px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5", showType === 'task' ? "bg-amber-500/20 text-amber-400" : `${theme.text.secondary} ${theme.canvas.hover}`)}><Icons.CheckSquare className="w-3.5 h-3.5" />Tasks</button>
                     </div>
                     {/* Month Nav */}
-                    <div className="flex items-center gap-4 bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800 backdrop-blur-sm">
-                        <button onClick={prevMonth} className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"><Icons.ChevronRight className="w-5 h-5 rotate-180" /></button>
-                        <div className="text-center min-w-[140px]"><h2 className="text-lg font-bold text-white uppercase">{format(currentDate, 'MMMM yyyy')}</h2></div>
-                        <button onClick={nextMonth} className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"><Icons.ChevronRight className="w-5 h-5" /></button>
-                        <div className="w-px h-6 bg-zinc-800 mx-2" />
-                        <button onClick={jumpToToday} className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white border border-zinc-700 rounded-lg hover:border-zinc-500 transition-all">Today</button>
+                    <div className={`flex items-center gap-4 ${theme.canvas.card} p-2 rounded-2xl border ${theme.canvas.border} backdrop-blur-sm`}>
+                        <button onClick={prevMonth} className={`p-2 ${theme.text.secondary} ${theme.canvas.hover} hover:${theme.text.primary} rounded-xl transition-colors`}><Icons.ChevronRight className="w-5 h-5 rotate-180" /></button>
+                        <div className="text-center min-w-[140px]"><h2 className={`text-lg font-bold ${theme.text.primary} uppercase`}>{format(currentDate, 'MMMM yyyy')}</h2></div>
+                        <button onClick={nextMonth} className={`p-2 ${theme.text.secondary} ${theme.canvas.hover} hover:${theme.text.primary} rounded-xl transition-colors`}><Icons.ChevronRight className="w-5 h-5" /></button>
+                        <div className={`w-px h-6 ${theme.canvas.border} mx-2`} />
+                        <button onClick={jumpToToday} className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${theme.text.secondary} hover:${theme.text.primary} border ${theme.canvas.border} rounded-lg ${theme.canvas.hover} transition-all`}>Today</button>
                     </div>
                 </div>
             </div>
 
             {/* Calendar Grid */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden shadow-sm`}>
                 {/* Day Headers */}
-                <div className="grid grid-cols-7 border-b border-zinc-800 bg-zinc-950/30">
+                <div className={`grid grid-cols-7 border-b ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-30`}>
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-                        <div key={day} className={clsx("py-3 text-center text-xs font-bold uppercase tracking-widest text-zinc-500", i === 0 || i === 6 ? "bg-red-500/5" : "")}>{day}</div>
+                        <div key={day} className={clsx("py-3 text-center text-xs font-bold uppercase tracking-widest", (i === 0 || i === 6) ? "text-red-500/70" : theme.text.secondary)}>{day}</div>
                     ))}
                 </div>
 
@@ -286,14 +294,14 @@ const CalendarPage = () => {
                                 key={day.toString()}
                                 onClick={() => setSelectedDate(day)}
                                 className={clsx(
-                                    "min-h-[120px] p-2 border-b border-r border-zinc-800/50 relative group transition-colors cursor-pointer",
-                                    !isCurrentMonth ? "bg-zinc-950/50 text-zinc-600" : "bg-zinc-900/20 text-zinc-300 hover:bg-zinc-800/30",
+                                    `min-h-[120px] p-2 border-b border-r ${theme.canvas.border} relative group transition-colors cursor-pointer`,
+                                    !isCurrentMonth ? `${theme.canvas.bg} opacity-50` : `${theme.canvas.card} hover:${theme.canvas.hover}`,
                                     isTodayDate && "bg-blue-500/5"
                                 )}
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className={clsx("w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold", isTodayDate ? "bg-blue-500 text-white" : "text-zinc-500 group-hover:text-zinc-300")}>{format(day, 'd')}</span>
-                                    {dayEvents.length > 0 && <span className="text-[10px] font-bold text-zinc-600 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">{dayEvents.length}</span>}
+                                    <span className={clsx("w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold", isTodayDate ? "bg-blue-500 text-white" : `${theme.text.secondary} group-hover:${theme.text.primary}`)}>{format(day, 'd')}</span>
+                                    {dayEvents.length > 0 && <span className={`text-[10px] font-bold ${theme.text.secondary} ${theme.canvas.bg} px-1.5 py-0.5 rounded border ${theme.canvas.border}`}>{dayEvents.length}</span>}
                                 </div>
 
                                 <div className="space-y-1 overflow-visible">
@@ -303,7 +311,7 @@ const CalendarPage = () => {
                                             key={evt.id}
                                             className={clsx(
                                                 "text-[10px] px-1.5 py-0.5 rounded font-medium border-l-2 relative cursor-pointer transition-all overflow-visible",
-                                                evt.type === 'event' ? "bg-blue-500/10 text-blue-300 border-blue-500 hover:bg-blue-500/20" : "bg-amber-500/10 text-amber-300 border-amber-500 hover:bg-amber-500/20"
+                                                evt.type === 'event' ? "bg-blue-500/10 text-blue-400 border-blue-500 hover:bg-blue-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500 hover:bg-amber-500/20"
                                             )}
                                             onClick={(e) => handleEventClick(evt, e)}
                                             onMouseEnter={(e) => {
@@ -330,20 +338,18 @@ const CalendarPage = () => {
                                             onMouseEnter={(e) => {
                                                 const rect = e.currentTarget.getBoundingClientRect();
                                                 const viewportWidth = window.innerWidth;
-                                                const listWidth = 240; // Approx w-56
+                                                const listWidth = 240;
 
                                                 let left, placement;
 
                                                 if (rect.left + listWidth > viewportWidth) {
-                                                    // Align right edge to text right edge (or viewport right)
                                                     left = rect.right - listWidth;
-                                                    placement = 'left'; // Conceptually on left side of anchor point
+                                                    placement = 'left';
                                                 } else {
                                                     left = rect.left;
                                                     placement = 'right';
                                                 }
 
-                                                // Default to showing above
                                                 const bottom = window.innerHeight - rect.top;
 
                                                 setMoreTooltipPos({ bottom, left, placement });
@@ -351,7 +357,7 @@ const CalendarPage = () => {
                                             }}
                                             onMouseLeave={() => setHoveredMoreDay(null)}
                                         >
-                                            <div className="text-[10px] text-zinc-500 pl-1 font-bold cursor-pointer hover:text-zinc-300">
+                                            <div className={`text-[10px] ${theme.text.secondary} pl-1 font-bold cursor-pointer hover:${theme.text.primary}`}>
                                                 + {dayEvents.length - 4} more
                                             </div>
 
@@ -364,7 +370,7 @@ const CalendarPage = () => {
                                                             animate={{ opacity: 1, y: 0 }}
                                                             exit={{ opacity: 0, y: 5 }}
                                                             transition={{ duration: 0.15 }}
-                                                            className="fixed w-56 p-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-[150]"
+                                                            className={`fixed w-56 p-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl z-[150]`}
                                                             style={{
                                                                 bottom: moreTooltipPos.bottom,
                                                                 left: moreTooltipPos.left
@@ -372,7 +378,7 @@ const CalendarPage = () => {
                                                             onMouseEnter={() => setHoveredMoreDay(day.toString())}
                                                             onMouseLeave={() => setHoveredMoreDay(null)}
                                                         >
-                                                            <div className="text-[10px] uppercase font-bold text-zinc-500 mb-2 px-1">Hidden Items</div>
+                                                            <div className={`text-[10px] uppercase font-bold ${theme.text.secondary} mb-2 px-1`}>Hidden Items</div>
                                                             <div className="space-y-1 max-h-[200px] overflow-y-auto custom-scrollbar overflow-visible p-1">
                                                                 {dayEvents.slice(4).map((evt) => (
                                                                     <div
@@ -380,8 +386,8 @@ const CalendarPage = () => {
                                                                         className={clsx(
                                                                             "text-[10px] px-2 py-1.5 rounded font-medium border-l-2 relative cursor-pointer transition-all",
                                                                             evt.type === 'event'
-                                                                                ? "bg-blue-500/10 text-blue-300 border-blue-500 hover:bg-blue-500/20"
-                                                                                : "bg-amber-500/10 text-amber-300 border-amber-500 hover:bg-amber-500/20"
+                                                                                ? "bg-blue-500/10 text-blue-400 border-blue-500 hover:bg-blue-500/20"
+                                                                                : "bg-amber-500/10 text-amber-400 border-amber-500 hover:bg-amber-500/20"
                                                                         )}
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
@@ -390,7 +396,7 @@ const CalendarPage = () => {
                                                                         onMouseEnter={(e) => {
                                                                             const rect = e.currentTarget.getBoundingClientRect();
                                                                             const viewportWidth = window.innerWidth;
-                                                                            const tooltipWidth = 280; // Estimated width + padding
+                                                                            const tooltipWidth = 280;
 
                                                                             if (rect.right + tooltipWidth > viewportWidth) {
                                                                                 const rightPos = viewportWidth - rect.left;
@@ -414,8 +420,9 @@ const CalendarPage = () => {
                                                                 ))}
                                                             </div>
                                                             <div className={clsx(
-                                                                "absolute w-0 h-0 border-8 border-transparent border-t-zinc-700 -bottom-4",
-                                                                moreTooltipPos.placement === 'left' ? "right-4" : "left-4"
+                                                                "absolute w-0 h-0 border-8 border-transparent -bottom-4",
+                                                                moreTooltipPos.placement === 'left' ? "right-4" : "left-4",
+                                                                `border-t-current ${themeMode === 'light' ? 'text-white' : 'text-zinc-950'}`
                                                             )} />
                                                         </motion.div>
                                                     )}
@@ -432,12 +439,12 @@ const CalendarPage = () => {
             </div>
 
             {loading && (
-                <div className="absolute inset-0 bg-zinc-950/50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
-                    <Icons.Loader className="w-8 h-8 text-white animate-spin" />
+                <div className={`absolute inset-0 ${theme.canvas.bg} bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl`}>
+                    <Icons.Loader className={`w-8 h-8 ${theme.text.primary} animate-spin`} />
                 </div>
             )}
 
-            <div className="mt-6 flex gap-6 justify-center text-xs font-bold uppercase text-zinc-500">
+            <div className={`mt-6 flex gap-6 justify-center text-xs font-bold uppercase ${theme.text.secondary}`}>
                 <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded bg-blue-500/20 border-l-2 border-blue-500" /> Event / Shoot
                 </div>

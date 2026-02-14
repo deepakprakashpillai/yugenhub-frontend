@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { Icons } from './Icons';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
 import { toast } from 'sonner';
 
@@ -11,6 +12,7 @@ const ProjectCard = ({ project, onRefresh }) => {
     const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
     const { config } = useAgencyConfig();
+    const { theme } = useTheme();
     const [statusOpen, setStatusOpen] = useState(false);
     const statusRef = useRef(null);
     const [updating, setUpdating] = useState(false);
@@ -108,7 +110,7 @@ const ProjectCard = ({ project, onRefresh }) => {
             onClick={() => setExpanded(!expanded)}
             className={clsx(
                 "relative border rounded-2xl overflow-hidden transition-colors duration-300 flex flex-col cursor-pointer",
-                expanded ? "bg-zinc-900 border-zinc-700 shadow-2xl z-10" : "bg-zinc-900/40 border-zinc-800 hover:border-zinc-600"
+                expanded ? `${theme.canvas.card} border-${theme.accent?.primary || 'zinc-500'} shadow-2xl z-10` : `${theme.canvas.card} ${theme.canvas.border} hover:border-${theme.accent?.primary || 'zinc-500'}`
             )}
         >
             {/* Decorative Gradient Blob */}
@@ -117,7 +119,7 @@ const ProjectCard = ({ project, onRefresh }) => {
             {/* --- CARD HEADER (Always Visible) --- */}
             <div className="p-6 pb-2">
                 <div className="flex justify-between items-start mb-4">
-                    <span className="font-mono text-[10px] text-zinc-500 tracking-widest uppercase bg-zinc-950/50 px-2 py-1 rounded border border-zinc-800/50">
+                    <span className={`font-mono text-[10px] ${theme.text.secondary} tracking-widest uppercase ${theme.canvas.bg} px-2 py-1 rounded border ${theme.canvas.border}`}>
                         {project.code}
                     </span>
                     {/* Status Dropdown */}
@@ -142,12 +144,12 @@ const ProjectCard = ({ project, onRefresh }) => {
 
                         {/* Dropdown Menu */}
                         {statusOpen && (
-                            <div className="absolute top-full right-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-lg shadow-xl py-1 z-30 animate-in fade-in slide-in-from-top-1">
+                            <div className={`absolute top-full right-0 mt-2 w-40 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-30 animate-in fade-in slide-in-from-top-1`}>
                                 {(config?.statusOptions || []).map(option => (
                                     <button
                                         key={option.id}
                                         onClick={() => handleStatusUpdate(option.id)}
-                                        className="w-full text-left px-3 py-2 text-xs hover:bg-zinc-900 flex items-center gap-2 transition-colors text-zinc-300 hover:text-white"
+                                        className={`w-full text-left px-3 py-2 text-xs ${theme.canvas.hover} flex items-center gap-2 transition-colors ${theme.text.secondary} hover:${theme.text.primary}`}
                                     >
                                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: option.color }} />
                                         {option.label}
@@ -159,10 +161,10 @@ const ProjectCard = ({ project, onRefresh }) => {
                     </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-1 leading-tight group-hover:text-red-500 transition-colors">
+                <h3 className={`text-xl font-bold ${theme.text.primary} mb-1 leading-tight group-hover:text-red-500 transition-colors`}>
                     {displayTitle}
                 </h3>
-                <p className="text-sm text-zinc-400 font-medium">
+                <p className={`text-sm ${theme.text.secondary} font-medium`}>
                     {project.metadata?.client_name}
                 </p>
 
@@ -170,12 +172,12 @@ const ProjectCard = ({ project, onRefresh }) => {
                 {project.stats && project.stats.total_tasks > 0 && (
                     <div className="mt-4">
                         <div className="flex justify-between items-end mb-1.5">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Progress</span>
-                            <span className="text-[10px] font-bold text-zinc-400">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${theme.text.secondary}`}>Progress</span>
+                            <span className={`text-[10px] font-bold ${theme.text.secondary}`}>
                                 {project.stats.completed_tasks}/{project.stats.total_tasks}
                             </span>
                         </div>
-                        <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                        <div className={`h-1.5 w-full ${theme.canvas.bg} rounded-full overflow-hidden`}>
                             <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${project.stats.percentage}%` }}
@@ -192,7 +194,7 @@ const ProjectCard = ({ project, onRefresh }) => {
 
             {/* --- PREVIEW FOOTER (Visible when Collapsed) --- */}
             {!expanded && (
-                <div className="px-6 py-4 mt-auto border-t border-zinc-800/50 flex items-center justify-between text-xs text-zinc-500">
+                <div className={`px-6 py-4 mt-auto border-t ${theme.canvas.border} flex items-center justify-between text-xs ${theme.text.secondary}`}>
                     <div className="flex items-center gap-2 flex-wrap">
                         {/* Vertical-specific badges */}
                         {project.vertical === 'knots' && project.metadata?.side && (
@@ -206,7 +208,7 @@ const ProjectCard = ({ project, onRefresh }) => {
                             </span>
                         )}
                         {project.vertical === 'knots' && project.metadata?.religion && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${theme.canvas.card} ${theme.text.secondary} border ${theme.canvas.border}`}>
                                 {project.metadata.religion}
                             </span>
                         )}
@@ -230,13 +232,13 @@ const ProjectCard = ({ project, onRefresh }) => {
                                     {new Date(nextEvent.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                 </span>
                                 <span>•</span>
-                                <span className="text-zinc-400">{nextEvent.type}</span>
+                                <span className={theme.text.secondary}>{nextEvent.type}</span>
                             </>
                         ) : (
                             <span>No upcoming events</span>
                         )}
                     </div>
-                    <button className="p-1.5 hover:bg-zinc-800 rounded-full text-zinc-600 hover:text-white transition-colors">
+                    <button className={`p-1.5 hover:${theme.canvas.hover} rounded-full ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
                         <Icons.ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
@@ -256,11 +258,11 @@ const ProjectCard = ({ project, onRefresh }) => {
                         // The current design has a explicit "Close" button.
                         // So clicking inside the Expanded Content (the timeline) should probably NOT collapse the card.
                         // So adding stopPropagation to the AnimatePresence div is smart.
-                        className="overflow-hidden bg-zinc-950/30 cursor-default" // Change cursor to default inside
+                        className={`overflow-hidden ${theme.canvas.bg} cursor-default`} // Change cursor to default inside
                     >
-                        <div className="px-6 py-6 border-t border-zinc-800/50 relative">
+                        <div className={`px-6 py-6 border-t ${theme.canvas.border} relative`}>
                             {/* Vertical Line */}
-                            <div className="absolute left-[3.25rem] top-6 bottom-6 w-px bg-zinc-800" />
+                            <div className={`absolute left-[3.25rem] top-6 bottom-6 w-px ${theme.canvas.border}`} />
 
                             <div className="space-y-6">
                                 {project.events?.length > 0 ? (
@@ -278,8 +280,8 @@ const ProjectCard = ({ project, onRefresh }) => {
                                             >
                                                 {/* Date Box */}
                                                 <div className="w-10 flex flex-col items-center text-center shrink-0">
-                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase leading-none">{dateObj.month}</span>
-                                                    <span className={clsx("text-lg font-bold leading-none", isPast ? "text-zinc-600" : "text-white")}>
+                                                    <span className={`text-[10px] font-bold ${theme.text.secondary} uppercase leading-none`}>{dateObj.month}</span>
+                                                    <span className={clsx("text-lg font-bold leading-none", isPast ? `${theme.text.secondary}` : theme.text.primary)}>
                                                         {dateObj.day}
                                                     </span>
                                                 </div>
@@ -287,15 +289,15 @@ const ProjectCard = ({ project, onRefresh }) => {
                                                 {/* Timeline Dot */}
                                                 <div className={clsx(
                                                     "w-3 h-3 rounded-full border-2 z-10 shrink-0 transition-colors duration-300",
-                                                    isPast ? "bg-zinc-900 border-zinc-700" : "bg-zinc-900 border-red-500 group-hover/evt:bg-red-500"
+                                                    isPast ? `${theme.canvas.bg} ${theme.canvas.border}` : `${theme.canvas.bg} border-red-500 group-hover/evt:bg-red-500`
                                                 )} />
 
                                                 {/* Event Details */}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className={clsx("text-sm font-bold truncate", isPast ? "text-zinc-500" : "text-white")}>
+                                                    <p className={clsx("text-sm font-bold truncate", isPast ? `${theme.text.secondary}` : theme.text.primary)}>
                                                         {evt.type}
                                                     </p>
-                                                    <p className="text-xs text-zinc-500 truncate">
+                                                    <p className={`text-xs ${theme.text.secondary} truncate`}>
                                                         {evt.venue_name || "TBD"}
                                                     </p>
                                                 </div>
@@ -303,13 +305,13 @@ const ProjectCard = ({ project, onRefresh }) => {
                                         );
                                     })
                                 ) : (
-                                    <p className="text-xs text-zinc-500 text-center py-2">No timeline available.</p>
+                                    <p className={`text-xs ${theme.text.secondary} text-center py-2`}>No timeline available.</p>
                                 )}
                             </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex border-t border-zinc-800/50">
+                        <div className={`flex border-t ${theme.canvas.border}`}>
                             <button
                                 onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project._id}`); }}
                                 className="flex-1 py-3 text-xs font-bold uppercase tracking-widest text-red-400 hover:text-white hover:bg-red-500/10 transition-colors cursor-pointer"
@@ -318,7 +320,7 @@ const ProjectCard = ({ project, onRefresh }) => {
                             </button>
                             <button
                                 onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
-                                className="flex-1 py-3 text-xs font-bold uppercase tracking-widest text-zinc-600 hover:text-white hover:bg-zinc-900/50 transition-colors border-l border-zinc-800/50 cursor-pointer"
+                                className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest ${theme.text.secondary} hover:${theme.text.primary} hover:${theme.canvas.hover} transition-colors border-l ${theme.canvas.border} cursor-pointer`}
                             >
                                 Close
                             </button>

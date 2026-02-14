@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axios';
+import { useTheme } from '../../context/ThemeContext';
 
 function NotificationsSection() {
+    const { theme } = useTheme();
     const [prefs, setPrefs] = useState({});
     const [saving, setSaving] = useState(null);
 
@@ -36,20 +38,20 @@ function NotificationsSection() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white">Notifications</h2>
-                <p className="text-sm text-zinc-500 mt-1">Control how and when you receive notifications</p>
+                <h2 className={`text-2xl font-bold ${theme.text.primary}`}>Notifications</h2>
+                <p className={`text-sm ${theme.text.secondary} mt-1`}>Control how and when you receive notifications</p>
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl divide-y divide-zinc-800/50">
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl divide-y ${theme.canvas.border}`}>
                 {toggles.map(t => (
                     <div key={t.key} className="flex items-center justify-between px-6 py-4">
                         <div>
-                            <p className="text-sm font-medium text-white">{t.label}</p>
-                            <p className="text-xs text-zinc-500 mt-0.5">{t.desc}</p>
+                            <p className={`text-sm font-medium ${theme.text.primary}`}>{t.label}</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-0.5`}>{t.desc}</p>
                         </div>
                         <button
                             onClick={() => toggle(t.key)}
                             disabled={saving === t.key}
-                            className={`relative w-11 h-6 rounded-full transition-colors ${prefs[t.key] ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${prefs[t.key] ? 'bg-emerald-500' : theme.mode === 'light' ? 'bg-zinc-300' : 'bg-zinc-700'}`}
                         >
                             <span className={`block w-4 h-4 rounded-full bg-white transform transition-transform ${prefs[t.key] ? 'translate-x-6' : 'translate-x-1'}`} />
                         </button>

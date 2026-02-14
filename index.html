@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>yugenhub</title>
+    <script>
+      (function() {
+        try {
+          const mode = localStorage.getItem('theme_mode') || 'dark';
+          // Match these colors to theme.js defaults
+          const bg = mode === 'light' ? '#fdf4ff' : '#000000';
+          document.documentElement.style.backgroundColor = bg;
+          document.body.style.backgroundColor = bg;
+        } catch (e) {
+          console.error(e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

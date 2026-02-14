@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import api from '../../api/axios';
+import { useTheme } from '../../context/ThemeContext';
 
 const ROLES = ['Photographer', 'Cinematographer', 'Editor', 'Drone Pilot', 'Lead', 'Assistant'];
 
 const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading = false }) => {
+    const { theme } = useTheme();
     const isEditing = !!assignment;
     const [associates, setAssociates] = useState([]);
     const [loadingAssociates, setLoadingAssociates] = useState(false);
@@ -71,9 +73,9 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Associate Selection */}
                 <div>
-                    <label className="block text-sm text-zinc-400 mb-1.5">Team Member</label>
+                    <label className={`block text-sm ${theme.text.secondary} mb-1.5`}>Team Member</label>
                     {loadingAssociates ? (
-                        <div className="flex items-center gap-2 text-zinc-500 text-sm">
+                        <div className={`flex items-center gap-2 ${theme.text.secondary} text-sm`}>
                             <Icons.Loader className="w-4 h-4 animate-spin" />
                             Loading associates...
                         </div>
@@ -82,7 +84,7 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                             name="associate_id"
                             value={formData.associate_id}
                             onChange={handleAssociateChange}
-                            className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                            className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                         >
                             <option value="">Select an associate...</option>
                             {associates.map(associate => (
@@ -95,10 +97,10 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                 </div>
 
                 {/* Or enter name manually */}
-                <div className="text-center text-zinc-500 text-xs">— or enter name manually —</div>
+                <div className={`text-center ${theme.text.secondary} text-xs`}>— or enter name manually —</div>
 
                 <div>
-                    <label className="block text-sm text-zinc-400 mb-1.5">Name *</label>
+                    <label className={`block text-sm ${theme.text.secondary} mb-1.5`}>Name *</label>
                     <input
                         type="text"
                         name="associate_name"
@@ -106,19 +108,19 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                         onChange={handleChange}
                         placeholder="Enter name"
                         required
-                        className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+                        className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} placeholder:${theme.text.secondary} focus:outline-none focus:border-purple-500`}
                     />
                 </div>
 
                 {/* Role */}
                 <div>
-                    <label className="block text-sm text-zinc-400 mb-1.5">Role *</label>
+                    <label className={`block text-sm ${theme.text.secondary} mb-1.5`}>Role *</label>
                     <select
                         name="role"
                         value={formData.role}
                         onChange={handleChange}
                         required
-                        className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                        className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                     >
                         {ROLES.map(role => (
                             <option key={role} value={role}>{role}</option>
@@ -132,14 +134,14 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                         type="button"
                         onClick={onClose}
                         disabled={loading}
-                        className="flex-1 px-4 py-2.5 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                        className={`flex-1 px-4 py-2.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.text.primary} hover:${theme.canvas.hover} transition-colors disabled:opacity-50`}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={loading || !formData.associate_name || !formData.role}
-                        className="flex-1 px-4 py-2.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                        className={`flex-1 px-4 py-2.5 rounded-lg bg-purple-600 ${theme.text.inverse} hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2`}
                     >
                         {loading ? (
                             <>

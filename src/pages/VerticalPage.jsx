@@ -14,7 +14,11 @@ import FloatingActionButton from '../components/FloatingActionButton';
 import { ProjectSlideOver, ClientModal } from '../components/modals';
 import { v4 as uuidv4 } from 'uuid';
 
+import { useTheme } from '../context/ThemeContext';
+
 const VerticalPage = ({ vertical, title }) => {
+    const { theme } = useTheme();
+
     const [searchParams, setSearchParams] = useSearchParams();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -225,8 +229,8 @@ const VerticalPage = ({ vertical, title }) => {
 
 
     return (
-        <div className="p-8 pb-20 max-w-[1600px] mx-auto">
-            <h1 className="text-4xl font-black mb-8 text-white uppercase tracking-tighter flex items-center gap-3">
+        <div className={`p-8 pb-20 max-w-[1600px] mx-auto ${theme.text.primary}`}>
+            <h1 className={`text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
                 {title}
             </h1>
 
@@ -286,23 +290,23 @@ const VerticalPage = ({ vertical, title }) => {
 
             {/* PAGINATION CONTROLS */}
             {!loading && totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-12 bg-zinc-900/50 py-3 px-6 rounded-full w-fit mx-auto border border-zinc-800 backdrop-blur-sm shadow-2xl">
+                <div className={`flex justify-center items-center gap-4 mt-12 ${theme.canvas.card} py-3 px-6 rounded-full w-fit mx-auto border ${theme.canvas.border} backdrop-blur-sm shadow-2xl`}>
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         title={`Go to page ${page - 1}`}
-                        className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95"
+                        className={`p-2 rounded-full ${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95`}
                     >
                         <Icons.ChevronLeft className="w-5 h-5" />
                     </button>
-                    <span className="text-zinc-500 font-mono text-xs uppercase tracking-widest px-4 border-l border-r border-zinc-800/50">
-                        Page <span className="text-white font-bold text-sm mx-1">{page}</span> of {totalPages}
+                    <span className={`${theme.text.secondary} font-mono text-xs uppercase tracking-widest px-4 border-l border-r ${theme.canvas.border}`}>
+                        Page <span className={`${theme.text.primary} font-bold text-sm mx-1`}>{page}</span> of {totalPages}
                     </span>
                     <button
                         disabled={page === totalPages}
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         title={`Go to page ${page + 1}`}
-                        className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95"
+                        className={`p-2 rounded-full ${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-all active:scale-95`}
                     >
                         <Icons.ChevronRight className="w-5 h-5" />
                     </button>

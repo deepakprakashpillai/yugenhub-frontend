@@ -1,27 +1,32 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
-const StatCard = ({ label, value, trend, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay }}
-        className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-6 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group hover:border-zinc-700 transition-colors"
-    >
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            {/* Abstract Shape or Icon could go here */}
-            <div className="w-16 h-16 bg-gradient-to-br from-white to-transparent rounded-full blur-xl" />
-        </div>
-        <span className="text-4xl font-black text-white mb-1 tracking-tighter">{value}</span>
-        <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest">{label}</span>
-        {trend && (
-            <span className="text-emerald-500 text-xs mt-2 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                {trend}
-            </span>
-        )}
-    </motion.div>
-);
+const StatCard = ({ label, value, trend, delay }) => {
+    const { theme } = useTheme();
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay }}
+            className={`${theme.canvas.card} backdrop-blur-md border ${theme.canvas.border} p-6 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group ${theme.canvas.hover} transition-colors`}
+        >
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                {/* Abstract Shape or Icon could go here */}
+                <div className="w-16 h-16 bg-gradient-to-br from-white to-transparent rounded-full blur-xl" />
+            </div>
+            <span className={`text-4xl font-black ${theme.text.primary} mb-1 tracking-tighter`}>{value}</span>
+            <span className={`${theme.text.secondary} text-xs font-bold uppercase tracking-widest`}>{label}</span>
+            {trend && (
+                <span className="text-emerald-500 text-xs mt-2 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    {trend}
+                </span>
+            )}
+        </motion.div>
+    );
+};
 
 const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
     const [stats, setStats] = useState({

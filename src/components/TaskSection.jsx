@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
+import { useTheme } from '../context/ThemeContext';
 import { Icons } from './Icons';
 import TaskCard from './TaskCard';
 import TaskTable from './TaskTable';
@@ -18,6 +19,7 @@ const TaskSection = ({
     onEditTask,
     refreshTrigger = 0
 }) => {
+    const { theme } = useTheme();
     const [tasks, setTasks] = useState([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
@@ -88,8 +90,8 @@ const TaskSection = ({
                         {Icon && <Icon className={clsx("w-5 h-5", color)} />}
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white uppercase tracking-tight">{title}</h2>
-                        <p className="text-zinc-500 text-xs font-medium">
+                        <h2 className={`text-xl font-bold ${theme.text.primary} uppercase tracking-tight`}>{title}</h2>
+                        <p className={`${theme.text.secondary} text-xs font-medium`}>
                             {loading ? "Loading..." : `${total} task${total !== 1 ? 's' : ''} found`}
                         </p>
                     </div>
@@ -103,7 +105,7 @@ const TaskSection = ({
                             "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold uppercase transition-all",
                             showCompleted
                                 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                                : "bg-zinc-900 border-zinc-700 text-zinc-500 hover:text-zinc-300"
+                                : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                         )}
                     >
                         {showCompleted ? <Icons.CheckCircle className="w-3.5 h-3.5" /> : <Icons.Circle className="w-3.5 h-3.5" />}
@@ -149,17 +151,17 @@ const TaskSection = ({
                             <button
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
                                 disabled={page === 1}
-                                className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 disabled:opacity-50 hover:bg-zinc-800 hover:text-white transition-colors"
+                                className={`p-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} disabled:opacity-50 hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
                             >
                                 <Icons.ChevronLeft className="w-4 h-4" />
                             </button>
-                            <span className="px-4 py-2 text-sm text-zinc-500 font-medium">
+                            <span className={`px-4 py-2 text-sm ${theme.text.secondary} font-medium`}>
                                 Page {page} of {totalPages}
                             </span>
                             <button
                                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                 disabled={page === totalPages}
-                                className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 disabled:opacity-50 hover:bg-zinc-800 hover:text-white transition-colors"
+                                className={`p-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} disabled:opacity-50 hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
                             >
                                 <Icons.ChevronRight className="w-4 h-4" />
                             </button>

@@ -1,8 +1,10 @@
 
 import { useState, useRef } from 'react';
 import { ArrowUp, ArrowDown, X, Plus } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 function EditableTagList({ title, items, editing, onUpdate }) {
+    const { theme } = useTheme();
     const [newValue, setNewValue] = useState('');
     const inputRef = useRef(null);
 
@@ -29,24 +31,24 @@ function EditableTagList({ title, items, editing, onUpdate }) {
 
     return (
         <div>
-            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 block">{title}</label>
+            <label className={`text-[10px] font-bold ${theme.text.secondary} uppercase tracking-widest mb-3 block`}>{title}</label>
             <div className="flex flex-wrap gap-2">
                 {(items || []).map((item, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-zinc-300 group">
+                    <span key={i} className={`inline-flex items-center gap-1 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-1.5 text-sm ${theme.text.primary} group`}>
                         {editing && (
                             <span className="flex gap-0.5 mr-1">
-                                <button onClick={() => moveItem(i, -1)} className="text-zinc-700 hover:text-white" title="Move left"><ArrowUp size={10} className="rotate-[-90deg]" /></button>
-                                <button onClick={() => moveItem(i, 1)} className="text-zinc-700 hover:text-white" title="Move right"><ArrowDown size={10} className="rotate-[-90deg]" /></button>
+                                <button onClick={() => moveItem(i, -1)} className={`${theme.text.secondary} hover:${theme.text.primary}`} title="Move left"><ArrowUp size={10} className="rotate-[-90deg]" /></button>
+                                <button onClick={() => moveItem(i, 1)} className={`${theme.text.secondary} hover:${theme.text.primary}`} title="Move right"><ArrowDown size={10} className="rotate-[-90deg]" /></button>
                             </span>
                         )}
                         {item}
                         {editing && (
-                            <button onClick={() => removeItem(i)} className="text-zinc-600 hover:text-red-400 ml-1"><X size={12} /></button>
+                            <button onClick={() => removeItem(i)} className={`${theme.text.secondary} hover:text-red-400 ml-1`}><X size={12} /></button>
                         )}
                     </span>
                 ))}
                 {editing && (
-                    <span className="inline-flex items-center gap-1 border border-dashed border-zinc-700 rounded-lg overflow-hidden">
+                    <span className={`inline-flex items-center gap-1 border border-dashed ${theme.canvas.border} rounded-lg overflow-hidden`}>
                         <input
                             ref={inputRef}
                             type="text"
@@ -54,9 +56,9 @@ function EditableTagList({ title, items, editing, onUpdate }) {
                             onChange={e => setNewValue(e.target.value)}
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem(); } }}
                             placeholder="Type & Enter"
-                            className="bg-transparent border-none px-3 py-1.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none w-32"
+                            className={`bg-transparent border-none px-3 py-1.5 text-sm ${theme.text.primary} placeholder:${theme.text.secondary} focus:outline-none w-32`}
                         />
-                        <button onClick={addItem} className="px-2 py-1.5 text-zinc-500 hover:text-white"><Plus size={14} /></button>
+                        <button onClick={addItem} className={`px-2 py-1.5 ${theme.text.secondary} hover:${theme.text.primary}`}><Plus size={14} /></button>
                     </span>
                 )}
             </div>

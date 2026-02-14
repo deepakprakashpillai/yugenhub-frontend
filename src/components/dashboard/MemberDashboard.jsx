@@ -7,7 +7,10 @@ import { Badge } from '../ui/badge';
 import { Link } from 'react-router-dom';
 import EmptyState from '../EmptyState';
 
+import { useTheme } from '../../context/ThemeContext';
+
 const MemberDashboard = ({ user }) => {
+    const { theme } = useTheme();
     const [loading, setLoading] = useState(true);
     const [attention, setAttention] = useState([]);
     const [workload, setWorkload] = useState({});
@@ -42,19 +45,19 @@ const MemberDashboard = ({ user }) => {
     if (loading) return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Attention Section Skeleton */}
-            <div className="h-48 w-full bg-zinc-900/40 rounded-3xl border border-zinc-800/50 p-6 space-y-4">
+            <div className={`h-48 w-full ${theme.canvas.card} rounded-3xl border ${theme.canvas.border} p-6 space-y-4`}>
                 <div className="flex gap-4">
-                    <div className="h-12 w-12 bg-zinc-800 rounded-xl animate-pulse" />
+                    <div className={`h-12 w-12 ${theme.canvas.bg} rounded-xl animate-pulse`} />
                     <div className="space-y-2">
-                        <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
-                        <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
+                        <div className={`h-6 w-48 ${theme.canvas.bg} rounded animate-pulse`} />
+                        <div className={`h-4 w-32 ${theme.canvas.bg} rounded animate-pulse`} />
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="md:col-span-2 h-64 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 animate-pulse" />
-                <div className="h-64 bg-zinc-900/40 rounded-3xl border border-zinc-800/50 animate-pulse" />
+                <div className={`md:col-span-2 h-64 ${theme.canvas.card} rounded-3xl border ${theme.canvas.border} animate-pulse`} />
+                <div className={`h-64 ${theme.canvas.card} rounded-3xl border ${theme.canvas.border} animate-pulse`} />
             </div>
         </div>
     );
@@ -68,13 +71,13 @@ const MemberDashboard = ({ user }) => {
             <WorkloadSection type="me" data={workload} />
 
             {/* 3. My Upcoming Tasks */}
-            <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-3xl p-8">
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-3xl p-8`}>
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <h2 className={`text-xl font-bold ${theme.text.primary} flex items-center gap-2`}>
                         <Icons.List className="w-5 h-5 text-blue-500" />
                         My Next Tasks
                     </h2>
-                    <Link to="/tasks" className="text-sm text-zinc-400 hover:text-white transition-colors">
+                    <Link to="/tasks" className={`text-sm ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
                         View All
                     </Link>
                 </div>
@@ -92,10 +95,10 @@ const MemberDashboard = ({ user }) => {
                         />
                     ) : (
                         myTasks.map((task) => (
-                            <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/30 border border-zinc-800 hover:border-zinc-700 transition-all">
+                            <div key={task.id} className={`flex items-center justify-between p-4 rounded-xl ${theme.canvas.bg} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-all`}>
                                 <div>
-                                    <h3 className="font-medium text-white mb-1">{task.title}</h3>
-                                    <div className="flex items-center gap-3 text-xs text-zinc-500">
+                                    <h3 className={`font-medium ${theme.text.primary} mb-1`}>{task.title}</h3>
+                                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary}`}>
                                         <span className="flex items-center gap-1">
                                             <Icons.Calendar className="w-3 h-3" />
                                             {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Date'}
@@ -108,7 +111,7 @@ const MemberDashboard = ({ user }) => {
                                 <Badge variant="outline" className={`
                                     ${task.priority === 'urgent' ? 'border-red-500/30 text-red-500' :
                                         task.priority === 'high' ? 'border-orange-500/30 text-orange-500' :
-                                            'border-zinc-700 text-zinc-400'}
+                                            `${theme.canvas.border} ${theme.text.secondary}`}
                                 `}>
                                     {task.priority || 'Normal'}
                                 </Badge>

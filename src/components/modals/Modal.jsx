@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icons } from '../Icons';
+import { useTheme } from '../../context/ThemeContext';
 
 const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+    const { theme } = useTheme();
     const sizeClasses = {
         sm: 'max-w-sm',
         md: 'max-w-lg',
@@ -28,21 +30,21 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ duration: 0.2 }}
-                        className={`relative w-full ${sizeClasses[size]} bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl overflow-hidden`}
+                        className={`relative w-full ${sizeClasses[size]} ${theme.canvas.card} border ${theme.canvas.border} rounded-2xl shadow-2xl overflow-hidden`}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-                            <h3 className="text-lg font-bold text-white">{title}</h3>
+                        <div className={`flex items-center justify-between px-6 py-4 border-b ${theme.canvas.border}`}>
+                            <h3 className={`text-lg font-bold ${theme.text.primary}`}>{title}</h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                                className={`p-2 rounded-lg hover:${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
                             >
                                 <Icons.X className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Body */}
-                        <div className="p-6 max-h-[70vh] overflow-y-auto">
+                        <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                             {children}
                         </div>
                     </motion.div>
