@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Command } from "cmdk";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,16 +12,19 @@ import {
     Search,
     Plus,
     Briefcase,
-    Users
+    Users,
+    Minus
 } from "lucide-react";
 import { Icons } from "./Icons";
 import { useAgencyConfig } from "../context/AgencyConfigContext";
+import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 export function CommandPalette() {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
     const { config } = useAgencyConfig();
+    const { user } = useAuth();
     const { theme } = useTheme();
 
     // Toggle with Cmd+K
@@ -144,6 +147,55 @@ export function CommandPalette() {
                                         />
                                         <span>{vertical.label}</span>
                                     </Command.Item>
+                                ))}
+                            </div>
+                        </Command.Group>
+                    </>
+                )}
+                {(user?.role === 'admin' || user?.role === 'owner') && (
+                    <>
+                        <div className={`border-t ${theme.canvas.border} my-2`} />
+                        <Command.Group heading="Finance" className={`text-xs ${theme.text.secondary} font-medium mb-2 px-2`}>
+                            <div className="space-y-1">
+                                <Command.Item
+                                    onSelect={() => runCommand(() => navigate("/finance?action=new_transaction&type=income"))}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${theme.text.primary} ${theme.canvas.hover} transition-colors cursor-pointer aria-selected:bg-zinc-800/10`}
+                                >
+                                    <div className="w-4 h-4 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
+                                        <Icons.Plus className="w-3 h-3" />
+                                    </div>
+                                    <span>Add Income</span>
+                                </Command.Item>
+                                <Command.Item
+                                    onSelect={() => runCommand(() => navigate("/finance?action=new_transaction&type=expense"))}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${theme.text.primary} ${theme.canvas.hover} transition-colors cursor-pointer aria-selected:bg-zinc-800/10`}
+                                >
+                                    <div className="w-4 h-4 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">
+                                        <Icons.Minus className="w-3 h-3" />
+                                    </div>
+                                    <span>Add Expense</span>
+                                </Command.Item>
+                                {config?.verticals?.map(vertical => (
+                                    <React.Fragment key={vertical.id}>
+                                        <Command.Item
+                                            onSelect={() => runCommand(() => navigate(`/finance?action=new_transaction&type=income&vertical=${vertical.id}`))}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${theme.text.primary} ${theme.canvas.hover} transition-colors cursor-pointer aria-selected:bg-zinc-800/10`}
+                                        >
+                                            <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: `${vertical.color || '#000'}33`, color: vertical.color || '#000' }}>
+                                                <Icons.Plus className="w-3 h-3" />
+                                            </div>
+                                            <span>Add {vertical.label} Income</span>
+                                        </Command.Item>
+                                        <Command.Item
+                                            onSelect={() => runCommand(() => navigate(`/finance?action=new_transaction&type=expense&vertical=${vertical.id}`))}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${theme.text.primary} ${theme.canvas.hover} transition-colors cursor-pointer aria-selected:bg-zinc-800/10`}
+                                        >
+                                            <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: `${vertical.color || '#000'}33`, color: vertical.color || '#000' }}>
+                                                <Icons.Minus className="w-3 h-3" />
+                                            </div>
+                                            <span>Add {vertical.label} Expense</span>
+                                        </Command.Item>
+                                    </React.Fragment>
                                 ))}
                             </div>
                         </Command.Group>

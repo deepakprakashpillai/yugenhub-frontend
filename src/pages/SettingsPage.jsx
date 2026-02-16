@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Building2, Users, Workflow, Layers, Bell, Download, AlertTriangle,
-    GripVertical
+    GripVertical, IndianRupee
 } from 'lucide-react';
 import { Icons } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,7 @@ import NotificationsSection from '../components/settings/NotificationsSection';
 import ExportSection from '../components/settings/ExportSection';
 import TemplatesSection from '../components/settings/TemplatesSection';
 import AppearanceSection from '../components/settings/AppearanceSection';
+import FinanceSection from '../components/settings/FinanceSection';
 
 const SECTIONS = [
     { id: 'org', label: 'Organisation', icon: Building2, roles: ['owner', 'admin', 'member'] },
@@ -27,6 +28,7 @@ const SECTIONS = [
     { id: 'workflow', label: 'Workflow', icon: Workflow, roles: ['owner', 'admin', 'member'] },
     { id: 'verticals', label: 'Verticals', icon: Layers, roles: ['owner', 'admin'] },
     { id: 'templates', label: 'Templates', icon: Icons.LayoutTemplate, roles: ['owner', 'admin'] },
+    { id: 'finance', label: 'Finance', icon: IndianRupee, roles: ['owner', 'admin'] },
     { id: 'notifications', label: 'Notifications', icon: Bell, roles: ['owner', 'admin', 'member'] },
     { id: 'export', label: 'Data Export', icon: Download, roles: ['owner', 'admin'] },
     { id: 'danger', label: 'Danger Zone', icon: AlertTriangle, roles: ['owner'] },
@@ -67,6 +69,7 @@ function SettingsPage() {
             case 'workflow': return <WorkflowSection role={role} />;
             case 'verticals': return <VerticalsSection role={role} />;
             case 'templates': return <TemplatesSection />;
+            case 'finance': return <FinanceSection role={role} />;
             case 'notifications': return <NotificationsSection />;
             case 'export': return <ExportSection />;
             case 'danger': return <DangerZone />;

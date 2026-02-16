@@ -17,7 +17,7 @@ import { AGENCY_CONFIG } from '../config';
 import { useAuth } from '../context/AuthContext';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useTheme } from '../context/ThemeContext';
-import api from '../api/axios';
+import { ROLES } from '../constants';
 
 export default function Sidebar() {
   const location = useLocation();
@@ -53,8 +53,11 @@ export default function Sidebar() {
   const opsItems = [
     { id: 'tasks', label: 'Tasks', icon: ClipboardList },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'finance', label: 'Finance', icon: IndianRupee },
   ];
+
+  if (user?.role === ROLES.ADMIN || user?.role === ROLES.OWNER) {
+    opsItems.push({ id: 'finance', label: 'Finance', icon: IndianRupee });
+  }
 
   const managementItems = [
     { id: 'clients', label: 'Clients', icon: Users },

@@ -13,3 +13,5 @@ export { default as TaskModal } from './TaskModal';
 export { default as InviteUserModal } from './InviteUserModal';
 export { default as EditUserModal } from './EditUserModal';
 export { TemplateModal } from './TemplateModal';
+export { default as TransactionSlideOver } from './TransactionSlideOver';
+export { default as InvoiceSlideOver } from './InvoiceSlideOver';

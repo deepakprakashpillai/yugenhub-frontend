@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
+import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -7,8 +8,9 @@ import api from '../api/axios';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Icons } from '../components/Icons';
 import clsx from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
+import { Wallet } from 'lucide-react';
 
 // Modals
 import { ConfirmDeleteModal, TeamMemberModal, MetadataModal, EventSlideOver, TaskModal, TemplateModal } from '../components/modals';
@@ -17,6 +19,7 @@ import EmptyState from '../components/EmptyState';
 
 // Vertical-specific templates
 import { WeddingTemplate, KidsTemplate, EventsTemplate, GenericTemplate } from '../components/templates';
+import ProjectFinance from '../components/finance/ProjectFinance';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -618,10 +621,28 @@ const ProjectPage = () => {
     // Task Integration (Unified for both general tasks and deliverables)
     const [tasks, setTasks] = useState([]);
     const [users, setUsers] = useState([]); // For assignment
+    const { user } = useAuth();
+    // ... other hooks
+
+    const allTabs = [
+        { id: 'overview', label: 'Overview', icon: Icons.LayoutDashboard },
+        { id: 'tasks', label: 'Tasks', icon: Icons.ListTodo },
+        { id: 'finance', label: 'Finance', icon: Icons.CircleDollarSign },
+        { id: 'invoices', label: 'Quotes & Invoices', icon: Icons.FileText }, // Renamed from Invoices
+        { id: 'settings', label: 'Settings', icon: Icons.Settings },
+    ];
+
+    const tabs = allTabs.filter(tab => {
+        if (tab.id === 'finance' || tab.id === 'invoices') {
+            return user?.role === 'admin' || user?.role === 'owner';
+        }
+        return true;
+    });
+
     const [activeTab, setActiveTab] = useState('overview');
     const [taskModal, setTaskModal] = useState({ open: false, task: null, eventId: null }); // Unified: eventId for deliverables
 
-    const fetchProject = async () => {
+    const fetchProject = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -642,11 +663,11 @@ const ProjectPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
     useEffect(() => {
         fetchProject();
-    }, [id]);
+    }, [id, fetchProject]);
 
     const toggleEvent = (index) => {
         setExpandedEvents(prev => ({ ...prev, [index]: !prev[index] }));
@@ -970,18 +991,18 @@ const ProjectPage = () => {
             </div>
 
             {/* Tabs */}
-            <div className={`flex items-center gap-6 mb-8 border-b ${theme.canvas.border}`}>
-                {['overview', 'tasks'].map(tab => (
+            <div className={`flex items-center gap-6 mb-8 border-b ${theme.canvas.border} overflow-x-auto`}>
+                {tabs.map(tab => (
                     <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
                         className={clsx(
-                            "pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2",
-                            activeTab === tab ? `${theme.text.primary} border-current` : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
+                            "pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap",
+                            activeTab === tab.id ? `${theme.text.primary} border-current` : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
                         )}
-                        style={activeTab === tab ? { borderColor: theme.accents?.default?.primary, color: theme.accents?.default?.primary } : {}}
+                        style={activeTab === tab.id ? { borderColor: theme.accents?.default?.primary, color: theme.accents?.default?.primary } : {}}
                     >
-                        {tab}
+                        {tab.label}
                     </button>
                 ))}
             </div>
@@ -1045,6 +1066,17 @@ const ProjectPage = () => {
                             </div>
                         )}
                     </div>
+                </div>
+            )}
+
+            {/* Finance Tab */}
+            {activeTab === 'finance' && (
+                <div className="mb-8">
+                    <ProjectFinance
+                        projectId={id}
+                        projectData={project}
+                        onUpdateProject={fetchProject}
+                    />
                 </div>
             )}
 

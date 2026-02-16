@@ -19,3 +19,23 @@
   inset: 0;
   z-index: 9998;
 }
+
+/* Custom Scrollbar Utilities */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 20px;
+}
+
+.dark .scrollbar-thumb-zinc-600::-webkit-scrollbar-thumb {
+  background-color: #52525b;
+  border-radius: 20px;
+}

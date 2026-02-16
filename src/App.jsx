@@ -16,6 +16,7 @@ import TasksPage from './pages/TasksPage';
 import NotificationsPage from './pages/NotificationsPage';
 import CalendarPage from './pages/CalendarPage';
 import SettingsPage from './pages/SettingsPage';
+import FinancePage from './pages/FinancePage';
 
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
@@ -124,7 +125,7 @@ function AppRoutes() {
       } />
       <Route path="/finance" element={
         <ProtectedRoute>
-          <div className="p-10">Finance & Quotations</div>
+          <FinancePage />
         </ProtectedRoute>
       } />
 

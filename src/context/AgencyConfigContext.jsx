@@ -18,10 +18,11 @@ export const AgencyConfigProvider = ({ children }) => {
             return;
         }
         try {
-            const [workflowRes, verticalsRes, orgRes] = await Promise.all([
+            const [workflowRes, verticalsRes, orgRes, financeRes] = await Promise.all([
                 api.get('/settings/workflow'),
                 api.get('/settings/verticals'),
                 api.get('/settings/org'),
+                api.get('/settings/finance/categories'),
             ]);
 
             setConfig({
@@ -39,6 +40,7 @@ export const AgencyConfigProvider = ({ children }) => {
                 leadSources: workflowRes.data.lead_sources || FALLBACK_CONFIG.leadSources,
                 deliverableTypes: workflowRes.data.deliverable_types || FALLBACK_CONFIG.deliverableTypes,
                 verticals: verticalsRes.data.verticals || FALLBACK_CONFIG.verticals,
+                finance_categories: financeRes.data.categories || FALLBACK_CONFIG.finance_categories || [],
             });
         } catch (err) {
             console.error('Failed to fetch agency config, using fallback', err);

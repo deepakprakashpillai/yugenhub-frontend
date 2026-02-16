@@ -6,11 +6,12 @@ import api from '../../api/axios';
 import { InviteUserModal, EditUserModal } from '../modals';
 import RemoveUserModal from '../modals/RemoveUserModal';
 import { useTheme } from '../../context/ThemeContext';
+import { ROLES } from '../../constants';
 
 const ROLE_BADGE = {
-    owner: { label: 'Owner', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Crown },
-    admin: { label: 'Admin', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20', icon: ShieldCheck },
-    member: { label: 'Member', color: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20', icon: UserCircle },
+    [ROLES.OWNER]: { label: 'Owner', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Crown },
+    [ROLES.ADMIN]: { label: 'Admin', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20', icon: ShieldCheck },
+    [ROLES.MEMBER]: { label: 'Member', color: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20', icon: UserCircle },
 };
 
 function TeamSection({ role }) {
@@ -21,7 +22,7 @@ function TeamSection({ role }) {
     const [removeUser, setRemoveUser] = useState(null);
     const [editUser, setEditUser] = useState(null);
 
-    const canManage = role === 'owner' || role === 'admin';
+    const canManage = role === ROLES.OWNER || role === ROLES.ADMIN;
 
     const fetchTeam = async () => {
         setLoading(true);
@@ -94,7 +95,7 @@ function TeamSection({ role }) {
                     // Check if current user can edit this member
                     // Owner can edit anyone (except self-demotion, handled by API-side check mostly)
                     // Admin can edit Members.
-                    const canEditThisUser = canManage && (role === 'owner' || (member.role === 'member'));
+                    const canEditThisUser = canManage && (role === ROLES.OWNER || (member.role === ROLES.MEMBER));
 
                     return (
                         <motion.div
@@ -129,7 +130,7 @@ function TeamSection({ role }) {
                                         <Edit2 size={14} />
                                     </button>
                                 )}
-                                {canManage && member.role !== 'owner' && (
+                                {canManage && member.role !== ROLES.OWNER && (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setRemoveUser(member); }}
                                         className={`p-1.5 rounded-md ${theme.text.secondary} hover:text-red-400 hover:bg-red-500/10 transition-colors`}
@@ -158,14 +159,14 @@ function TeamSection({ role }) {
                                         <BadgeIcon size={12} /> {badge.label}
                                     </div>
 
-                                    {canManage && member.role !== 'owner' && (
+                                    {canManage && member.role !== ROLES.OWNER && (
                                         <select
                                             value={member.role}
                                             onChange={e => handleRoleChange(member.id, e.target.value)}
                                             className={`${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-2 py-1 text-xs ${theme.text.secondary} focus:outline-none focus:border-zinc-500 cursor-pointer hover:${theme.canvas.hover} transition-colors`}
                                         >
-                                            <option value="member">Member</option>
-                                            <option value="admin">Admin</option>
+                                            <option value={ROLES.MEMBER}>Member</option>
+                                            <option value={ROLES.ADMIN}>Admin</option>
                                         </select>
                                     )}
                                 </div>
