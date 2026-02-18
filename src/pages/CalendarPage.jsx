@@ -13,8 +13,10 @@ import clsx from 'clsx';
 import SkeletonCard from '../components/SkeletonCard';
 import TaskModal from '../components/modals/TaskModal';
 import { usePermission } from '../hooks/usePermissions';
-import { PERMISSIONS } from '../config/permissions';
+import { PERMISSIONS, ROLES } from '../config/permissions';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 const CalendarPage = () => {
     const { theme } = useTheme();
@@ -38,8 +40,22 @@ const CalendarPage = () => {
     const canViewAll = usePermission(PERMISSIONS.VIEW_ALL_CALENDAR);
 
     // Filter States
+    const { user } = useAuth();
     const [showType, setShowType] = useState('all'); // 'all' | 'event' | 'task'
-    const [assignedOnly, setAssignedOnly] = useState(false); // Default: Show all events, optional filter
+    const isMobile = useIsMobile();
+
+    // On mobile, auto-select today
+    const [mobileSelectedDate, setMobileSelectedDate] = useState(new Date());
+
+    // Default: Show all events for admins, but assigned only for members
+    const [assignedOnly, setAssignedOnly] = useState(user?.role === ROLES.MEMBER);
+
+    // Sync default state when user loads (in case of refresh)
+    useEffect(() => {
+        if (user?.role === ROLES.MEMBER) {
+            setAssignedOnly(true);
+        }
+    }, [user]);
 
     // Compute Calendar Grid
     const { days, startDate, endDate } = useMemo(() => {
@@ -227,11 +243,11 @@ const CalendarPage = () => {
     const { themeMode } = useTheme();
 
     return (
-        <div className="p-8 pb-20 max-w-[1600px] mx-auto min-h-screen relative">
+        <div className="p-4 md:p-8 pb-20 max-w-[1600px] mx-auto min-h-screen relative">
             {/* ... Header ... */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
-                    <h1 className={`text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Calendar</h1>
+                    <h1 className={`text-2xl md:text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Calendar</h1>
                     <p className={`${theme.text.secondary} text-sm mt-1`}>Global schedule of shoots and deadlines.</p>
                 </div>
                 {/* ... Filter Controls ... */}
@@ -273,170 +289,291 @@ const CalendarPage = () => {
                 </div>
             </div>
 
-            {/* Calendar Grid */}
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden shadow-sm`}>
-                {/* Day Headers */}
-                <div className={`grid grid-cols-7 border-b ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-30`}>
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-                        <div key={day} className={clsx("py-3 text-center text-xs font-bold uppercase tracking-widest", (i === 0 || i === 6) ? "text-red-500/70" : theme.text.secondary)}>{day}</div>
-                    ))}
-                </div>
+            {/* === MOBILE CALENDAR VIEW === */}
+            {isMobile ? (
+                <div>
+                    {/* Compact Mini-Calendar */}
+                    <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden shadow-sm mb-4`}>
+                        {/* Day headers */}
+                        <div className={`grid grid-cols-7 border-b ${theme.canvas.border}`}>
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                                <div key={i} className={clsx("py-2 text-center text-[10px] font-bold uppercase tracking-widest", (i === 0 || i === 6) ? "text-red-500/70" : theme.text.secondary)}>{d}</div>
+                            ))}
+                        </div>
+                        {/* Date cells */}
+                        <div className="grid grid-cols-7">
+                            {days.map((day) => {
+                                const dayEvents = getEventsForDay(day);
+                                const isCurrentMonth = isSameMonth(day, currentDate);
+                                const isTodayDate = isToday(day);
+                                const isSelected = isSameDay(day, mobileSelectedDate);
+                                const hasEvents = dayEvents.length > 0;
+                                const hasEventType = dayEvents.some(e => e.type === 'event');
+                                const hasTaskType = dayEvents.some(e => e.type === 'task');
 
-                {/* Days Cells */}
-                <div className="grid grid-cols-7 auto-rows-fr">
-                    {days.map((day, idx) => {
-                        const dayEvents = getEventsForDay(day);
-                        const isCurrentMonth = isSameMonth(day, currentDate);
-                        const isTodayDate = isToday(day);
+                                return (
+                                    <button
+                                        key={day.toString()}
+                                        onClick={() => setMobileSelectedDate(day)}
+                                        className={clsx(
+                                            "flex flex-col items-center justify-center py-2.5 relative transition-all",
+                                            !isCurrentMonth && "opacity-30",
+                                            isSelected && "bg-blue-500/15",
+                                        )}
+                                    >
+                                        <span className={clsx(
+                                            "w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold transition-all",
+                                            isTodayDate && !isSelected && "bg-blue-500 text-white",
+                                            isSelected && "bg-blue-500 text-white scale-110",
+                                            !isTodayDate && !isSelected && theme.text.secondary
+                                        )}>
+                                            {format(day, 'd')}
+                                        </span>
+                                        {/* Dot indicators */}
+                                        {hasEvents && (
+                                            <div className="flex gap-0.5 mt-1">
+                                                {hasEventType && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
+                                                {hasTaskType && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                                            </div>
+                                        )}
+                                        {!hasEvents && <div className="h-[10px]" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
 
-                        return (
-                            <div
-                                key={day.toString()}
-                                onClick={() => setSelectedDate(day)}
-                                className={clsx(
-                                    `min-h-[120px] p-2 border-b border-r ${theme.canvas.border} relative group transition-colors cursor-pointer`,
-                                    !isCurrentMonth ? `${theme.canvas.bg} opacity-50` : `${theme.canvas.card} hover:${theme.canvas.hover}`,
-                                    isTodayDate && "bg-blue-500/5"
-                                )}
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className={clsx("w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold", isTodayDate ? "bg-blue-500 text-white" : `${theme.text.secondary} group-hover:${theme.text.primary}`)}>{format(day, 'd')}</span>
-                                    {dayEvents.length > 0 && <span className={`text-[10px] font-bold ${theme.text.secondary} ${theme.canvas.bg} px-1.5 py-0.5 rounded border ${theme.canvas.border}`}>{dayEvents.length}</span>}
-                                </div>
-
-                                <div className="space-y-1 overflow-visible">
-                                    {/* Visible Events */}
-                                    {dayEvents.slice(0, 4).map((evt) => (
+                    {/* Daily Event List */}
+                    <div>
+                        <h3 className={`text-sm font-bold ${theme.text.primary} mb-3 uppercase tracking-wider`}>
+                            {format(mobileSelectedDate, 'EEEE, MMMM d')}
+                        </h3>
+                        {(() => {
+                            const dayEvents = getEventsForDay(mobileSelectedDate);
+                            if (dayEvents.length === 0) {
+                                return (
+                                    <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-6 text-center`}>
+                                        <p className={`${theme.text.secondary} text-sm`}>No events on this day</p>
+                                    </div>
+                                );
+                            }
+                            return (
+                                <div className="space-y-2">
+                                    {dayEvents.map((evt) => (
                                         <div
                                             key={evt.id}
-                                            className={clsx(
-                                                "text-[10px] px-1.5 py-0.5 rounded font-medium border-l-2 relative cursor-pointer transition-all overflow-visible",
-                                                evt.type === 'event' ? "bg-blue-500/10 text-blue-400 border-blue-500 hover:bg-blue-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500 hover:bg-amber-500/20"
-                                            )}
                                             onClick={(e) => handleEventClick(evt, e)}
-                                            onMouseEnter={(e) => {
-                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                setTooltipPos({ top: rect.top, left: rect.left, placement: 'top' });
-                                                setHoveredEvent(evt);
-                                            }}
-                                            onMouseLeave={() => setHoveredEvent(null)}
+                                            className={clsx(
+                                                `${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-3 flex items-start gap-3 cursor-pointer active:scale-[0.98] transition-all`,
+                                                evt.type === 'event' ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-amber-500'
+                                            )}
                                         >
-                                            <span className="flex items-center truncate">
-                                                {evt.type === 'task' && <Icons.CheckSquare className="w-2.5 h-2.5 mr-1 opacity-70 shrink-0" />}
-                                                {evt.type === 'event' && <Icons.Video className="w-2.5 h-2.5 mr-1 opacity-70 shrink-0" />}
-                                                <span className="truncate">{evt.title}</span>
-                                            </span>
-                                            {/* Main Tooltip */}
-                                            {renderEventTooltip(evt, false)}
+                                            <div className={clsx(
+                                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
+                                                evt.type === 'event' ? "bg-blue-500/20" : "bg-amber-500/20"
+                                            )}>
+                                                {evt.type === 'event'
+                                                    ? <Icons.Video className="w-4 h-4 text-blue-400" />
+                                                    : <Icons.CheckSquare className="w-4 h-4 text-amber-400" />
+                                                }
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className={`text-sm font-bold ${theme.text.primary} leading-tight`}>{evt.title}</p>
+                                                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                                                    {evt.project_code && (
+                                                        <span className={`text-[11px] ${theme.text.secondary} flex items-center gap-1`}>
+                                                            <Icons.Package className="w-3 h-3 opacity-70" />
+                                                            {evt.project_code}
+                                                        </span>
+                                                    )}
+                                                    {evt.details?.venue && (
+                                                        <span className={`text-[11px] ${theme.text.secondary} flex items-center gap-1`}>
+                                                            <Icons.MapPin className="w-3 h-3 opacity-70" />
+                                                            {evt.details.venue}
+                                                        </span>
+                                                    )}
+                                                    {evt.details?.assignee && (
+                                                        <span className={`text-[11px] ${theme.text.secondary} flex items-center gap-1`}>
+                                                            <Icons.Users className="w-3 h-3 opacity-70" />
+                                                            {evt.details.assignee}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <Icons.ChevronRight className={`w-4 h-4 ${theme.text.secondary} shrink-0 mt-1`} />
                                         </div>
                                     ))}
-
-                                    {/* Overflow Indicator */}
-                                    {dayEvents.length > 4 && (
-                                        <div
-                                            className="relative"
-                                            onMouseEnter={(e) => {
-                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                const viewportWidth = window.innerWidth;
-                                                const listWidth = 240;
-
-                                                let left, placement;
-
-                                                if (rect.left + listWidth > viewportWidth) {
-                                                    left = rect.right - listWidth;
-                                                    placement = 'left';
-                                                } else {
-                                                    left = rect.left;
-                                                    placement = 'right';
-                                                }
-
-                                                const bottom = window.innerHeight - rect.top;
-
-                                                setMoreTooltipPos({ bottom, left, placement });
-                                                setHoveredMoreDay(day.toString());
-                                            }}
-                                            onMouseLeave={() => setHoveredMoreDay(null)}
-                                        >
-                                            <div className={`text-[10px] ${theme.text.secondary} pl-1 font-bold cursor-pointer hover:${theme.text.primary}`}>
-                                                + {dayEvents.length - 4} more
-                                            </div>
-
-                                            {/* Hidden Events List Tooltip */}
-                                            {createPortal(
-                                                <AnimatePresence>
-                                                    {hoveredMoreDay === day.toString() && (
-                                                        <motion.div
-                                                            initial={{ opacity: 0, y: 5 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            exit={{ opacity: 0, y: 5 }}
-                                                            transition={{ duration: 0.15 }}
-                                                            className={`fixed w-56 p-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl z-[150]`}
-                                                            style={{
-                                                                bottom: moreTooltipPos.bottom,
-                                                                left: moreTooltipPos.left
-                                                            }}
-                                                            onMouseEnter={() => setHoveredMoreDay(day.toString())}
-                                                            onMouseLeave={() => setHoveredMoreDay(null)}
-                                                        >
-                                                            <div className={`text-[10px] uppercase font-bold ${theme.text.secondary} mb-2 px-1`}>Hidden Items</div>
-                                                            <div className="space-y-1 max-h-[200px] overflow-y-auto custom-scrollbar overflow-visible p-1">
-                                                                {dayEvents.slice(4).map((evt) => (
-                                                                    <div
-                                                                        key={evt.id}
-                                                                        className={clsx(
-                                                                            "text-[10px] px-2 py-1.5 rounded font-medium border-l-2 relative cursor-pointer transition-all",
-                                                                            evt.type === 'event'
-                                                                                ? "bg-blue-500/10 text-blue-400 border-blue-500 hover:bg-blue-500/20"
-                                                                                : "bg-amber-500/10 text-amber-400 border-amber-500 hover:bg-amber-500/20"
-                                                                        )}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            handleEventClick(evt, e);
-                                                                        }}
-                                                                        onMouseEnter={(e) => {
-                                                                            const rect = e.currentTarget.getBoundingClientRect();
-                                                                            const viewportWidth = window.innerWidth;
-                                                                            const tooltipWidth = 280;
-
-                                                                            if (rect.right + tooltipWidth > viewportWidth) {
-                                                                                const rightPos = viewportWidth - rect.left;
-                                                                                setTooltipPos({ top: rect.top, right: rightPos, placement: 'left' });
-                                                                                setHoveredEvent(evt);
-                                                                            } else {
-                                                                                setTooltipPos({ top: rect.top, left: rect.right + 8, placement: 'right' });
-                                                                                setHoveredEvent(evt);
-                                                                            }
-                                                                        }}
-                                                                        onMouseLeave={() => setHoveredEvent(null)}
-                                                                    >
-                                                                        <span className="flex items-center truncate">
-                                                                            {evt.type === 'task' && <Icons.CheckSquare className="w-2.5 h-2.5 mr-1.5 opacity-70 shrink-0" />}
-                                                                            {evt.type === 'event' && <Icons.Video className="w-2.5 h-2.5 mr-1.5 opacity-70 shrink-0" />}
-                                                                            <span className="truncate">{evt.title}</span>
-                                                                        </span>
-                                                                        {/* Nested Tooltip (Overflow Item) */}
-                                                                        {renderEventTooltip(evt, true)}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                            <div className={clsx(
-                                                                "absolute w-0 h-0 border-8 border-transparent -bottom-4",
-                                                                moreTooltipPos.placement === 'left' ? "right-4" : "left-4",
-                                                                `border-t-current ${themeMode === 'light' ? 'text-white' : 'text-zinc-950'}`
-                                                            )} />
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>,
-                                                document.body
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })()}
+                    </div>
                 </div>
-            </div>
+            ) : (
+                /* === DESKTOP CALENDAR GRID === */
+                <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden shadow-sm`}>
+                    {/* Day Headers */}
+                    <div className={`grid grid-cols-7 border-b ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-30`}>
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                            <div key={day} className={clsx("py-3 text-center text-xs font-bold uppercase tracking-widest", (i === 0 || i === 6) ? "text-red-500/70" : theme.text.secondary)}>{day}</div>
+                        ))}
+                    </div>
+
+                    {/* Days Cells */}
+                    <div className="grid grid-cols-7 auto-rows-fr">
+                        {days.map((day, idx) => {
+                            const dayEvents = getEventsForDay(day);
+                            const isCurrentMonth = isSameMonth(day, currentDate);
+                            const isTodayDate = isToday(day);
+
+                            return (
+                                <div
+                                    key={day.toString()}
+                                    onClick={() => setSelectedDate(day)}
+                                    className={clsx(
+                                        `min-h-[120px] p-2 border-b border-r ${theme.canvas.border} relative group transition-colors cursor-pointer`,
+                                        !isCurrentMonth ? `${theme.canvas.bg} opacity-50` : `${theme.canvas.card} hover:${theme.canvas.hover}`,
+                                        isTodayDate && "bg-blue-500/5"
+                                    )}
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className={clsx("w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold", isTodayDate ? "bg-blue-500 text-white" : `${theme.text.secondary} group-hover:${theme.text.primary}`)}>{format(day, 'd')}</span>
+                                        {dayEvents.length > 0 && <span className={`text-[10px] font-bold ${theme.text.secondary} ${theme.canvas.bg} px-1.5 py-0.5 rounded border ${theme.canvas.border}`}>{dayEvents.length}</span>}
+                                    </div>
+
+                                    <div className="space-y-1 overflow-visible">
+                                        {/* Visible Events */}
+                                        {dayEvents.slice(0, 4).map((evt) => (
+                                            <div
+                                                key={evt.id}
+                                                className={clsx(
+                                                    "text-[10px] px-1.5 py-0.5 rounded font-medium border-l-2 relative cursor-pointer transition-all overflow-visible",
+                                                    evt.type === 'event' ? "bg-blue-500/10 text-blue-400 border-blue-500 hover:bg-blue-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500 hover:bg-amber-500/20"
+                                                )}
+                                                onClick={(e) => handleEventClick(evt, e)}
+                                                onMouseEnter={(e) => {
+                                                    const rect = e.currentTarget.getBoundingClientRect();
+                                                    setTooltipPos({ top: rect.top, left: rect.left, placement: 'top' });
+                                                    setHoveredEvent(evt);
+                                                }}
+                                                onMouseLeave={() => setHoveredEvent(null)}
+                                            >
+                                                <span className="flex items-center truncate">
+                                                    {evt.type === 'task' && <Icons.CheckSquare className="w-2.5 h-2.5 mr-1 opacity-70 shrink-0" />}
+                                                    {evt.type === 'event' && <Icons.Video className="w-2.5 h-2.5 mr-1 opacity-70 shrink-0" />}
+                                                    <span className="truncate">{evt.title}</span>
+                                                </span>
+                                                {/* Main Tooltip */}
+                                                {renderEventTooltip(evt, false)}
+                                            </div>
+                                        ))}
+
+                                        {/* Overflow Indicator */}
+                                        {dayEvents.length > 4 && (
+                                            <div
+                                                className="relative"
+                                                onMouseEnter={(e) => {
+                                                    const rect = e.currentTarget.getBoundingClientRect();
+                                                    const viewportWidth = window.innerWidth;
+                                                    const listWidth = 240;
+
+                                                    let left, placement;
+
+                                                    if (rect.left + listWidth > viewportWidth) {
+                                                        left = rect.right - listWidth;
+                                                        placement = 'left';
+                                                    } else {
+                                                        left = rect.left;
+                                                        placement = 'right';
+                                                    }
+
+                                                    const bottom = window.innerHeight - rect.top;
+
+                                                    setMoreTooltipPos({ bottom, left, placement });
+                                                    setHoveredMoreDay(day.toString());
+                                                }}
+                                                onMouseLeave={() => setHoveredMoreDay(null)}
+                                            >
+                                                <div className={`text-[10px] ${theme.text.secondary} pl-1 font-bold cursor-pointer hover:${theme.text.primary}`}>
+                                                    + {dayEvents.length - 4} more
+                                                </div>
+
+                                                {/* Hidden Events List Tooltip */}
+                                                {createPortal(
+                                                    <AnimatePresence>
+                                                        {hoveredMoreDay === day.toString() && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: 5 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                exit={{ opacity: 0, y: 5 }}
+                                                                transition={{ duration: 0.15 }}
+                                                                className={`fixed w-56 p-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl z-[150]`}
+                                                                style={{
+                                                                    bottom: moreTooltipPos.bottom,
+                                                                    left: moreTooltipPos.left
+                                                                }}
+                                                                onMouseEnter={() => setHoveredMoreDay(day.toString())}
+                                                                onMouseLeave={() => setHoveredMoreDay(null)}
+                                                            >
+                                                                <div className={`text-[10px] uppercase font-bold ${theme.text.secondary} mb-2 px-1`}>Hidden Items</div>
+                                                                <div className="space-y-1 max-h-[200px] overflow-y-auto custom-scrollbar overflow-visible p-1">
+                                                                    {dayEvents.slice(4).map((evt) => (
+                                                                        <div
+                                                                            key={evt.id}
+                                                                            className={clsx(
+                                                                                "text-[10px] px-2 py-1.5 rounded font-medium border-l-2 relative cursor-pointer transition-all",
+                                                                                evt.type === 'event'
+                                                                                    ? "bg-blue-500/10 text-blue-400 border-blue-500 hover:bg-blue-500/20"
+                                                                                    : "bg-amber-500/10 text-amber-400 border-amber-500 hover:bg-amber-500/20"
+                                                                            )}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleEventClick(evt, e);
+                                                                            }}
+                                                                            onMouseEnter={(e) => {
+                                                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                                                const viewportWidth = window.innerWidth;
+                                                                                const tooltipWidth = 280;
+
+                                                                                if (rect.right + tooltipWidth > viewportWidth) {
+                                                                                    const rightPos = viewportWidth - rect.left;
+                                                                                    setTooltipPos({ top: rect.top, right: rightPos, placement: 'left' });
+                                                                                    setHoveredEvent(evt);
+                                                                                } else {
+                                                                                    setTooltipPos({ top: rect.top, left: rect.right + 8, placement: 'right' });
+                                                                                    setHoveredEvent(evt);
+                                                                                }
+                                                                            }}
+                                                                            onMouseLeave={() => setHoveredEvent(null)}
+                                                                        >
+                                                                            <span className="flex items-center truncate">
+                                                                                {evt.type === 'task' && <Icons.CheckSquare className="w-2.5 h-2.5 mr-1.5 opacity-70 shrink-0" />}
+                                                                                {evt.type === 'event' && <Icons.Video className="w-2.5 h-2.5 mr-1.5 opacity-70 shrink-0" />}
+                                                                                <span className="truncate">{evt.title}</span>
+                                                                            </span>
+                                                                            {/* Nested Tooltip (Overflow Item) */}
+                                                                            {renderEventTooltip(evt, true)}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <div className={clsx(
+                                                                    "absolute w-0 h-0 border-8 border-transparent -bottom-4",
+                                                                    moreTooltipPos.placement === 'left' ? "right-4" : "left-4",
+                                                                    `border-t-current ${themeMode === 'light' ? 'text-white' : 'text-zinc-950'}`
+                                                                )} />
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>,
+                                                    document.body
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {loading && (
                 <div className={`absolute inset-0 ${theme.canvas.bg} bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl`}>

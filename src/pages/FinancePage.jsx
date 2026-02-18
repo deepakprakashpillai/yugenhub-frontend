@@ -10,6 +10,7 @@ import FinanceProjects from '../components/finance/FinanceProjects'; // NEW
 import MultiActionFAB from '../components/MultiActionFAB';
 import { TransactionSlideOver, InvoiceSlideOver } from '../components/modals';
 import { CreditCard, PieChart, Users, FileText, ArrowLeftRight, Briefcase } from 'lucide-react';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +20,7 @@ const FinancePage = () => {
     const { theme } = useTheme();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
     const [activeTab, setActiveTab] = useState('overview');
 
     useEffect(() => {
@@ -110,7 +112,7 @@ const FinancePage = () => {
     return (
         <div className={`h-full flex flex-col ${theme.canvas.bg}`}>
             {/* Header */}
-            <div className={`p-6 border-b ${theme.canvas.border} flex justify-between items-center`}>
+            <div className={`px-4 py-4 md:p-6 border-b ${theme.canvas.border} flex justify-between items-center`}>
                 <div>
                     <h1 className="text-2xl font-bold">Finance</h1>
                     <p className={`text-sm ${theme.text.secondary}`}>Manage your agency's finances</p>
@@ -118,20 +120,28 @@ const FinancePage = () => {
             </div>
 
             {/* Tabs */}
-            <div className={`px-6 pt-4 border-b ${theme.canvas.border} flex space-x-6 overflow-x-auto`}>
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`pb-4 flex items-center space-x-2 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
-                            ? `border-[var(--primary)] ${theme.text.primary}`
-                            : `border-transparent ${theme.text.secondary} hover:${theme.text.primary}`
-                            }`}
-                    >
-                        <tab.icon size={16} />
-                        <span>{tab.label}</span>
-                    </button>
-                ))}
+            <div className={`px-4 md:px-6 pt-4 border-b ${theme.canvas.border} relative`}>
+                <div
+                    className="flex space-x-3 md:space-x-6 overflow-x-auto scrollbar-hide"
+                    style={isMobile ? {
+                        maskImage: 'linear-gradient(to right, transparent, black 8%, black 88%, transparent)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 88%, transparent)',
+                    } : {}}
+                >
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`pb-4 flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
+                                ? `border-[var(--primary)] ${theme.text.primary}`
+                                : `border-transparent ${theme.text.secondary} hover:${theme.text.primary}`
+                                }`}
+                        >
+                            <tab.icon size={14} />
+                            <span className="whitespace-nowrap">{isMobile ? tab.label.split(' ')[0] : tab.label}</span>
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Content */}

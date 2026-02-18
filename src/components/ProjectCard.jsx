@@ -106,18 +106,21 @@ const ProjectCard = ({ project, onRefresh }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             whileHover={{ y: expanded ? 0 : -4, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)" }}
+            whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            onClick={() => setExpanded(!expanded)}
             className={clsx(
-                "relative border rounded-2xl overflow-hidden transition-colors duration-300 flex flex-col cursor-pointer",
+                "relative border rounded-2xl overflow-hidden transition-colors duration-300 flex flex-col",
                 expanded ? `${theme.canvas.card} border-${theme.accent?.primary || 'zinc-500'} shadow-2xl z-10` : `${theme.canvas.card} ${theme.canvas.border} hover:border-${theme.accent?.primary || 'zinc-500'}`
             )}
         >
             {/* Decorative Gradient Blob */}
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-red-500/10 blur-3xl rounded-full pointer-events-none" />
 
-            {/* --- CARD HEADER (Always Visible) --- */}
-            <div className="p-6 pb-2">
+            {/* --- CARD HEADER (Navigation Zone) --- */}
+            <div
+                className="p-6 pb-2 cursor-pointer group/header"
+                onClick={() => navigate(`/projects/${project._id}`)}
+            >
                 <div className="flex justify-between items-start mb-4">
                     <span className={`font-mono text-[10px] ${theme.text.secondary} tracking-widest uppercase ${theme.canvas.bg} px-2 py-1 rounded border ${theme.canvas.border}`}>
                         {project.code}
@@ -192,9 +195,12 @@ const ProjectCard = ({ project, onRefresh }) => {
                 )}
             </div>
 
-            {/* --- PREVIEW FOOTER (Visible when Collapsed) --- */}
+            {/* --- PREVIEW FOOTER (Expansion Zone) --- */}
             {!expanded && (
-                <div className={`px-6 py-4 mt-auto border-t ${theme.canvas.border} flex items-center justify-between text-xs ${theme.text.secondary}`}>
+                <div
+                    onClick={() => setExpanded(true)}
+                    className={`px-6 py-4 mt-auto border-t ${theme.canvas.border} flex items-center justify-between text-xs ${theme.text.secondary} cursor-pointer group/footer hover:${theme.canvas.hover} transition-colors`}
+                >
                     <div className="flex items-center gap-2 flex-wrap">
                         {/* Vertical-specific badges */}
                         {project.vertical === 'knots' && project.metadata?.side && (

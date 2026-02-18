@@ -1,9 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 
 const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
     const { theme } = useTheme();
+    const isMobile = useIsMobile();
+
     const sizeClasses = {
         sm: 'max-w-sm',
         md: 'max-w-lg',
@@ -11,10 +14,26 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
         xl: 'max-w-4xl'
     };
 
+    // Mobile: bottom sheet slide-up
+    const mobileAnimation = {
+        initial: { opacity: 0, y: '100%' },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: '100%' },
+    };
+
+    // Desktop: center scale-in
+    const desktopAnimation = {
+        initial: { opacity: 0, scale: 0.95, y: 20 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.95, y: 20 },
+    };
+
+    const animation = isMobile ? mobileAnimation : desktopAnimation;
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className={`fixed inset-0 z-50 flex ${isMobile ? 'items-end' : 'items-center justify-center p-4'}`}>
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -26,12 +45,19 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
 
                     {/* Modal Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ duration: 0.2 }}
-                        className={`relative w-full ${sizeClasses[size]} ${theme.canvas.card} border ${theme.canvas.border} rounded-2xl shadow-2xl overflow-hidden`}
+                        initial={animation.initial}
+                        animate={animation.animate}
+                        exit={animation.exit}
+                        transition={{ duration: 0.2, type: isMobile ? 'spring' : 'tween', damping: isMobile ? 30 : undefined, stiffness: isMobile ? 300 : undefined }}
+                        className={`relative w-full ${isMobile ? '' : sizeClasses[size]} ${theme.canvas.card} border ${theme.canvas.border} ${isMobile ? 'rounded-t-2xl' : 'rounded-2xl'} shadow-2xl overflow-hidden`}
                     >
+                        {/* Mobile drag handle */}
+                        {isMobile && (
+                            <div className="flex justify-center pt-3 pb-1">
+                                <div className={`w-10 h-1 rounded-full ${theme.canvas.border} bg-current opacity-30`} />
+                            </div>
+                        )}
+
                         {/* Header */}
                         <div className={`flex items-center justify-between px-6 py-4 border-b ${theme.canvas.border}`}>
                             <h3 className={`text-lg font-bold ${theme.text.primary}`}>{title}</h3>
@@ -44,7 +70,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
                         </div>
 
                         {/* Body */}
-                        <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        <div className={`p-6 ${isMobile ? 'max-h-[75vh] pb-8' : 'max-h-[70vh]'} overflow-y-auto custom-scrollbar`}>
                             {children}
                         </div>
                     </motion.div>

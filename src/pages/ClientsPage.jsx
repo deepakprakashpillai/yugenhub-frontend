@@ -17,50 +17,50 @@ const ClientCard = ({ client, theme }) => (
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-6 hover:${theme.canvas.hover} transition-colors group`}
+        whileTap={{ scale: 0.98 }}
+        className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-4 hover:${theme.canvas.hover} transition-colors group`}
     >
-        <div className="flex justify-between items-start mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+        <div className="flex justify-between items-start mb-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">
                 {client.name.charAt(0)}
             </div>
-            <span className={`text-xs px-2 py-1 rounded-full border ${client.type === 'Active Client' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${client.type === 'Active Client' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                 client.type === 'Lead' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                     `${theme.canvas.bg} ${theme.text.secondary} border ${theme.canvas.border}`
                 }`}>
                 {client.type}
             </span>
         </div>
-        <h3 className={`text-xl font-bold ${theme.text.primary} mb-1 group-hover:text-blue-400 transition-colors`}>{client.name}</h3>
-        <div className={`space-y-2 mt-4 text-sm ${theme.text.secondary}`}>
+        <h3 className={`text-lg font-bold ${theme.text.primary} mb-0.5 group-hover:text-blue-400 transition-colors`}>{client.name}</h3>
+        <div className={`space-y-1 mt-2 text-xs ${theme.text.secondary}`}>
             <div className="flex items-center gap-2">
-                <Icons.Phone className="w-4 h-4" />
-                {client.phone}
+                <Icons.Phone className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{client.phone}</span>
             </div>
             {client.email && (
                 <div className="flex items-center gap-2">
-                    <Icons.Mail className="w-4 h-4" />
-                    {client.email}
+                    <Icons.Mail className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{client.email}</span>
                 </div>
             )}
             {client.location && (
                 <div className="flex items-center gap-2">
-                    <Icons.MapPin className="w-4 h-4" />
-                    {client.location}
+                    <Icons.MapPin className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{client.location}</span>
                 </div>
             )}
         </div>
-        <div className={`mt-6 pt-4 border-t ${theme.canvas.border} flex justify-between items-center gap-2`}>
-            <div className="flex gap-2">
-                <a href={`tel:${client.phone}`} className={`p-2 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.text.primary} hover:${theme.canvas.hover} transition-colors`} title="Call">
-                    <Icons.Phone className="w-4 h-4" />
+        <div className={`mt-3 pt-3 border-t ${theme.canvas.border} flex justify-between items-center gap-2`}>
+            <div className="flex gap-1.5">
+                <a href={`tel:${client.phone}`} className={`p-1.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.text.primary} hover:${theme.canvas.hover} transition-colors`} title="Call">
+                    <Icons.Phone className="w-3.5 h-3.5" />
                 </a>
-                <a href={`https://wa.me/${client.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={`p-2 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-green-900/30 hover:text-green-500 transition-colors`} title="WhatsApp">
-                    <Icons.WhatsApp className="w-4 h-4" />
+                <a href={`https://wa.me/${client.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={`p-1.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-green-900/30 hover:text-green-500 transition-colors`} title="WhatsApp">
+                    <Icons.WhatsApp className="w-3.5 h-3.5" />
                 </a>
             </div>
             <div className="text-right">
-                <div className={`text-xs ${theme.text.secondary}`}>Joined {new Date(client.created_at).toLocaleDateString()}</div>
-                <div className={`text-xs font-mono ${theme.text.secondary}`}>{client.total_projects} Projects</div>
+                <div className={`text-[10px] font-mono ${theme.text.secondary}`}>{client.total_projects} Projects</div>
             </div>
         </div>
     </motion.div>
@@ -209,7 +209,7 @@ const ClientsPage = () => {
     };
 
     return (
-        <div className="p-8 pb-20 max-w-[1600px] mx-auto min-h-screen relative">
+        <div className="p-4 md:p-8 pb-20 max-w-[1600px] mx-auto min-h-screen relative">
             {/* Opaque Overlay for closing dropdowns - High Z-Index Logic */}
             {activeDropdown && (
                 <div
@@ -220,7 +220,7 @@ const ClientsPage = () => {
 
 
 
-            <h1 className={`text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter`}>Clients</h1>
+            <h1 className={`text-2xl md:text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter`}>Clients</h1>
 
             <StatsHeader type="clients" />
 
@@ -298,8 +298,8 @@ const ClientsPage = () => {
                         )}
                     </div>
 
-                    {/* View Toggle */}
-                    <div className={`flex ${theme.canvas.card} border ${theme.canvas.border} rounded-lg p-1 ml-auto xl:ml-0`}>
+                    {/* View Toggle - hidden on mobile */}
+                    <div className={`hidden md:flex ${theme.canvas.card} border ${theme.canvas.border} rounded-lg p-1 ml-auto xl:ml-0`}>
                         <button
                             onClick={() => setViewMode('grid')}
                             className={clsx(

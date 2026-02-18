@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -8,7 +8,7 @@ import api from '../api/axios';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Icons } from '../components/Icons';
 import clsx from 'clsx';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { Wallet } from 'lucide-react';
 
@@ -286,37 +286,223 @@ const VerticalTemplate = ({ project }) => {
 };
 
 // Task Item Component (for Deliverables display)
-const TaskItem = ({ task, onEdit, onDelete }) => {
+const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
     const { theme } = useTheme();
+    const [showPriorityMenu, setShowPriorityMenu] = useState(false);
+    const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
+    const [isEditingDate, setIsEditingDate] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const priorityRef = useRef(null);
+    const assigneeRef = useRef(null);
+    const dateRef = useRef(null);
+
+    // Close menus on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (priorityRef.current && !priorityRef.current.contains(event.target)) setShowPriorityMenu(false);
+            if (assigneeRef.current && !assigneeRef.current.contains(event.target)) setShowAssigneeMenu(false);
+            if (dateRef.current && !dateRef.current.contains(event.target)) setIsEditingDate(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const priorityIcons = {
+        low: <Icons.ArrowDown className="w-3 h-3 text-blue-400" />,
+        medium: <Icons.Minus className="w-3 h-3 text-yellow-400" />,
+        high: <Icons.ArrowUp className="w-3 h-3 text-orange-400" />,
+        urgent: <Icons.AlertTriangle className="w-3 h-3 text-red-500" />,
+    };
+
     const formatDate = (dateStr) => {
-        if (!dateStr) return 'No Due Date';
+        if (!dateStr) return 'No Date';
         return new Date(dateStr).toLocaleDateString('en-IN', {
-            day: 'numeric', month: 'short', year: 'numeric'
+            day: 'numeric', month: 'short'
         });
     };
 
+    const assignedUser = users.find(u => u.id === task.assigned_to);
+    const filteredUsers = users.filter(u =>
+        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handlePriorityChange = (priority) => {
+        onUpdate(task.id, { priority });
+        setShowPriorityMenu(false);
+    };
+
+    const handleAssigneeChange = (userId) => {
+        onUpdate(task.id, { assigned_to: userId });
+        setShowAssigneeMenu(false);
+    };
+
+    const handleDateChange = (e) => {
+        onUpdate(task.id, { due_date: e.target.value });
+        setIsEditingDate(false);
+    };
+
     return (
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group`}>
-            <div className="flex items-start gap-3">
-                <div className={`w-8 h-8 rounded-lg ${theme.canvas.card} flex items-center justify-center`}>
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group relative`}>
+            <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className={`w-8 h-8 rounded-lg ${theme.canvas.card} flex items-center justify-center flex-shrink-0`}>
                     <Icons.Package className={`w-4 h-4 ${theme.text.secondary}`} />
                 </div>
-                <div>
-                    <h5 className={`${theme.text.primary} font-medium`}>{task.title}</h5>
-                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1`}>
-                        {task.quantity && <span>Qty: {task.quantity}</span>}
-                        {task.quantity && <span>•</span>}
-                        <span className="flex items-center gap-1">
-                            <Icons.Calendar className="w-3 h-3" />
-                            {formatDate(task.due_date)}
-                        </span>
+                <div className="min-w-0 flex-1">
+                    <h5 className={`${theme.text.primary} font-medium truncate`}>{task.title}</h5>
+                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5 flex-wrap`}>
+
+                        {/* Inline Priority Marker */}
+                        <div className="relative" ref={priorityRef}>
+                            <button
+                                onClick={() => setShowPriorityMenu(!showPriorityMenu)}
+                                title={`Priority: ${task.priority}`}
+                                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} hover:border-zinc-500 transition-all`}
+                            >
+                                {priorityIcons[task.priority] || <Icons.Minus className="w-3 h-3" />}
+                                <span className="capitalize">{task.priority}</span>
+                            </button>
+
+                            <AnimatePresence>
+                                {showPriorityMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className={`absolute bottom-full left-0 mb-2 w-32 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-xl bg-opacity-95`}
+                                    >
+                                        {Object.keys(priorityIcons).map((p) => (
+                                            <button
+                                                key={p}
+                                                onClick={() => handlePriorityChange(p)}
+                                                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:${theme.canvas.hover} transition-colors capitalize`}
+                                            >
+                                                {priorityIcons[p]}
+                                                {p}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Inline Assignee Marker */}
+                        <div className="relative" ref={assigneeRef}>
+                            <button
+                                onClick={() => {
+                                    setShowAssigneeMenu(!showAssigneeMenu);
+                                    setSearchQuery('');
+                                }}
+                                title={assignedUser ? `Assigned to: ${assignedUser.name}` : "Unassigned"}
+                                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} hover:border-zinc-500 transition-all`}
+                            >
+                                {assignedUser ? (
+                                    <>
+                                        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">
+                                            {assignedUser.name.charAt(0)}
+                                        </div>
+                                        <span className="max-w-[100px] truncate">{assignedUser.name}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Icons.UserPlus className="w-3 h-3" />
+                                        <span>Assign</span>
+                                    </>
+                                )}
+                            </button>
+
+                            <AnimatePresence>
+                                {showAssigneeMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className={`absolute bottom-full left-0 mb-2 w-64 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden backdrop-blur-xl bg-opacity-95`}
+                                    >
+                                        <div className={`p-2 border-b ${theme.canvas.border}`}>
+                                            <input
+                                                autoFocus
+                                                type="text"
+                                                placeholder="Search members..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className={`w-full bg-transparent px-2 py-1 text-sm border-none focus:outline-none ${theme.text.primary}`}
+                                            />
+                                        </div>
+                                        <div className="max-h-48 overflow-y-auto">
+                                            <button
+                                                onClick={() => handleAssigneeChange(null)}
+                                                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:${theme.canvas.hover} transition-colors text-zinc-500`}
+                                            >
+                                                <Icons.UserMinus className="w-3 h-3" />
+                                                Unassign
+                                            </button>
+                                            {filteredUsers.map((user) => (
+                                                <button
+                                                    key={user.id}
+                                                    onClick={() => handleAssigneeChange(user.id)}
+                                                    className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:${theme.canvas.hover} transition-colors`}
+                                                >
+                                                    <div className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold">
+                                                        {user.name.charAt(0)}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className={`text-sm font-medium ${theme.text.primary} truncate`}>{user.name}</p>
+                                                        <p className={`text-[10px] ${theme.text.secondary} truncate`}>{user.role}</p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Inline Due Date Marker */}
+                        <div className="relative" ref={dateRef}>
+                            <button
+                                onClick={() => setIsEditingDate(!isEditingDate)}
+                                className={clsx(
+                                    "flex items-center gap-1.5 px-2 py-0.5 rounded-md border transition-all",
+                                    task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done'
+                                        ? "bg-red-500/10 border-red-500/30 text-red-400 font-medium"
+                                        : `${theme.canvas.card} ${theme.canvas.border} hover:border-zinc-500`
+                                )}
+                            >
+                                <Icons.Calendar className="w-3 h-3" />
+                                {formatDate(task.due_date)}
+                            </button>
+
+                            <AnimatePresence>
+                                {isEditingDate && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className={`absolute bottom-full left-0 mb-2 p-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] backdrop-blur-xl bg-opacity-95`}
+                                    >
+                                        <input
+                                            autoFocus
+                                            type="date"
+                                            value={task.due_date ? task.due_date.split('T')[0] : ''}
+                                            onChange={handleDateChange}
+                                            className={`bg-transparent text-sm border-none focus:outline-none ${theme.text.primary} [color-scheme:dark]`}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {task.quantity && (
+                            <span className={`px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary}`}>
+                                Qty: {task.quantity}
+                            </span>
+                        )}
                     </div>
-                    {task.description && (
-                        <p className={`${theme.text.secondary} text-xs mt-2 italic`}>"{task.description}"</p>
-                    )}
                 </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                 <StatusBadge status={task.status} />
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -388,9 +574,11 @@ const EventSection = ({
     onAddDeliverable, // Opens TaskModal with eventId
     onEditDeliverable, // Opens TaskModal with task
     onDeleteDeliverable,
+    onUpdateTask, // NEW: Inline update handler
     onAddTeamMember,
     onEditTeamMember,
-    onDeleteTeamMember
+    onDeleteTeamMember,
+    users // Added users prop
 }) => {
     const { theme } = useTheme();
     const formatDate = (dateStr) => {
@@ -532,8 +720,10 @@ const EventSection = ({
                                             <TaskItem
                                                 key={task.id}
                                                 task={task}
+                                                users={users}
                                                 onEdit={() => onEditDeliverable(task)}
                                                 onDelete={() => onDeleteDeliverable(task)}
+                                                onUpdate={onUpdateTask}
                                             />
                                         ))}
                                     </div>
@@ -628,8 +818,6 @@ const ProjectPage = () => {
         { id: 'overview', label: 'Overview', icon: Icons.LayoutDashboard },
         { id: 'tasks', label: 'Tasks', icon: Icons.ListTodo },
         { id: 'finance', label: 'Finance', icon: Icons.CircleDollarSign },
-        { id: 'invoices', label: 'Quotes & Invoices', icon: Icons.FileText }, // Renamed from Invoices
-        { id: 'settings', label: 'Settings', icon: Icons.Settings },
     ];
 
     const tabs = allTabs.filter(tab => {
@@ -736,6 +924,19 @@ const ProjectPage = () => {
             toast.error('Failed to save');
         } finally {
             setActionLoading(false);
+        }
+    };
+
+    const handleUpdateTaskInline = async (taskId, updates) => {
+        try {
+            await api.patch(`/tasks/${taskId}`, updates);
+            // Refresh tasks
+            const res = await api.get(`/tasks?project_id=${id}&context=project_page`);
+            setTasks(res.data.data || []);
+            toast.success('Task updated');
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to update task');
         }
     };
 
@@ -881,7 +1082,7 @@ const ProjectPage = () => {
 
     if (loading) {
         return (
-            <div className="p-8 max-w-[1400px] mx-auto space-y-8">
+            <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-8">
                 <div className="flex justify-between items-center">
                     <Skeleton className="h-10 w-32" />
                     <div className="flex gap-4">
@@ -905,7 +1106,7 @@ const ProjectPage = () => {
 
     if (error) {
         return (
-            <div className="p-8 max-w-[1400px] mx-auto">
+            <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
                 <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} mb-8 transition-colors`}>
                     <Icons.ArrowLeft className="w-5 h-5" /> Back
                 </button>
@@ -927,7 +1128,7 @@ const ProjectPage = () => {
     const generalTasks = tasks.filter(t => t.category !== 'deliverable');
 
     return (
-        <div className="p-8 pb-20 max-w-[1400px] mx-auto">
+        <div className="p-4 md:p-8 pb-20 max-w-[1400px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
@@ -1098,6 +1299,8 @@ const ProjectPage = () => {
                                 onToggle={() => toggleEvent(index)}
                                 onEditEvent={() => setEventModal({ open: true, event, eventId: event.id })}
                                 onDeleteEvent={() => setDeleteEventModal({ open: true, event })}
+                                users={users}
+                                onUpdateTask={handleUpdateTaskInline}
 
                                 // NEW: Pass Tasks linked to this Event
                                 eventTasks={tasks.filter(t => t.event_id === event.id)}

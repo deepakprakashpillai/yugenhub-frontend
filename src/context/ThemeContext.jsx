@@ -37,6 +37,18 @@ export const ThemeProvider = ({ children }) => {
         }
     }, [config]);
 
+    // Apply 'dark' class to html element
+    useEffect(() => {
+        const root = window.document.documentElement;
+        console.log('ThemeContext: Setting theme mode to', themeMode); // DEBUG
+        root.classList.remove('light', 'dark');
+        root.classList.add(themeMode);
+
+        // Also ensure body has it, just in case cmdk portals there and needs inheritance
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(themeMode);
+    }, [themeMode]);
+
     // Construct the active theme object
     const theme = useMemo(() => {
         const baseTheme = THEME_VARIANTS[themeMode === 'light' ? 'light' : 'dark'];

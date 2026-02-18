@@ -53,7 +53,13 @@ import {
     Zap,
     ArrowUpRight,
     LayoutTemplate,
-    Download
+    Download,
+    UserMinus,
+    LayoutDashboard,
+    ListTodo,
+    CircleDollarSign,
+    Settings,
+    Menu
 } from 'lucide-react';
 
 export const Icons = {
@@ -99,6 +105,11 @@ export const Icons = {
     Layers,
     Play,
     Check,
+    UserMinus,
+    LayoutDashboard,
+    ListTodo,
+    CircleDollarSign,
+    Settings,
     WhatsApp: (props) => (
         <svg
             viewBox="0 0 24 24"
@@ -126,5 +137,6 @@ export const Icons = {
     Zap,
     ArrowUpRight,
     LayoutTemplate,
-    Download
+    Download,
+    Menu
 };

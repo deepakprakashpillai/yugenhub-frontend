@@ -11,15 +11,17 @@ import {
   Code,
   Bell,
   Calendar,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AGENCY_CONFIG } from '../config';
 import { useAuth } from '../context/AuthContext';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useTheme } from '../context/ThemeContext';
 import { ROLES } from '../constants';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose, isMobile }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, notificationCount } = useAuth();
@@ -39,6 +41,13 @@ export default function Sidebar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Close sidebar on route change (mobile only)
+  useEffect(() => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  }, [currentPath]);
 
   const handleLogout = () => {
     logout();
@@ -106,16 +115,25 @@ export default function Sidebar() {
     </div>
   );
 
-  return (
-    <aside className={`w-64 border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen sticky top-0 ${theme.canvas?.sidebar || "bg-black"}`}>
+  const sidebarContent = (
+    <aside className={`w-64 border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen ${isMobile ? '' : 'sticky top-0'} ${theme.canvas?.sidebar || "bg-black"}`}>
 
-      <div className="p-6 pb-4">
+      <div className="p-6 pb-4 flex items-center justify-between">
         <h1 className={(theme.text?.heading || "") + ` ${theme.text.primary}`}>
           {currentConfig.brand?.name || AGENCY_CONFIG?.brand?.name}
           <span style={{ color: theme.accents?.default?.primary }}>
             {currentConfig.brand?.suffix || AGENCY_CONFIG?.brand?.suffix}
           </span>
         </h1>
+        {isMobile && (
+          <button
+            onClick={onClose}
+            className={`p-2 rounded-xl ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
+            aria-label="Close navigation menu"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-4 overflow-y-auto scrollbar-hide">
@@ -223,5 +241,39 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+  );
+
+  // Desktop: render sidebar inline
+  if (!isMobile) {
+    return sidebarContent;
+  }
+
+  // Mobile: render as overlay drawer
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            onClick={onClose}
+          />
+          {/* Drawer */}
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed left-0 top-0 h-full z-[100]"
+          >
+            {sidebarContent}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

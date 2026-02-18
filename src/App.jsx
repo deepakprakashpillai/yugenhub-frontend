@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import MobileHeader from './components/MobileHeader';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AgencyConfigProvider, useAgencyConfig } from './context/AgencyConfigContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { useIsMobile } from './hooks/useMediaQuery';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import DashboardPage from './pages/DashboardPage';
@@ -24,6 +27,8 @@ import { Skeleton } from './components/ui/Skeleton';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Helper to get hex background based on current theme mode
   const getBgColor = () => {
@@ -34,9 +39,18 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) return (
     <div
-      className={`flex h-screen w-full`}
+      className={`flex flex-col md:flex-row h-screen w-full`}
       style={{ backgroundColor: getBgColor() }}
     >
+      {/* Mobile Header Skeleton */}
+      <div className={`md:hidden flex items-center justify-between h-14 px-4 border-b ${theme.canvas.sidebar} ${theme.canvas.border}`}>
+        <Skeleton className="h-5 w-5" />
+        <Skeleton className="h-4 w-20" />
+        <div className="flex gap-2">
+          <Skeleton className="h-5 w-5" />
+          <Skeleton className="h-5 w-5" />
+        </div>
+      </div>
       {/* Sidebar Skeleton */}
       <div className={`w-64 border-r ${theme.canvas.sidebar} ${theme.canvas.border} p-6 space-y-8 hidden md:block`}>
         <div className={`h-8 w-32 ${theme.canvas.card} rounded-lg animate-pulse`} />
@@ -47,16 +61,16 @@ const ProtectedRoute = ({ children }) => {
         </div>
       </div>
       {/* Content Skeleton */}
-      <div className="flex-1 p-8 space-y-6">
+      <div className="flex-1 p-4 md:p-8 space-y-6">
         <div className="flex justify-between">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-8 md:h-10 w-36 md:w-48" />
+          <Skeleton className="h-8 md:h-10 w-24 md:w-32" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-32 col-span-2" />
-          <Skeleton className="h-32" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <Skeleton className="h-24 md:h-32 md:col-span-2" />
+          <Skeleton className="h-24 md:h-32" />
         </div>
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-48 md:h-64 w-full" />
       </div>
     </div>
   );
@@ -66,12 +80,21 @@ const ProtectedRoute = ({ children }) => {
   return (
     <div className={`flex min-h-screen ${theme.canvas.bg} ${theme.text.primary}`}>
       <CommandPalette />
-      {/* 1. SIDEBAR: Always stays on the left */}
-      <Sidebar />
 
-      {/* 2. CONTENT AREA: Changes based on the URL */}
-      <main className="flex-1 h-screen overflow-y-auto">
-        {children}
+      {/* SIDEBAR: Desktop = inline, Mobile = overlay drawer */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isMobile={isMobile}
+      />
+
+      {/* CONTENT AREA */}
+      <main className="flex-1 h-screen overflow-y-auto flex flex-col">
+        {/* Mobile Header - only renders on mobile */}
+        <MobileHeader onMenuToggle={() => setSidebarOpen(true)} />
+        <div className="flex-1">
+          {children}
+        </div>
       </main>
     </div>
   );
@@ -158,13 +181,18 @@ function AppRoutes() {
   );
 }
 
+function ToasterWrapper() {
+  const isMobile = useIsMobile();
+  return <Toaster theme="system" position={isMobile ? "top-center" : "bottom-right"} richColors closeButton />;
+}
+
 function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <AgencyConfigProvider>
           <ThemeProvider>
-            <Toaster theme="system" position="bottom-right" richColors closeButton />
+            <ToasterWrapper />
             <AppRoutes />
           </ThemeProvider>
         </AgencyConfigProvider>

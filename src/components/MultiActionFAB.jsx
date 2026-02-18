@@ -9,7 +9,10 @@ const MultiActionFAB = ({ actions = [], mainLabel = 'Add', className }) => {
     const toggleOpen = () => setIsOpen(!isOpen);
 
     return (
-        <div className={clsx("fixed bottom-8 right-8 z-40 flex flex-col items-end gap-3", className)}>
+        <div
+            className={clsx("fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 flex flex-col items-end gap-3", className)}
+            style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
             <AnimatePresence>
                 {isOpen && (
                     <div className="flex flex-col gap-3 items-end mb-2">

@@ -21,6 +21,13 @@ export const AGENCY_CONFIG = {
   // COMMON DELIVERABLES
   deliverableTypes: ['Cinematic Film', 'Teaser', 'Traditional Video', 'Raw Photos', 'Edited Photos', 'Wedding Album'],
 
+  // ASSOCIATE ROLES
+  associateRoles: [
+    'Photographer', 'Cinematographer', 'Editor',
+    'Makeup Artist', 'DJ', 'Decorator',
+    'Coordinator', 'Assistant', 'Other'
+  ],
+
   verticals: [
     {
       id: 'knots',

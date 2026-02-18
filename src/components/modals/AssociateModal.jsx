@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = false }) => {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const isEditing = !!associate;
 
     const [formData, setFormData] = useState({
@@ -16,17 +18,7 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
         notes: ''
     });
 
-    const roleOptions = [
-        'Photographer',
-        'Cinematographer',
-        'Editor',
-        'Makeup Artist',
-        'DJ',
-        'Decorator',
-        'Coordinator',
-        'Assistant',
-        'Other'
-    ];
+    const roleOptions = config?.associateRoles || [];
 
     useEffect(() => {
         if (isOpen && associate) {

@@ -417,7 +417,8 @@ const ProjectSlideOver = ({
                                 </select>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-3">
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Name</label>
                                     <input
@@ -442,7 +443,8 @@ const ProjectSlideOver = ({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-3">
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label className={`block text-xs ${theme.text.secondary} mb-1`}>Bride Name</label>
                                     <input
@@ -465,9 +467,10 @@ const ProjectSlideOver = ({
                                         className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
                                     />
                                 </div>
-                            </div>
+                            </div >
 
-                            <div className="grid grid-cols-2 gap-3 mb-3">
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Age</label>
                                     <input
@@ -490,7 +493,7 @@ const ProjectSlideOver = ({
                                         className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
                                     />
                                 </div>
-                            </div>
+                            </div >
 
                             <div className="mb-3">
                                 <label className={`block text-xs ${theme.text.secondary} mb-1`}>Wedding Style</label>
@@ -504,7 +507,7 @@ const ProjectSlideOver = ({
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
                                     <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Location</label>
                                     <input
@@ -528,7 +531,7 @@ const ProjectSlideOver = ({
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </div >
                     )}
 
                     {/* Render Custom Fields defined in Config */}
@@ -545,7 +548,7 @@ const ProjectSlideOver = ({
                         Event Details
                     </h4>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
                             <label className={`block text-xs ${theme.text.secondary} mb-1`}>Child's Name</label>
                             <input
@@ -585,7 +588,7 @@ const ProjectSlideOver = ({
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
                             <label className={`block text-xs ${theme.text.secondary} mb-1`}>Mother's Name</label>
                             <input

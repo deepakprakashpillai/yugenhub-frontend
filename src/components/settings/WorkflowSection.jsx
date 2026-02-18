@@ -223,6 +223,13 @@ function WorkflowSection({ role }) {
                     onUpdate={(items) => setDraft({ ...draft, deliverable_types: items })}
                 />
 
+                <EditableTagList
+                    title="Associate Roles"
+                    items={(editing ? draft : workflow).associate_roles || []}
+                    editing={editing}
+                    onUpdate={(items) => setDraft({ ...draft, associate_roles: items })}
+                />
+
                 {editing && (
                     <div className="flex gap-3 pt-2">
                         <button onClick={handleSave} disabled={saving} className={`flex items-center gap-2 px-5 py-2.5 ${theme.text.inverse} bg-black dark:bg-white font-bold text-sm rounded-xl hover:opacity-90 transition-colors disabled:opacity-50`}>

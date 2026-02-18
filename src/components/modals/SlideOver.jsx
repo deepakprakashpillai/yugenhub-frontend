@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
 import { useTheme } from '../../context/ThemeContext';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 
 const SlideOver = ({
     isOpen,
@@ -12,6 +13,23 @@ const SlideOver = ({
     width = 'max-w-xl'
 }) => {
     const { theme } = useTheme();
+    const isMobile = useIsMobile();
+
+    // Mobile: full-screen bottom sheet
+    const mobileVariants = {
+        initial: { y: '100%' },
+        animate: { y: 0 },
+        exit: { y: '100%' },
+    };
+
+    // Desktop: slide from right
+    const desktopVariants = {
+        initial: { x: '100%' },
+        animate: { x: 0 },
+        exit: { x: '100%' },
+    };
+
+    const variants = isMobile ? mobileVariants : desktopVariants;
 
     return (
         <AnimatePresence>
@@ -29,18 +47,33 @@ const SlideOver = ({
 
                     {/* Slide-over Panel */}
                     <motion.div
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
+                        initial={variants.initial}
+                        animate={variants.animate}
+                        exit={variants.exit}
                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                        drag={isMobile ? 'y' : false}
+                        dragConstraints={{ top: 0 }}
+                        dragElastic={0.2}
+                        onDragEnd={(_, info) => {
+                            if (info.offset.y > 100) onClose();
+                        }}
                         className={clsx(
-                            `fixed right-0 top-0 h-full ${theme.canvas.card} border-l ${theme.canvas.border} z-50 flex flex-col`,
-                            width
+                            `fixed z-50 flex flex-col ${theme.canvas.card}`,
+                            isMobile
+                                ? `inset-x-0 bottom-0 top-0 rounded-t-2xl border-t ${theme.canvas.border}`
+                                : `right-0 top-0 h-full border-l ${theme.canvas.border} ${width}`
                         )}
-                        style={{ width: '100%' }}
+                        style={isMobile ? {} : { width: '100%' }}
                     >
+                        {/* Mobile drag handle */}
+                        {isMobile && (
+                            <div className="flex justify-center pt-3 pb-1 shrink-0">
+                                <div className={`w-10 h-1 rounded-full ${theme.canvas.border} bg-current opacity-30`} />
+                            </div>
+                        )}
+
                         {/* Header */}
-                        <div className={`flex items-center justify-between p-5 border-b ${theme.canvas.border} shrink-0`}>
+                        <div className={`flex items-center justify-between p-5 ${!isMobile ? `border-b ${theme.canvas.border}` : 'pb-3'} shrink-0`}>
                             <div>
                                 <h2 className={`text-xl font-bold ${theme.text.primary}`}>{title}</h2>
                                 {subtitle && (

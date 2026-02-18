@@ -120,81 +120,27 @@ const VerticalPage = ({ vertical, title }) => {
     const handleAddProject = async (projectData) => {
         setActionLoading(true);
         try {
-            // 1. Separate events from core project data
-            const { events, ...coreProjectData } = projectData;
-
-            // Generate Project Code (e.g., KNOTS-8392)
-            const projectCode = `${vertical.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-            const newProject = {
-                id: uuidv4(),
-                code: projectCode,
-                ...coreProjectData
-            };
-
-            // 2. Create Project
-            const projectRes = await api.post('/projects', newProject);
-            const projectId = projectRes.data?.data?._id || projectRes.data?._id || newProject.id; // Use returned ID if available
-
-            // 3. Create Events & Children
-            if (events && events.length > 0) {
-                await Promise.all(events.map(async (event) => {
-                    // Normalize Date/Time
-                    // Combine date and time if present
-                    let startDateTime = event.start_date;
-                    if (event.start_date && event.start_time) {
-                        startDateTime = `${event.start_date}T${event.start_time}:00`;
-                    } else if (event.start_date) {
-                        startDateTime = `${event.start_date}T00:00:00`;
-                    }
-
-                    let endDateTime = event.end_date;
-                    if (event.end_date && event.end_time) {
-                        endDateTime = `${event.end_date}T${event.end_time}:00`;
-                    } else if (event.end_date) {
-                        endDateTime = `${event.end_date}T00:00:00`;
-                    }
-
-                    // Create Event (Send deliverables IN payload)
-                    const { assignments, ...eventPayload } = event; // Keep deliverables in payload, strip assignments to handle separately if needed, or check backend support.
-                    // Backend add_event_to_project supports deliverables via EventModel -> TaskModel creation.
-                    // It does NOT seem to support inline assignments in EventModel based on project.py code reading?
-                    // Let's check EventModel definition? Assuming assignments need separate call.
-
-                    const eventRes = await api.post(`/projects/${projectId}/events`, {
-                        ...eventPayload,
-                        start_date: startDateTime,
-                        end_date: endDateTime,
-                        project_id: projectId
-                    });
-
-                    const eventId = eventRes.data?.data?._id || eventRes.data?._id;
-
-                    if (eventId) {
-                        // Deliverables are handled by backend when passed in event payload
-
-                        // Create Assignments (Backend requires separate call)
-                        if (assignments && assignments.length > 0) {
-                            await Promise.all(assignments.map(assign =>
-                                api.post(`/projects/${projectId}/events/${eventId}/assignments`, { ...assign, event_id: eventId })
-                            ));
-                        }
-                    }
-                }));
+            // 1. Validation: Ensure every event has a start date
+            const invalidEvents = (projectData.events || []).filter(e => !e.start_date);
+            if (invalidEvents.length > 0) {
+                toast.error(`Please provide a start date for all events (${invalidEvents.map(e => e.type).join(', ')})`);
+                return;
             }
 
-            setProjectSlideOver(false);
-            // Refresh projects list
-            setPage(1);
-            const response = await api.get('/projects', {
-                params: { vertical, limit: LIMIT, page: 1, search: debouncedSearch, status: filter, sort, view }
-            });
-            setProjects(response.data.data);
-            toast.success('Project created successfully!');
+            // 2. Send unified payload to backend (including events, deliverables, assignments)
+            const response = await api.post('/projects', projectData);
+
+            // The backend returns the created project including its generated ID and sequential code
+            const savedProject = response.data;
+
+            setProjects(prev => [savedProject, ...prev]);
+            toast.success(`Project ${savedProject.code} created successfully!`);
+            setShowAddSlideOver(false);
+            setRefreshTrigger(p => p + 1);
+
         } catch (err) {
             console.error('Failed to create project:', err);
-            console.error('Validation Error Details:', err.response?.data);
-            const errorMsg = err.response?.data?.detail?.[0]?.msg || err.response?.data?.detail || err.message || 'Unknown error';
+            const errorMsg = err.response?.data?.detail || err.message || 'Unknown error';
             toast.error(`Failed to create project: ${errorMsg}`);
         } finally {
             setActionLoading(false);
@@ -229,8 +175,8 @@ const VerticalPage = ({ vertical, title }) => {
 
 
     return (
-        <div className={`p-8 pb-20 max-w-[1600px] mx-auto ${theme.text.primary}`}>
-            <h1 className={`text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
+        <div className={`p-4 md:p-8 pb-20 max-w-[1600px] mx-auto ${theme.text.primary}`}>
+            <h1 className={`text-2xl md:text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
                 {title}
             </h1>
 

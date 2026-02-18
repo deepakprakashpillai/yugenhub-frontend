@@ -18,7 +18,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
     const { user: currentUser } = useAuth();
     const { config } = useAgencyConfig();
     const { theme } = useTheme();
-    const isDeliverable = !!eventId;
+    const isDeliverable = !!eventId || task?.category === 'deliverable' || !!task?.event_id;
 
     // Determine initial "isNew" state for title display logic
     const isNewTask = !task;
@@ -57,16 +57,18 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 due_date: task.due_date ? task.due_date.split('T')[0] : '',
                 comment: ''
             });
+
             // Try to deduce vertical/project from task if available
-            // Note: If task object has project info, we should use it. 
-            // Assuming task.project object or check backend response structure.
             if (task.project_id) {
                 setSelectedProjectId(task.project_id);
-                // If we knew the vertical, we'd set it here. 
-                // For now, if we don't know, maybe we default to general or try to fetch project details?
-                // Ideally task should have project: { vertical: '...' }
-                if (task.project && task.project.vertical) {
-                    setSelectedVertical(task.project.vertical);
+                // If the task has a project_vertical (added by backend lookup or provided in task object)
+                if (task.project_vertical) {
+                    setSelectedVertical(task.project_vertical);
+                } else if (task.category === 'deliverable') {
+                    // Safety: deliverables always have a project, but we might not have the vertical string yet
+                    // We'll let the user change it if needed, but we don't reset to 'general'
+                } else if (task.type === 'project') {
+                    // For project-linked general tasks, we should try to stay in that project context
                 }
             } else {
                 setSelectedProjectId('');
@@ -165,17 +167,17 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
             ...formData,
             due_date: formData.due_date || null,
             assigned_to: formData.assigned_to || null,
-            category: isDeliverable ? 'deliverable' : (selectedProjectId ? 'general' : 'general'), // Keep general category but add project linkage
-            type: selectedProjectId ? 'project' : 'internal', // Update type based on project selection
-            project_id: selectedProjectId || projectId,
+            // PRESERVE category if it was a deliverable
+            category: isDeliverable ? 'deliverable' : 'general',
+            // PRESERVE type logic
+            type: (isDeliverable || selectedProjectId) ? 'project' : 'internal',
+            project_id: selectedProjectId || projectId || task?.project_id,
+            event_id: eventId || task?.event_id
         };
-
-        if (isDeliverable) {
-            payload.event_id = eventId;
-        }
 
         onSave(payload);
     };
+
 
 
     // --- OPTIONS CONFIG ---
@@ -254,21 +256,21 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                             onChange={(val) => handleSelectChange('status', val)}
                             options={statusOptions}
                             placeholder="Status"
-                            className="w-36"
+                            className="w-full md:w-36"
                         />
                         <Select
                             value={formData.priority}
                             onChange={(val) => handleSelectChange('priority', val)}
                             options={priorityOptions}
                             placeholder="Priority"
-                            className="w-32"
+                            className="w-full md:w-32"
                         />
                         <Select
                             value={formData.assigned_to}
                             onChange={(val) => handleSelectChange('assigned_to', val)}
                             options={assigneeOptions}
                             placeholder="Assignee"
-                            className="w-40"
+                            className="w-full md:w-40"
                         />
 
                         {/* Vertical Selection */}
@@ -288,7 +290,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                                 })) || [])
                             ]}
                             placeholder="Type"
-                            className="w-40"
+                            className="w-full md:w-40"
                         />
 
                         {/* Project Selection (Conditional) */}
@@ -303,7 +305,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                                     color: theme.text.primary
                                 }))}
                                 placeholder={projectsLoading ? "Loading..." : "Select Project"}
-                                className="w-48"
+                                className="w-full md:w-48"
                                 disabled={projectsLoading}
                             />
                         )}

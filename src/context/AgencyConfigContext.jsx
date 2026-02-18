@@ -39,6 +39,7 @@ export const AgencyConfigProvider = ({ children }) => {
                 statusOptions: workflowRes.data.status_options || FALLBACK_CONFIG.statusOptions,
                 leadSources: workflowRes.data.lead_sources || FALLBACK_CONFIG.leadSources,
                 deliverableTypes: workflowRes.data.deliverable_types || FALLBACK_CONFIG.deliverableTypes,
+                associateRoles: workflowRes.data.associate_roles || FALLBACK_CONFIG.associateRoles || [],
                 verticals: verticalsRes.data.verticals || FALLBACK_CONFIG.verticals,
                 finance_categories: financeRes.data.categories || FALLBACK_CONFIG.finance_categories || [],
             });

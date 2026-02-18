@@ -86,19 +86,19 @@ const NotificationsPage = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <div className="p-8 max-w-[800px] mx-auto min-h-screen">
+        <div className="p-4 md:p-8 max-w-[800px] mx-auto min-h-screen">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className={`p-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-colors`}
+                        className={`p-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-colors hidden md:block`}
                     >
                         <ArrowLeft size={16} className={theme.text.secondary} />
                     </button>
                     <div>
-                        <h1 className={`text-3xl font-black ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
-                            <Bell size={24} />
+                        <h1 className={`text-2xl md:text-3xl font-black ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
+                            <Bell size={20} />
                             Notifications
                         </h1>
                         <p className={`${theme.text.secondary} text-sm mt-1`}>
@@ -109,7 +109,7 @@ const NotificationsPage = () => {
                 {unreadCount > 0 && (
                     <button
                         onClick={handleMarkAllRead}
-                        className={`px-4 py-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} text-xs font-bold ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors flex items-center gap-2`}
+                        className={`px-4 py-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} text-xs font-bold ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors flex items-center gap-2 self-start sm:self-auto`}
                     >
                         <CheckCircle size={14} />
                         Mark all as read

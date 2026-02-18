@@ -59,7 +59,7 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Email</label>
                         <input
