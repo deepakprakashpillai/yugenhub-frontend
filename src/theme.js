@@ -77,7 +77,7 @@ export const THEME_VARIANTS = {
       card: "bg-zinc-950",
       border: "border-zinc-900",
       hover: "hover:bg-zinc-900/50",
-      active: "bg-white text-black",
+      active: "bg-accent text-white",
       inactive: "text-zinc-500",
     },
     text: {
@@ -96,7 +96,7 @@ export const THEME_VARIANTS = {
       card: "bg-white/90 backdrop-blur-sm border border-[#e9d5ff] shadow-sm", // Glassy with Purple-200 border
       border: "border-[#e9d5ff]", // Purple-200
       hover: "hover:bg-[#fae8ff]", // Fuchsia-100
-      active: "bg-[#a78bfa] text-white", // Violet-400
+      active: "bg-accent text-white", // Accent
       inactive: "text-[#94a3b8]", // Slate-400
     },
     text: {

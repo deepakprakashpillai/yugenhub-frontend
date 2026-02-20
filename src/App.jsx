@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import MobileHeader from './components/MobileHeader';
@@ -8,19 +8,18 @@ import { AgencyConfigProvider, useAgencyConfig } from './context/AgencyConfigCon
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useIsMobile } from './hooks/useMediaQuery';
 import { Toaster } from 'sonner';
-import Login from './pages/Login';
-import DashboardPage from './pages/DashboardPage';
-import DevLoginPage from './pages/DevLoginPage';
-import VerticalPage from './pages/VerticalPage';
-import ClientsPage from './pages/ClientsPage';
-import AssociatesPage from './pages/AssociatesPage';
-import ProjectPage from './pages/ProjectPage';
-import TasksPage from './pages/TasksPage';
-import NotificationsPage from './pages/NotificationsPage';
-import CalendarPage from './pages/CalendarPage';
-import SettingsPage from './pages/SettingsPage';
-import FinancePage from './pages/FinancePage';
-
+const Login = lazy(() => import('./pages/Login'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const DevLoginPage = lazy(() => import('./pages/DevLoginPage'));
+const VerticalPage = lazy(() => import('./pages/VerticalPage'));
+const ClientsPage = lazy(() => import('./pages/ClientsPage'));
+const AssociatesPage = lazy(() => import('./pages/AssociatesPage'));
+const ProjectPage = lazy(() => import('./pages/ProjectPage'));
+const TasksPage = lazy(() => import('./pages/TasksPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const FinancePage = lazy(() => import('./pages/FinancePage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
 
@@ -104,80 +103,86 @@ function AppRoutes() {
   const { config } = useAgencyConfig();
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/dev-login" element={<DevLoginPage />} />
+    <Suspense fallback={
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    }>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/dev-login" element={<DevLoginPage />} />
 
-      <Route path="/" element={
-        <ProtectedRoute>
-          <DashboardPage />
-        </ProtectedRoute>
-      } />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        } />
 
-      {/* Verticals - Dynamic Routing */}
-      {config?.verticals?.map(vertical => (
-        <Route
-          key={vertical.id}
-          path={`/${vertical.id}`}
-          element={
-            <ProtectedRoute>
-              <VerticalPage
-                vertical={vertical.id}
-                title={vertical.label}
-              />
-            </ProtectedRoute>
-          }
-        />
-      ))}
+        {/* Verticals - Dynamic Routing */}
+        {config?.verticals?.map(vertical => (
+          <Route
+            key={vertical.id}
+            path={`/${vertical.id}`}
+            element={
+              <ProtectedRoute>
+                <VerticalPage
+                  vertical={vertical.id}
+                  title={vertical.label}
+                />
+              </ProtectedRoute>
+            }
+          />
+        ))}
 
-      {/* Operations (Placeholders for now) */}
-      <Route path="/tasks" element={
-        <ProtectedRoute>
-          <TasksPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/calendar" element={
-        <ProtectedRoute>
-          <CalendarPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/notifications" element={
-        <ProtectedRoute>
-          <NotificationsPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/finance" element={
-        <ProtectedRoute>
-          <FinancePage />
-        </ProtectedRoute>
-      } />
+        {/* Operations */}
+        <Route path="/tasks" element={
+          <ProtectedRoute>
+            <TasksPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/calendar" element={
+          <ProtectedRoute>
+            <CalendarPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/finance" element={
+          <ProtectedRoute>
+            <FinancePage />
+          </ProtectedRoute>
+        } />
 
-      {/* Management (Placeholders for now) */}
-      <Route path="/clients" element={
-        <ProtectedRoute>
-          <ClientsPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/associates" element={
-        <ProtectedRoute>
-          <AssociatesPage />
-        </ProtectedRoute>
-      } />
+        {/* Management */}
+        <Route path="/clients" element={
+          <ProtectedRoute>
+            <ClientsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/associates" element={
+          <ProtectedRoute>
+            <AssociatesPage />
+          </ProtectedRoute>
+        } />
 
-      {/* Project Details */}
-      <Route path="/projects/:id" element={
-        <ProtectedRoute>
-          <ProjectPage />
-        </ProtectedRoute>
-      } />
+        {/* Project Details */}
+        <Route path="/projects/:id" element={
+          <ProtectedRoute>
+            <ProjectPage />
+          </ProtectedRoute>
+        } />
 
-      {/* Settings */}
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <SettingsPage />
-        </ProtectedRoute>
-      } />
-    </Routes>
+        {/* Settings */}
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </Suspense>
   );
 }
 

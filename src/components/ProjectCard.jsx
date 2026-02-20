@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { Icons } from './Icons';
@@ -36,7 +37,7 @@ const ProjectCard = ({ project, onRefresh }) => {
         }
 
         setUpdating(true);
-        const originalStatus = project.status; // Optimistic rollback not implemented, but safer to just load
+
 
         try {
             await api.patch(`/projects/${project._id}`, { status: newStatusId });

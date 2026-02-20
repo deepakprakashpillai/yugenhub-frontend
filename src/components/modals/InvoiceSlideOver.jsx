@@ -77,8 +77,15 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
     useEffect(() => {
         if (isOpen) {
-            // Load Clients only initially
-            // ... (existing code) ...
+            const fetchClients = async () => {
+                try {
+                    const res = await getClients();
+                    setClients(Array.isArray(res) ? res : res.data || []);
+                } catch (err) {
+                    console.error("Failed to fetch clients", err);
+                }
+            };
+            if (clients.length === 0) fetchClients();
 
             const initializeForm = async () => {
                 if (initialData) {
@@ -130,7 +137,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
             };
             initializeForm();
         }
-    }, [isOpen]);
+    }, [isOpen, initialData, clients.length]);
 
     // Load Projects
     useEffect(() => {
@@ -161,6 +168,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 fetchNextNumber(docType, formData.project_id, project.code);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [docType]);
 
     const handleLineItemChange = (index, field, value) => {
@@ -408,10 +416,10 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                     <div className="space-y-3">
                         {formData.line_items.map((item, index) => (
                             <div key={index} className={`p-3 rounded-lg border ${theme.canvas.border} bg-gray-50/50`}>
-                                <div className="flex gap-2 items-center">
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center">
                                     {/* Description */}
-                                    <div className="flex-1">
-                                        {index === 0 && <label className="text-[10px] text-gray-500 mb-0.5 block">Description</label>}
+                                    <div className="flex-1 w-full">
+                                        <label className={`text-[10px] text-gray-500 mb-0.5 ${index === 0 ? 'block' : 'block sm:hidden'}`}>Description</label>
                                         <input
                                             type="text"
                                             placeholder={docType === 'quote' ? "e.g. Wedding Photography Package" : "Item description"}
@@ -422,50 +430,53 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                                         />
                                     </div>
 
-                                    {/* Quantity (Hidden for Quotes) */}
-                                    {docType !== 'quote' && (
-                                        <div className="w-16">
-                                            {index === 0 && <label className="text-[10px] text-gray-500 mb-0.5 block">Qty</label>}
+                                    {/* Math Group */}
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        {/* Quantity (Hidden for Quotes) */}
+                                        {docType !== 'quote' && (
+                                            <div className="w-16">
+                                                <label className={`text-[10px] text-gray-500 mb-0.5 ${index === 0 ? 'block' : 'block sm:hidden'}`}>Qty</label>
+                                                <input
+                                                    type="number"
+                                                    value={item.quantity}
+                                                    onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value))}
+                                                    className={`w-full px-2 py-1.5 text-sm rounded-md border ${theme.canvas.bg} ${theme.canvas.border}`}
+                                                    required
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Price / Amount */}
+                                        <div className={docType === 'quote' ? "flex-1 sm:flex-none sm:w-32" : "flex-1 sm:flex-none sm:w-24"}>
+                                            <label className={`text-[10px] text-gray-500 mb-0.5 ${index === 0 ? 'block' : 'block sm:hidden'}`}>{docType === 'quote' ? 'Amount' : 'Price'}</label>
                                             <input
                                                 type="number"
-                                                value={item.quantity}
-                                                onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value))}
+                                                value={item.price}
+                                                onChange={(e) => handleLineItemChange(index, 'price', parseFloat(e.target.value))}
                                                 className={`w-full px-2 py-1.5 text-sm rounded-md border ${theme.canvas.bg} ${theme.canvas.border}`}
                                                 required
                                             />
                                         </div>
-                                    )}
 
-                                    {/* Price / Amount */}
-                                    <div className={docType === 'quote' ? "w-32" : "w-24"}>
-                                        {index === 0 && <label className="text-[10px] text-gray-500 mb-0.5 block">{docType === 'quote' ? 'Amount' : 'Price'}</label>}
-                                        <input
-                                            type="number"
-                                            value={item.price}
-                                            onChange={(e) => handleLineItemChange(index, 'price', parseFloat(e.target.value))}
-                                            className={`w-full px-2 py-1.5 text-sm rounded-md border ${theme.canvas.bg} ${theme.canvas.border}`}
-                                            required
-                                        />
-                                    </div>
+                                        {/* Total (Hidden for Quotes) */}
+                                        {docType !== 'quote' && (
+                                            <div className="w-20 text-right">
+                                                <label className={`text-[10px] text-gray-500 mb-0.5 text-right ${index === 0 ? 'block' : 'block sm:hidden'}`}>Total</label>
+                                                <span className="text-sm font-semibold block py-1.5">₹ {item.total?.toLocaleString('en-IN') || 0}</span>
+                                            </div>
+                                        )}
 
-                                    {/* Total (Hidden for Quotes) */}
-                                    {docType !== 'quote' && (
-                                        <div className="w-20 text-right">
-                                            {index === 0 && <label className="text-[10px] text-gray-500 mb-0.5 block">Total</label>}
-                                            <span className="text-sm font-semibold block py-1.5">₹ {item.total?.toLocaleString('en-IN') || 0}</span>
+                                        {/* Delete Button */}
+                                        <div className={index === 0 ? "pt-5 sm:pt-5 ml-auto sm:ml-0" : "pt-4 sm:pt-0 ml-auto sm:ml-0"}>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeLineItem(index)}
+                                                className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                                                disabled={formData.line_items.length === 1}
+                                            >
+                                                <Trash size={14} />
+                                            </button>
                                         </div>
-                                    )}
-
-                                    {/* Delete Button */}
-                                    <div className={index === 0 ? "pt-5" : ""}>
-                                        <button
-                                            type="button"
-                                            onClick={() => removeLineItem(index)}
-                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded"
-                                            disabled={formData.line_items.length === 1}
-                                        >
-                                            <Trash size={14} />
-                                        </button>
                                     </div>
                                 </div>
                             </div>

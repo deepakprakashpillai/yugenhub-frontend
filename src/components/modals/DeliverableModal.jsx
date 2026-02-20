@@ -22,7 +22,7 @@ const DeliverableModal = ({
 
     useEffect(() => {
         if (isOpen) {
-            setViewMode(!!deliverable);
+            setTimeout(() => setViewMode(!!deliverable), 0);
         }
     }, [isOpen, deliverable]);
 
@@ -39,24 +39,24 @@ const DeliverableModal = ({
 
     useEffect(() => {
         if (isOpen && deliverable) {
-            setFormData({
+            setTimeout(() => setFormData({
                 title: deliverable.title || '',
                 quantity: deliverable.quantity || 1,
                 description: deliverable.description || '',
                 status: deliverable.status || 'Pending',
                 assigned_to: deliverable.assigned_to || '',
                 due_date: deliverable.due_date ? deliverable.due_date.split('T')[0] : '',
-            });
+            }), 0);
         } else if (isOpen) {
             // Reset for new deliverable
-            setFormData({
+            setTimeout(() => setFormData({
                 title: '',
                 quantity: 1,
                 description: '',
                 status: 'Pending',
                 assigned_to: '',
                 due_date: '',
-            });
+            }), 0);
         }
     }, [isOpen, deliverable]);
 

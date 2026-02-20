@@ -7,7 +7,7 @@ import clsx from 'clsx';
 
 const DevLoginPage = () => {
     const navigate = useNavigate();
-    const { devLogin, isAuthenticated } = useAuth();
+    const { devLogin } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loginLoading, setLoginLoading] = useState(null);

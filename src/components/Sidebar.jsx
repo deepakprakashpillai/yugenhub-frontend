@@ -14,6 +14,8 @@ import {
   Settings,
   X
 } from 'lucide-react';
+ 
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { AGENCY_CONFIG } from '../config';
 import { useAuth } from '../context/AuthContext';
@@ -47,7 +49,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
     if (isMobile && onClose) {
       onClose();
     }
-  }, [currentPath]);
+  }, [currentPath, isMobile, onClose]);
 
   const handleLogout = () => {
     logout();

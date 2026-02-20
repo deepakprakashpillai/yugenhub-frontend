@@ -1,5 +1,7 @@
 import clsx from 'clsx';
 import { Icons } from './Icons';
+
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
@@ -27,7 +29,7 @@ const TaskTable = ({ tasks, onTaskClick }) => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`overflow-hidden rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-30 backdrop-blur-sm`}
+            className={`overflow-x-auto rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-30 backdrop-blur-sm`}
         >
             <table className={`w-full text-left text-sm ${theme.text.secondary}`}>
                 <thead className={`${theme.canvas.card} bg-opacity-50 text-xs uppercase font-medium ${theme.text.secondary} border-b ${theme.canvas.border}`}>

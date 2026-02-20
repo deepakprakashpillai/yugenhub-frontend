@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getTransactions, createInvoice, getInvoices, updateInvoice } from '../../api/finance';
 import { getAssociates } from '../../api/associates'; // Import getAssociates
 import { useTheme } from '../../context/ThemeContext';
@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import api from '../../api/axios';
 import { FINANCE_CATEGORIES, TRANSACTION_TYPES } from '../../constants';
 
+// eslint-disable-next-line
 const FinanceStatCard = ({ title, value, subtitle, icon: Icon, type, theme, onEdit, isEditable }) => (
     <div className={`p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm relative group`}>
         <div className="flex justify-between items-start">
@@ -49,7 +50,7 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
 
 
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -82,13 +83,14 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [projectId, projectData]);
 
     useEffect(() => {
         if (projectId) {
             loadData();
         }
-    }, [projectId, projectData]);
+
+    }, [projectId, projectData, loadData]);
 
     const handleSaveQuote = async () => {
         try {

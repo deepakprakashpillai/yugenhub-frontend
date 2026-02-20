@@ -1,11 +1,12 @@
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
     eachDayOfInterval, addMonths, subMonths, isSameMonth,
-    isSameDay, isToday, parseISO
+    isSameDay, isToday
 } from 'date-fns';
-import { AnimatePresence, motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { Icons } from '../components/Icons';
@@ -22,10 +23,8 @@ const CalendarPage = () => {
     const { theme } = useTheme();
     const navigate = useNavigate();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [view, setView] = useState('month'); // 'month' | 'week' (future scope)
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState(null);
     const [hoveredEvent, setHoveredEvent] = useState(null);
     const [hoveredMoreDay, setHoveredMoreDay] = useState(null);
     const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
@@ -82,7 +81,7 @@ const CalendarPage = () => {
     }, []);
 
     // Fetch Data when range or filters change
-    const fetchCalendar = async () => {
+    const fetchCalendar = useCallback(async () => {
         setLoading(true);
         try {
             const startStr = format(startDate, 'yyyy-MM-dd');
@@ -106,11 +105,11 @@ const CalendarPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [startDate, endDate, showType, assignedOnly]);
 
     useEffect(() => {
         fetchCalendar();
-    }, [startDate, endDate, showType, assignedOnly]);
+    }, [fetchCalendar]);
 
     // Handlers
     const handleEventClick = (evt, e) => {
@@ -420,7 +419,7 @@ const CalendarPage = () => {
 
                     {/* Days Cells */}
                     <div className="grid grid-cols-7 auto-rows-fr">
-                        {days.map((day, idx) => {
+                        {days.map((day) => {
                             const dayEvents = getEventsForDay(day);
                             const isCurrentMonth = isSameMonth(day, currentDate);
                             const isTodayDate = isToday(day);
@@ -428,7 +427,6 @@ const CalendarPage = () => {
                             return (
                                 <div
                                     key={day.toString()}
-                                    onClick={() => setSelectedDate(day)}
                                     className={clsx(
                                         `min-h-[120px] p-2 border-b border-r ${theme.canvas.border} relative group transition-colors cursor-pointer`,
                                         !isCurrentMonth ? `${theme.canvas.bg} opacity-50` : `${theme.canvas.card} hover:${theme.canvas.hover}`,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Shield, UserPlus, X, ChevronRight, Check } from 'lucide-react';
 import api from '../../api/axios';
 import { toast } from 'sonner';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -124,7 +125,7 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
                         <button
                             type="submit"
                             disabled={loading || !email.trim()}
-                            className={`flex-1 ${theme.text.inverse} bg-white text-black px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-zinc-200 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/5`}
+                            className={`flex-1 ${theme.text.inverse} bg-accent text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:brightness-110 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20`}
                         >
                             {loading ? (
                                 <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

@@ -8,6 +8,7 @@ import api from '../api/axios';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Icons } from '../components/Icons';
 import clsx from 'clsx';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { Wallet } from 'lucide-react';
@@ -1199,9 +1200,8 @@ const ProjectPage = () => {
                         onClick={() => setActiveTab(tab.id)}
                         className={clsx(
                             "pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap",
-                            activeTab === tab.id ? `${theme.text.primary} border-current` : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
+                            activeTab === tab.id ? `text-accent border-accent` : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
                         )}
-                        style={activeTab === tab.id ? { borderColor: theme.accents?.default?.primary, color: theme.accents?.default?.primary } : {}}
                     >
                         {tab.label}
                     </button>

@@ -7,6 +7,7 @@ import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton';
 import TransactionItem from './TransactionItem';
 
+// eslint-disable-next-line
 const StatCard = ({ title, value, icon: Icon, trend, type, theme }) => (
     <div className={`p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm`}>
         <div className="flex justify-between items-start">

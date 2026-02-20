@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Icons } from './Icons';
 import { useTheme } from '../context/ThemeContext';
 import Select from './ui/Select';
-import clsx from 'clsx';
 
 const STATUS_OPTIONS = [
     { value: 'all', label: 'All Statuses' },

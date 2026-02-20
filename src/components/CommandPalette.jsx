@@ -17,38 +17,11 @@ import { useAgencyConfig } from "../context/AgencyConfigContext";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
-export function CommandPalette() {
-    const [open, setOpen] = useState(false);
-    const [search, setSearch] = useState("");
-    const navigate = useNavigate();
-    const { config } = useAgencyConfig();
-    const { user } = useAuth();
-    const { theme, themeMode } = useTheme(); // Get themeMode explicitly
 
-    // Toggle with Cmd+K
-    useEffect(() => {
-        const down = (e) => {
-            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                setOpen((open) => !open);
-            }
-        };
-        document.addEventListener("keydown", down);
-        return () => document.removeEventListener("keydown", down);
-    }, []);
-
-    const runCommand = (command) => {
-        setOpen(false);
-        command();
-    };
-
-    if (!theme) return null;
-
-    // Direct JS logic for theme styles to avoid reliance on 'dark:' selector in portals
-    const isDark = themeMode === 'dark';
 
     // Helper for List Items
-    const ListItem = ({ icon: Icon, label, shortcut, color, onClick, value }) => {
+    // eslint-disable-next-line
+    const ListItem = ({ icon: Icon, label, shortcut, color, onClick, value, isDark, runCommand }) => {
         return (
             <Command.Item
                 value={value || label}
@@ -84,6 +57,35 @@ export function CommandPalette() {
         );
     };
 
+export function CommandPalette() {
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const navigate = useNavigate();
+    const { config } = useAgencyConfig();
+    const { user } = useAuth();
+    const { theme, themeMode } = useTheme(); // Get themeMode explicitly
+
+    // Toggle with Cmd+K
+    useEffect(() => {
+        const down = (e) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                setOpen((open) => !open);
+            }
+        };
+        document.addEventListener("keydown", down);
+        return () => document.removeEventListener("keydown", down);
+    }, []);
+
+    const runCommand = (command) => {
+        setOpen(false);
+        command();
+    };
+
+    if (!theme) return null;
+
+    // Direct JS logic for theme styles to avoid reliance on 'dark:' selector in portals
+    const isDark = themeMode === 'dark';
     const isGridMode = search === "";
 
     return (
@@ -139,9 +141,9 @@ export function CommandPalette() {
                                 </div>
                             )}
                             <Command.Group heading={!isGridMode ? "Navigation" : undefined} className={isGridMode ? "space-y-1" : ""}>
-                                <ListItem icon={LayoutDashboard} label="Dashboard" onClick={() => navigate("/")} value="app-dashboard" />
-                                <ListItem icon={Settings} label="Settings" onClick={() => navigate("/settings")} value="app-settings" />
-                                <ListItem icon={Users} label="Clients" onClick={() => navigate("/clients")} value="app-clients" />
+                                <ListItem isDark={isDark} runCommand={runCommand} icon={LayoutDashboard} label="Dashboard" onClick={() => navigate("/")} value="app-dashboard" />
+                                <ListItem isDark={isDark} runCommand={runCommand} icon={Settings} label="Settings" onClick={() => navigate("/settings")} value="app-settings" />
+                                <ListItem isDark={isDark} runCommand={runCommand} icon={Users} label="Clients" onClick={() => navigate("/clients")} value="app-clients" />
                             </Command.Group>
                         </div>
 
@@ -153,9 +155,9 @@ export function CommandPalette() {
                                 </div>
                             )}
                             <Command.Group heading={!isGridMode ? "Tasks" : undefined} className={isGridMode ? "space-y-1" : ""}>
-                                <ListItem icon={Plus} label="New Task" onClick={() => navigate("/tasks?action=new")} color="#3b82f6" value="tasks-new" />
-                                <ListItem icon={LayoutDashboard} label="My Tasks" onClick={() => navigate("/tasks?view=mine")} value="tasks-mine" />
-                                <ListItem icon={Calendar} label="Calendar View" onClick={() => navigate("/tasks?view=calendar")} value="tasks-calendar" />
+                                <ListItem isDark={isDark} runCommand={runCommand} icon={Plus} label="New Task" onClick={() => navigate("/tasks?action=new")} color="#3b82f6" value="tasks-new" />
+                                <ListItem isDark={isDark} runCommand={runCommand} icon={LayoutDashboard} label="My Tasks" onClick={() => navigate("/tasks?view=mine")} value="tasks-mine" />
+                                <ListItem isDark={isDark} runCommand={runCommand} icon={Calendar} label="Calendar View" onClick={() => navigate("/tasks?view=calendar")} value="tasks-calendar" />
                             </Command.Group>
                         </div>
 
@@ -168,21 +170,21 @@ export function CommandPalette() {
                                     </div>
                                 )}
                                 <Command.Group heading={!isGridMode ? "Finance" : undefined} className={isGridMode ? "space-y-1" : ""}>
-                                    <ListItem
+                                    <ListItem isDark={isDark} runCommand={runCommand}
                                         icon={Plus}
                                         label="Add Income"
                                         onClick={() => navigate("/finance?action=new_transaction&type=income")}
                                         color="#22c55e"
                                         value="finance-add-income"
                                     />
-                                    <ListItem
+                                    <ListItem isDark={isDark} runCommand={runCommand}
                                         icon={Minus}
                                         label="Add Expense"
                                         onClick={() => navigate("/finance?action=new_transaction&type=expense")}
                                         color="#ef4444"
                                         value="finance-add-expense"
                                     />
-                                    <ListItem icon={LayoutDashboard} label="Finance Overview" onClick={() => navigate("/finance")} value="finance-overview" />
+                                    <ListItem isDark={isDark} runCommand={runCommand} icon={LayoutDashboard} label="Finance Overview" onClick={() => navigate("/finance")} value="finance-overview" />
                                 </Command.Group>
                             </div>
                         )}
@@ -197,14 +199,14 @@ export function CommandPalette() {
                                     </div>
                                 )}
                                 <Command.Group heading={!isGridMode ? vertical.label : undefined} className={isGridMode ? "space-y-1" : ""}>
-                                    <ListItem
+                                    <ListItem isDark={isDark} runCommand={runCommand}
                                         icon={Icons.Plus}
                                         label={`New Project`}
                                         onClick={() => navigate(`/${vertical.id}?action=new`)}
                                         color={vertical.color}
                                         value={`${vertical.id}-new-project`}
                                     />
-                                    <ListItem
+                                    <ListItem isDark={isDark} runCommand={runCommand}
                                         icon={LayoutDashboard}
                                         label="Dashboard"
                                         onClick={() => navigate(`/${vertical.id}`)}
@@ -212,14 +214,14 @@ export function CommandPalette() {
                                     />
                                     {(user?.role === 'admin' || user?.role === 'owner') && (
                                         <>
-                                            <ListItem
+                                            <ListItem isDark={isDark} runCommand={runCommand}
                                                 icon={Plus}
                                                 label="Add Income"
                                                 onClick={() => navigate(`/finance?action=new_transaction&type=income&vertical=${vertical.id}`)}
                                                 color="#22c55e"
                                                 value={`${vertical.id}-add-income`}
                                             />
-                                            <ListItem
+                                            <ListItem isDark={isDark} runCommand={runCommand}
                                                 icon={Minus}
                                                 label="Add Expense"
                                                 onClick={() => navigate(`/finance?action=new_transaction&type=expense&vertical=${vertical.id}`)}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Building2, Users, Workflow, Layers, Bell, Download, AlertTriangle,
@@ -125,8 +126,8 @@ function SettingsPage() {
                                         key={section.id}
                                         onClick={() => setActiveSection(section.id)}
                                         className={`snap-center shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive
-                                                ? `${theme.text.primary}`
-                                                : `${theme.text.secondary} opacity-50`
+                                            ? `${theme.text.primary}`
+                                            : `${theme.text.secondary} opacity-50`
                                             }`}
                                         style={isActive ? {
                                             backgroundColor: `${accentData.primary}1A`,

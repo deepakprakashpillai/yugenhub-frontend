@@ -17,12 +17,12 @@ const PAGE_TITLES = {
 
 const MobileHeader = ({ onMenuToggle }) => {
     const { theme } = useTheme();
-    const { user, notificationCount } = useAuth();
+    const { notificationCount } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
     const pageTitle = PAGE_TITLES[location.pathname] || 'Yugen';
-    const initials = user?.name ? user.name.charAt(0).toUpperCase() : '?';
+
 
     const handleSearchClick = () => {
         // Trigger Command Palette via keyboard event

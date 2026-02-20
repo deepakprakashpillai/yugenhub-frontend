@@ -1,6 +1,8 @@
 import { useState, Fragment } from 'react';
 import clsx from 'clsx';
 import { Icons } from './Icons';
+
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import api from '../api/axios';
@@ -19,7 +21,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
     if (!projects.length) return null;
 
     return (
-        <div className={`overflow-hidden rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} backdrop-blur-sm bg-opacity-30`}>
+        <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} backdrop-blur-sm bg-opacity-30`}>
             <table className={`w-full text-left text-sm ${theme.text.secondary}`}>
                 <thead className={`${theme.canvas.card} text-xs uppercase font-medium ${theme.text.secondary} border-b ${theme.canvas.border}`}>
                     <tr>

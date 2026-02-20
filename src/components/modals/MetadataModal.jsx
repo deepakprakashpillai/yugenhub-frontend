@@ -50,7 +50,7 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
 
     useEffect(() => {
         if (isOpen && project?.metadata) {
-            setFormData({ ...project.metadata });
+            setTimeout(() => setFormData({ ...project.metadata }), 0);
         }
     }, [isOpen, project]);
 

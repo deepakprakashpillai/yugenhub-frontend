@@ -133,7 +133,7 @@ const FinancePage = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`pb-4 flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
-                                ? `border-[var(--primary)] ${theme.text.primary}`
+                                ? `border-accent text-accent`
                                 : `border-transparent ${theme.text.secondary} hover:${theme.text.primary}`
                                 }`}
                         >

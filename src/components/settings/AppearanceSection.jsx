@@ -26,8 +26,6 @@ const ACCENT_PRESETS = [
 export default function AppearanceSection({ role }) {
     const { config, refreshConfig } = useAgencyConfig();
     const { theme, setThemeMode } = useTheme();
-    const [loading, setLoading] = useState(false);
-
     // Local state for immediate feedback, though we save on change usually
     const [localThemeMode, setLocalThemeMode] = useState(config?.theme_mode || 'dark');
     const [localAccent, setLocalAccent] = useState(config?.accent_color || '#ef4444');
@@ -38,7 +36,6 @@ export default function AppearanceSection({ role }) {
             return;
         }
 
-        setLoading(true);
         try {
             await api.patch('/settings/org', {
                 [key]: value
@@ -48,8 +45,6 @@ export default function AppearanceSection({ role }) {
         } catch (err) {
             console.error(err);
             toast.error('Failed to update appearance');
-        } finally {
-            setLoading(false);
         }
     };
 

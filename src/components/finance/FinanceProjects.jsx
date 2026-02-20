@@ -37,7 +37,7 @@ const VerticalProjectList = ({ vertical, onSelectProject, selectedProjectId }) =
         } finally {
             setLoading(false);
         }
-    }, [vertical.id]);
+    }, [vertical.id, vertical.label]);
 
     useEffect(() => {
         if (expanded) {

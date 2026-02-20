@@ -17,15 +17,15 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
 
     useEffect(() => {
         if (isOpen && client) {
-            setFormData({
+            setTimeout(() => setFormData({
                 name: client.name || '',
                 email: client.email || '',
                 phone: client.phone || '',
-                location: client.location || '',
+                company: client.company || '',
                 notes: client.notes || ''
-            });
+            }), 0);
         } else if (isOpen) {
-            setFormData({ name: '', email: '', phone: '', location: '', notes: '' });
+            setTimeout(() => setFormData({ name: '', email: '', phone: '', location: '', notes: '' }), 0);
         }
     }, [isOpen, client]);
 

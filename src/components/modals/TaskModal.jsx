@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import api from '../../api/axios';
@@ -44,6 +44,19 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
 
     // Internal Users State (Bypass parent prop if needed)
     const [fetchedUsers, setFetchedUsers] = useState([]);
+
+    const fetchHistory = useCallback(async () => {
+        if (!task) return;
+        setHistoryLoading(true);
+        try {
+            const res = await api.get(`/tasks/${task.id}/history`);
+            setHistory(res.data);
+        } catch (err) {
+            console.error("Failed to fetch history", err);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, [task]);
 
     // Initialize formData when modal opens or task changes
     useEffect(() => {
@@ -101,7 +114,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 })
                 .catch(err => console.error("Modal user fetch failed", err));
         }
-    }, [isOpen, task]);
+    }, [isOpen, task, fetchHistory]);
 
     // Fetch Projects when Vertical Changes
     useEffect(() => {
@@ -132,18 +145,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
         fetchProjects();
     }, [selectedVertical, isOpen]);
 
-    const fetchHistory = async () => {
-        if (!task) return;
-        setHistoryLoading(true);
-        try {
-            const res = await api.get(`/tasks/${task.id}/history`);
-            setHistory(res.data);
-        } catch (err) {
-            console.error("Failed to fetch history", err);
-        } finally {
-            setHistoryLoading(false);
-        }
-    };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;

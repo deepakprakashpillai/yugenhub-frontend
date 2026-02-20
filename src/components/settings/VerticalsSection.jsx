@@ -5,6 +5,7 @@ import {
     Settings, Shield, ChevronRight, Activity,
     Save, Gem, Baby, Briefcase, CornerDownRight
 } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../api/axios';
@@ -426,17 +427,17 @@ function VerticalsSection({ role }) {
     // Derived state for creating new vertical
     const isCreating = editingId === 'new';
 
-    useEffect(() => {
-        fetchVerticals();
-    }, []);
-
-    const fetchVerticals = () => {
+    function fetchVerticals() {
         setLoading(true);
         api.get('/settings/verticals').then(r => {
             setVerticals(r.data.verticals || []);
             setLoading(false);
         });
-    };
+    }
+
+    useEffect(() => {
+        setTimeout(() => fetchVerticals(), 0);
+    }, []);
 
     const handleSaveVertical = async (updatedVertical) => {
         try {
@@ -477,7 +478,7 @@ function VerticalsSection({ role }) {
             setEditingId(null);
             await refreshConfig();
             toast.success('Vertical Deleted');
-        } catch (err) {
+        } catch {
             toast.error('Failed to delete');
         }
     };

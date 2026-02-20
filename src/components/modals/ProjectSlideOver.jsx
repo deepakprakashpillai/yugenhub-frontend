@@ -4,7 +4,6 @@ import { Icons } from '../Icons';
 import api from '../../api/axios';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
-import clsx from 'clsx';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
 import { TemplateModal } from './TemplateModal';
@@ -32,7 +31,6 @@ const ProjectSlideOver = ({
 
     // Events State
     const [events, setEvents] = useState([]);
-    const [showAddEvent, setShowAddEvent] = useState(false);
 
     // Client search state
     const [clients, setClients] = useState([]);

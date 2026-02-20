@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Crown, ShieldCheck, UserCircle, Mail, Phone, Edit2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import api from '../../api/axios';
 import { InviteUserModal, EditUserModal } from '../modals';

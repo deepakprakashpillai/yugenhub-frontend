@@ -5,11 +5,10 @@ import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import api from '../../api/axios';
 import { toast } from 'sonner';
 
-const FinanceSection = ({ role }) => {
+const FinanceSection = () => {
     const { theme } = useTheme();
     const { config, refreshConfig } = useAgencyConfig();
     const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [expandedCategories, setExpandedCategories] = useState({});
 
     // Edit States
@@ -25,7 +24,7 @@ const FinanceSection = ({ role }) => {
 
     useEffect(() => {
         if (config?.finance_categories) {
-            setCategories(JSON.parse(JSON.stringify(config.finance_categories)));
+            setTimeout(() => setCategories(JSON.parse(JSON.stringify(config.finance_categories))), 0);
         } else {
             // Fetch if not in context yet (should be handled by context update)
             api.get('/settings/finance/categories')
@@ -39,7 +38,6 @@ const FinanceSection = ({ role }) => {
     };
 
     const saveCategories = async (updatedCategories) => {
-        setLoading(true);
         try {
             await api.patch('/settings/finance/categories', { categories: updatedCategories });
             toast.success('Categories updated');
@@ -48,8 +46,6 @@ const FinanceSection = ({ role }) => {
         } catch (error) {
             console.error(error);
             toast.error('Failed to update categories');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -130,7 +126,7 @@ const FinanceSection = ({ role }) => {
     const incomeCategories = categories.filter(c => c.type === 'income');
     const expenseCategories = categories.filter(c => c.type === 'expense');
 
-    const CategoryList = ({ title, list, typeColor }) => (
+    const renderCategoryList = (title, list, typeColor) => (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 <h3 className={`text-lg font-bold ${theme.text.primary}`}>{title}</h3>
@@ -275,8 +271,8 @@ const FinanceSection = ({ role }) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <CategoryList title="Income" list={incomeCategories} typeColor="green" />
-                <CategoryList title="Expense" list={expenseCategories} typeColor="red" />
+                {renderCategoryList("Income", incomeCategories, "green")}
+                {renderCategoryList("Expense", expenseCategories, "red")}
             </div>
 
             {/* Add Category Modal/Overlay could be here, but using inline for now */}

@@ -109,7 +109,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         if (relevantCats.length > 0 && formData.category && !relevantCats.find(c => c.name === formData.category)) {
             setFormData(prev => ({ ...prev, category: '', subcategory: '', associate_id: '' }));
         }
-    }, [formData.type, config]);
+    }, [formData.type, config, formData.category]);
 
     // Update subcategories when category changes
     useEffect(() => {
@@ -143,7 +143,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 }
             }
         }
-    }, [formData.project_id, projects]);
+    }, [formData.project_id, projects, selectedVertical]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

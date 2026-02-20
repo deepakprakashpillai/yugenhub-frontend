@@ -238,24 +238,28 @@ const EventSlideOver = ({
 
     useEffect(() => {
         if (isOpen && event) {
-            const start = parseDateTime(event.start_date);
-            const end = parseDateTime(event.end_date);
-            setFormData({
-                type: event.type || '',
-                venue_name: event.venue_name || '',
-                venue_location: event.venue_location || '',
-                start_date: start.date,
-                start_time: start.time,
-                end_date: end.date,
-                end_time: end.time,
-                notes: event.notes || ''
-            });
-            setDeliverables(event.deliverables || []);
-            setAssignments(event.assignments || []);
+            setTimeout(() => {
+                const start = parseDateTime(event.start_date);
+                const end = parseDateTime(event.end_date);
+                setFormData({
+                    type: event.type || '',
+                    venue_name: event.venue_name || '',
+                    venue_location: event.venue_location || '',
+                    start_date: start.date,
+                    start_time: start.time,
+                    end_date: end.date,
+                    end_time: end.time,
+                    notes: event.notes || ''
+                });
+                setDeliverables(event.deliverables || []);
+                setAssignments(event.assignments || []);
+            }, 0);
         } else if (isOpen) {
-            setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
-            setDeliverables([]);
-            setAssignments([]);
+            setTimeout(() => {
+                setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
+                setDeliverables([]);
+                setAssignments([]);
+            }, 0);
         }
     }, [isOpen, event]);
 

@@ -22,16 +22,16 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
 
     useEffect(() => {
         if (isOpen && associate) {
-            setFormData({
+            setTimeout(() => setFormData({
                 name: associate.name || '',
                 role: associate.role || '',
                 email: associate.email || '',
                 phone: associate.phone || '',
                 location: associate.location || '',
                 notes: associate.notes || ''
-            });
+            }), 0);
         } else if (isOpen) {
-            setFormData({ name: '', role: '', email: '', phone: '', location: '', notes: '' });
+            setTimeout(() => setFormData({ name: '', role: '', email: '', phone: '', location: '', notes: '' }), 0);
         }
     }, [isOpen, associate]);
 
