@@ -8,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
 import SearchableSelect from '../ui/SearchableSelect';
+import DatePicker from '../ui/DatePicker';
 import { FINANCE_CATEGORIES, TRANSACTION_TYPES, VERTICALS } from '../../constants';
 
 const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
@@ -324,12 +325,11 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                     </div>
                     <div>
                         <label className="block text-xs font-medium mb-1 text-gray-500">Date</label>
-                        <input
-                            type="date"
-                            required
+                        <DatePicker
                             value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
+                            onChange={(val) => setFormData({ ...formData, date: val })}
+                            placeholder="Select date"
+                            className="w-full"
                         />
                     </div>
                 </div>

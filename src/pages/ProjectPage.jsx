@@ -8,6 +8,7 @@ import api from '../api/axios';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Icons } from '../components/Icons';
 import clsx from 'clsx';
+import DatePicker from '../components/ui/DatePicker';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
@@ -339,11 +340,6 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
         setShowAssigneeMenu(false);
     };
 
-    const handleDateChange = (e) => {
-        onUpdate(task.id, { due_date: e.target.value });
-        setIsEditingDate(false);
-    };
-
     return (
         <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group relative`}>
             <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -481,14 +477,15 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className={`absolute bottom-full left-0 mb-2 p-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] backdrop-blur-xl bg-opacity-95`}
+                                        className="absolute bottom-full left-0 mb-2 z-[60]"
                                     >
-                                        <input
-                                            autoFocus
-                                            type="date"
+                                        <DatePicker
                                             value={task.due_date ? task.due_date.split('T')[0] : ''}
-                                            onChange={handleDateChange}
-                                            className={`bg-transparent text-sm border-none focus:outline-none ${theme.text.primary} [color-scheme:dark]`}
+                                            onChange={(val) => {
+                                                onUpdate(task.id, { due_date: val });
+                                                setIsEditingDate(false);
+                                            }}
+                                            placeholder="Select date"
                                         />
                                     </motion.div>
                                 )}

@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
 import { TemplateModal } from './TemplateModal';
+import DatePicker from '../ui/DatePicker';
+import TimePicker from '../ui/TimePicker';
 
 const ProjectSlideOver = ({
     isOpen,
@@ -46,7 +48,7 @@ const ProjectSlideOver = ({
     const [showTemplateModal, setShowTemplateModal] = useState(false);
 
     // Collapsible Sections State
-    const [isWeddingDetailsOpen, setIsWeddingDetailsOpen] = useState(false);
+    const [isWeddingDetailsOpen, setIsWeddingDetailsOpen] = useState(true);
 
     // Fetch clients and associates
     useEffect(() => {
@@ -155,6 +157,17 @@ const ProjectSlideOver = ({
 
     // --- Event Handlers ---
     const handleAddEvent = () => {
+        // Find current vertical config to initialize custom event fields
+        const vId = vertical?.toLowerCase();
+        const configVertical = config?.verticals?.find(v => v.id === vId);
+        const customEventFields = configVertical?.event_fields || [];
+
+        // Build default values for custom fields
+        const initialCustomFields = {};
+        customEventFields.forEach(field => {
+            initialCustomFields[field.name] = field.type === 'number' ? null : '';
+        });
+
         setEvents(prev => [...prev, {
             id: uuidv4(),
             type: '',
@@ -166,7 +179,8 @@ const ProjectSlideOver = ({
             end_time: '',
             notes: '',
             deliverables: [],
-            assignments: []
+            assignments: [],
+            ...initialCustomFields
         }]);
     };
 
@@ -297,16 +311,14 @@ const ProjectSlideOver = ({
         onSave(projectData);
     };
 
-    // System Fields Configuration
+    // System Fields Configuration — only the essential core fields
     const SYSTEM_FIELDS = {
         wedding: [
-            'client_side', 'religion', 'groom_name', 'groom_number', 'bride_name',
-            'bride_number', 'groom_age', 'bride_age', 'wedding_style',
-            'groom_location', 'bride_location'
+            'client_side', 'side', 'religion', 'groom_name', 'groom_number', 'bride_name',
+            'bride_number', 'wedding_date'
         ],
         children: [
-            'child_name', 'child_age', 'occasion_type', 'mother_name',
-            'father_name', 'address'
+            'child_name', 'child_age', 'occasion_type'
         ]
     };
 
@@ -321,7 +333,7 @@ const ProjectSlideOver = ({
         if (filteredFields.length === 0) return null;
 
         return (
-            <div className="space-y-3 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-4">
                 {filteredFields.map(field => (
                     <div key={field.name}>
                         <label className={`block text-xs ${theme.text.secondary} mb-1`}>{field.label}</label>
@@ -330,21 +342,29 @@ const ProjectSlideOver = ({
                                 name={field.name}
                                 value={metadata[field.name] || ''}
                                 onChange={handleMetadataChange}
-                                className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
+                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
                             >
                                 <option value="">Select {field.label}</option>
                                 {field.options?.map(opt => (
                                     <option key={opt} value={opt}>{opt}</option>
                                 ))}
                             </select>
+                        ) : field.type === 'date' ? (
+                            <DatePicker
+                                value={metadata[field.name] || ''}
+                                onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
+                                placeholder={field.label}
+                                className="w-full"
+                                inputClassName={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
+                            />
                         ) : (
                             <input
-                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : field.type === 'date' ? 'date' : 'text'}
+                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
                                 name={field.name}
                                 value={metadata[field.name] || ''}
                                 onChange={handleMetadataChange}
                                 placeholder={field.label}
-                                className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
+                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
                             />
                         )}
                     </div>
@@ -386,35 +406,36 @@ const ProjectSlideOver = ({
 
                     {isWeddingDetailsOpen && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="mb-3">
-                                <label className={`block text-xs ${theme.text.secondary} mb-1`}>Side</label>
-                                <select
-                                    name="side"
-                                    value={metadata.side || 'both'}
-                                    onChange={handleMetadataChange}
-                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                >
-                                    <option value="groom">Groom</option>
-                                    <option value="bride">Bride</option>
-                                    <option value="both">Both</option>
-                                </select>
-                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Side</label>
+                                    <select
+                                        name="side"
+                                        value={metadata.side || 'both'}
+                                        onChange={handleMetadataChange}
+                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
+                                    >
+                                        <option value="groom">Groom</option>
+                                        <option value="bride">Bride</option>
+                                        <option value="both">Both</option>
+                                    </select>
+                                </div>
 
-                            <div className="mb-3">
-                                <label className={`block text-xs ${theme.text.secondary} mb-1`}>Religion</label>
-                                <select
-                                    name="religion"
-                                    value={metadata.religion || 'Hindu'}
-                                    onChange={handleMetadataChange}
-                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                >
-                                    <option value="Hindu">Hindu</option>
-                                    <option value="Christian">Christian</option>
-                                    <option value="Muslim">Muslim</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                <div>
+                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Religion</label>
+                                    <select
+                                        name="religion"
+                                        value={metadata.religion || 'Hindu'}
+                                        onChange={handleMetadataChange}
+                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
+                                    >
+                                        <option value="Hindu">Hindu</option>
+                                        <option value="Christian">Christian</option>
+                                        <option value="Muslim">Muslim</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
                             </div>
-
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                 <div>
@@ -441,7 +462,6 @@ const ProjectSlideOver = ({
                                 </div>
                             </div>
 
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                 <div>
                                     <label className={`block text-xs ${theme.text.secondary} mb-1`}>Bride Name</label>
@@ -465,69 +485,16 @@ const ProjectSlideOver = ({
                                         className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
                                     />
                                 </div>
-                            </div >
-
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Age</label>
-                                    <input
-                                        type="number"
-                                        name="groom_age"
-                                        value={metadata.groom_age || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="Age"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Bride Age</label>
-                                    <input
-                                        type="number"
-                                        name="bride_age"
-                                        value={metadata.bride_age || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="Age"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                            </div >
-
-                            <div className="mb-3">
-                                <label className={`block text-xs ${theme.text.secondary} mb-1`}>Wedding Style</label>
-                                <input
-                                    type="text"
-                                    name="wedding_style"
-                                    value={metadata.wedding_style || ''}
-                                    onChange={handleMetadataChange}
-                                    placeholder="e.g. Traditional, Modern, Destination"
-                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Location</label>
-                                    <input
-                                        type="text"
-                                        name="groom_location"
-                                        value={metadata.groom_location || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="City/Address"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Bride Location</label>
-                                    <input
-                                        type="text"
-                                        name="bride_location"
-                                        value={metadata.bride_location || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="City/Address"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
+                            <div className="mb-3">
+                                <label className={`block text-xs ${theme.text.secondary} mb-1`}>Wedding Date</label>
+                                <DatePicker
+                                    value={metadata.wedding_date || ''}
+                                    onChange={(val) => setMetadata(prev => ({ ...prev, wedding_date: val }))}
+                                    placeholder="Select wedding date"
+                                    className="w-full"
+                                />
                             </div>
                         </div >
                     )}
@@ -586,43 +553,6 @@ const ProjectSlideOver = ({
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Mother's Name</label>
-                            <input
-                                type="text"
-                                name="mother_name"
-                                value={metadata.mother_name || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Mother's name"
-                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            />
-                        </div>
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Father's Name</label>
-                            <input
-                                type="text"
-                                name="father_name"
-                                value={metadata.father_name || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Father's name"
-                                className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className={`block text-xs ${theme.text.secondary} mb-1`}>Address</label>
-                        <input
-                            type="text"
-                            name="address"
-                            value={metadata.address || ''}
-                            onChange={handleMetadataChange}
-                            placeholder="Residential Address"
-                            className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                        />
-                    </div>
-
                     {/* Render Custom Fields defined in Config */}
                     {renderCustomFields(customFields, verticalType)}
                 </>
@@ -657,276 +587,334 @@ const ProjectSlideOver = ({
         );
     };
 
-    const renderEventsSection = () => (
-        <div className={`mt-8 pt-6 border-t ${theme.canvas.border}`}>
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h4 className={`text-sm uppercase tracking-widest ${theme.text.secondary} font-semibold flex items-center gap-2`}>
-                        <Icons.Calendar className="w-4 h-4 text-purple-400" />
-                        Events & Deliverables
-                    </h4>
-                    <p className={`text-xs ${theme.text.secondary} mt-1 ml-6`}>Manage project events and their deliverables</p>
-                </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setShowTemplateModal(true)}
-                        className={`flex items-center gap-2 px-3 py-1.5 ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} rounded-lg text-xs font-medium transition-all hover:${theme.canvas.hover}`}
-                    >
-                        <Icons.Download className="w-3.5 h-3.5" />
-                        Import Template
-                    </button>
-                    <button
-                        onClick={handleAddEvent}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
-                    >
-                        <Icons.Plus className="w-3.5 h-3.5" />
-                        Add Event
-                    </button>
-                </div>
-            </div>
+    const renderEventsSection = () => {
+        // Fetch vertical config to get custom event fields
+        const vId = vertical?.toLowerCase();
+        const configVertical = config?.verticals?.find(v => v.id === vId);
+        const customEventFields = configVertical?.event_fields || [];
 
-            <div className="space-y-4">
-                {events.length === 0 && (
-                    <div className={`text-center py-8 border-2 border-dashed ${theme.canvas.border} rounded-xl ${theme.canvas.bg}`}>
-                        <Icons.Calendar className={`w-8 h-8 ${theme.text.secondary} mx-auto mb-3`} />
-                        <p className={`text-sm ${theme.text.secondary}`}>No events added yet</p>
+        return (
+            <div className={`mt-8 pt-6 border-t ${theme.canvas.border}`}>
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h4 className={`text-sm uppercase tracking-widest ${theme.text.secondary} font-semibold flex items-center gap-2`}>
+                            <Icons.Calendar className="w-4 h-4 text-purple-400" />
+                            Events & Deliverables
+                        </h4>
+                        <p className={`text-xs ${theme.text.secondary} mt-1 ml-6`}>Manage project events and their deliverables</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowTemplateModal(true)}
+                            className={`flex items-center gap-2 px-3 py-1.5 ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} rounded-lg text-xs font-medium transition-all hover:${theme.canvas.hover}`}
+                        >
+                            <Icons.Download className="w-3.5 h-3.5" />
+                            Import Template
+                        </button>
                         <button
                             onClick={handleAddEvent}
-                            className="text-xs text-purple-400 hover:text-purple-300 mt-2 font-medium"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
                         >
-                            + Add your first event
+                            <Icons.Plus className="w-3.5 h-3.5" />
+                            Add Event
                         </button>
                     </div>
-                )}
+                </div>
 
-                {events.map((event, index) => (
-                    <div key={event.id} className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl overflow-hidden shadow-sm hover:border-zinc-500 transition-colors group`}>
-                        {/* Event Header */}
-                        <div className={`p-4 ${theme.canvas.bg} border-b ${theme.canvas.border} flex flex-col gap-4`}>
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                    <label className={`text-[10px] uppercase ${theme.text.secondary} font-semibold mb-1.5 block tracking-wider`}>Event Type</label>
-                                    <input
-                                        type="text"
-                                        value={event.type}
-                                        onChange={(e) => handleEventChange(index, 'type', e.target.value)}
-                                        placeholder="e.g. Wedding Reception"
-                                        className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} focus:border-purple-500 text-base font-medium ${theme.text.primary} p-0 pb-1 focus:ring-0 placeholder-zinc-500 transition-colors`}
-                                    />
-                                </div>
-                                <button
-                                    onClick={() => handleRemoveEvent(index)}
-                                    className={`p-1.5 ${theme.text.secondary} hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100`}
-                                    title="Remove Event"
-                                >
-                                    <Icons.Trash className="w-4 h-4" />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Date & Time */}
-                                <div className="space-y-3">
-                                    <div className={`flex items-center gap-2 ${theme.text.secondary} text-xs font-medium`}>
-                                        <Icons.Clock className="w-3.5 h-3.5" />
-                                        Timing
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Start</label>
-                                            <div className="flex gap-1">
-                                                <input
-                                                    type="date"
-                                                    value={event.start_date}
-                                                    onChange={(e) => handleEventChange(index, 'start_date', e.target.value)}
-                                                    className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1.5 text-xs focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20`}
-                                                />
-                                                <input
-                                                    type="time"
-                                                    value={event.start_time}
-                                                    onChange={(e) => handleEventChange(index, 'start_time', e.target.value)}
-                                                    className={`w-20 ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1.5 text-xs focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20`}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>End</label>
-                                            <div className="flex gap-1">
-                                                <input
-                                                    type="date"
-                                                    value={event.end_date}
-                                                    onChange={(e) => handleEventChange(index, 'end_date', e.target.value)}
-                                                    className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1.5 text-xs focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20`}
-                                                />
-                                                <input
-                                                    type="time"
-                                                    value={event.end_time}
-                                                    onChange={(e) => handleEventChange(index, 'end_time', e.target.value)}
-                                                    className={`w-20 ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1.5 text-xs focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20`}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Venue */}
-                                <div className="space-y-3">
-                                    <div className={`flex items-center gap-2 ${theme.text.secondary} text-xs font-medium`}>
-                                        <Icons.MapPin className="w-3.5 h-3.5" />
-                                        Venue
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Name</label>
-                                            <input
-                                                type="text"
-                                                value={event.venue_name}
-                                                onChange={(e) => handleEventChange(index, 'venue_name', e.target.value)}
-                                                placeholder="Venue Name"
-                                                className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1.5 text-xs ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20`}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Location</label>
-                                            <input
-                                                type="text"
-                                                value={event.venue_location}
-                                                onChange={(e) => handleEventChange(index, 'venue_location', e.target.value)}
-                                                placeholder="Address/City"
-                                                className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1.5 text-xs ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20`}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div className="space-y-4">
+                    {events.length === 0 && (
+                        <div className={`text-center py-8 border-2 border-dashed ${theme.canvas.border} rounded-xl ${theme.canvas.bg}`}>
+                            <Icons.Calendar className={`w-8 h-8 ${theme.text.secondary} mx-auto mb-3`} />
+                            <p className={`text-sm ${theme.text.secondary}`}>No events added yet</p>
+                            <button
+                                onClick={handleAddEvent}
+                                className="text-xs text-purple-400 hover:text-purple-300 mt-2 font-medium"
+                            >
+                                + Add your first event
+                            </button>
                         </div>
+                    )}
 
-                        <div className={`flex flex-col gap-px ${theme.canvas.bg} bg-opacity-50`}>
-                            {/* Deliverables Section */}
-                            <div className={`p-5 ${theme.canvas.bg} bg-opacity-30`}>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className={`flex items-center gap-2 text-sm font-medium ${theme.text.secondary}`}>
-                                        <Icons.Package className="w-4 h-4" />
-                                        Deliverables
-                                        <span className={`px-2 py-0.5 rounded-full ${theme.canvas.card} text-xs ${theme.text.secondary} font-medium border ${theme.canvas.border}`}>{event.deliverables.length}</span>
+                    {events.map((event, index) => (
+                        <div key={event.id} className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-sm hover:border-zinc-500 transition-colors group`}>
+                            {/* Event Header and Details */}
+                            <div className={`p-5 md:p-6 ${theme.canvas.bg} border-b ${theme.canvas.border} flex flex-col gap-6`}>
+                                <div className={`flex items-start justify-between gap-4 pb-4 border-b border-dashed ${theme.canvas.border}`}>
+                                    <div className="flex-1">
+                                        <label className={`text-[10px] uppercase ${theme.text.secondary} font-semibold mb-1.5 block tracking-wider`}>Event Type</label>
+                                        <input
+                                            type="text"
+                                            value={event.type}
+                                            onChange={(e) => handleEventChange(index, 'type', e.target.value)}
+                                            placeholder="e.g. Wedding Reception"
+                                            className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} focus:border-purple-500 text-base font-medium ${theme.text.primary} p-0 pb-1 focus:ring-0 placeholder-zinc-500 transition-colors`}
+                                        />
                                     </div>
                                     <button
-                                        onClick={() => handleAddDeliverable(index)}
-                                        className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                        onClick={() => handleRemoveEvent(index)}
+                                        className={`p-1.5 ${theme.text.secondary} hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100`}
+                                        title="Remove Event"
                                     >
-                                        <Icons.Plus className="w-3.5 h-3.5" />
-                                        Add Item
+                                        <Icons.Trash className="w-4 h-4" />
                                     </button>
                                 </div>
-                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {event.deliverables.map((del, dIndex) => (
-                                        <div key={del.id} className={`flex items-center gap-3 ${theme.canvas.card} p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
-                                            <select
-                                                value={del.type}
-                                                onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                                className={`flex-1 bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
-                                            >
-                                                <option value="" disabled>Select Type</option>
-                                                {(config?.deliverableTypes || []).map(dt => (
-                                                    <option key={dt} value={dt}>{dt}</option>
-                                                ))}
-                                            </select>
-                                            <div className={`w-px h-6 ${theme.canvas.border}`}></div>
-                                            <input
-                                                type="number"
-                                                value={del.quantity}
-                                                onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
-                                                className={`w-12 bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 text-center font-medium`}
-                                                min="1"
-                                            />
-                                            <button
-                                                onClick={() => handleRemoveDeliverable(index, dIndex)}
-                                                className={`${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
-                                            >
-                                                <Icons.X className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                    {event.deliverables.length === 0 && (
-                                        <div className={`text-center py-6 border border-dashed ${theme.canvas.border} rounded-lg ${theme.canvas.bg}`}>
-                                            <p className={`text-xs ${theme.text.secondary} italic`}>No deliverables added yet</p>
-                                            <button
-                                                onClick={() => handleAddDeliverable(index)}
-                                                className="text-xs text-purple-400 hover:text-purple-300 mt-1.5"
-                                            >
-                                                + Add one
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
 
-                            {/* Team Section */}
-                            <div className={`p-5 ${theme.canvas.bg} bg-opacity-30 border-t ${theme.canvas.border}`}>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className={`flex items-center gap-2 text-sm font-medium ${theme.text.secondary}`}>
-                                        <Icons.Users className="w-4 h-4" />
-                                        Team Assignments
-                                        <span className={`px-2 py-0.5 rounded-full ${theme.canvas.card} text-xs ${theme.text.secondary} font-medium border ${theme.canvas.border}`}>{event.assignments.length}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => handleAddAssignment(index)}
-                                        className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors"
-                                    >
-                                        <Icons.Plus className="w-3.5 h-3.5" />
-                                        Add Member
-                                    </button>
-                                </div>
-                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {event.assignments.map((assign, aIndex) => (
-                                        <div key={assign.id} className={`grid grid-cols-[1fr,1fr,auto] gap-3 items-center ${theme.canvas.card} p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
-                                            <div className="min-w-0">
-                                                <select
-                                                    value={assign.associate_id}
-                                                    onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
-                                                    className={`w-full bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
-                                                >
-                                                    <option value="" disabled>Select Member</option>
-                                                    {associates.map(assoc => (
-                                                        <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
-                                                    ))}
-                                                </select>
+                                <div className="flex flex-col gap-6">
+                                    {/* Date & Time */}
+                                    <div className="space-y-3">
+                                        <div className={`flex items-center gap-2 ${theme.text.secondary} text-xs font-medium`}>
+                                            <Icons.Clock className="w-3.5 h-3.5" />
+                                            Timing
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Start</label>
+                                                <div className="flex gap-2 h-[38px]">
+                                                    <DatePicker
+                                                        value={event.start_date}
+                                                        onChange={(val) => handleEventChange(index, 'start_date', val)}
+                                                        placeholder="Start date"
+                                                        className="flex-1 w-1/2"
+                                                    />
+                                                    <TimePicker
+                                                        value={event.start_time}
+                                                        onChange={(val) => handleEventChange(index, 'start_time', val)}
+                                                        placeholder="Time"
+                                                        className="flex-1 w-1/2"
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className={`min-w-0 border-l ${theme.canvas.border} pl-3`}>
+                                            <div>
+                                                <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>End</label>
+                                                <div className="flex gap-2 h-[38px]">
+                                                    <DatePicker
+                                                        value={event.end_date}
+                                                        onChange={(val) => handleEventChange(index, 'end_date', val)}
+                                                        placeholder="End date"
+                                                        className="flex-1 w-1/2"
+                                                    />
+                                                    <TimePicker
+                                                        value={event.end_time}
+                                                        onChange={(val) => handleEventChange(index, 'end_time', val)}
+                                                        placeholder="Time"
+                                                        className="flex-1 w-1/2"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Venue */}
+                                    <div className="space-y-3">
+                                        <div className={`flex items-center gap-2 ${theme.text.secondary} text-xs font-medium`}>
+                                            <Icons.MapPin className="w-3.5 h-3.5" />
+                                            Venue
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Name</label>
                                                 <input
                                                     type="text"
-                                                    value={assign.role}
-                                                    onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
-                                                    placeholder="Role (e.g. Lead)"
-                                                    className={`w-full bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 placeholder-zinc-500`}
+                                                    value={event.venue_name}
+                                                    onChange={(e) => handleEventChange(index, 'venue_name', e.target.value)}
+                                                    placeholder="Venue Name"
+                                                    className={`w-full ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-2 text-sm ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors ${!event.venue_name ? theme.text.secondary : theme.text.primary}`}
                                                 />
                                             </div>
-                                            <button
-                                                onClick={() => handleRemoveAssignment(index, aIndex)}
-                                                className={`${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
-                                            >
-                                                <Icons.X className="w-4 h-4" />
-                                            </button>
+                                            <div>
+                                                <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Location</label>
+                                                <input
+                                                    type="text"
+                                                    value={event.venue_location}
+                                                    onChange={(e) => handleEventChange(index, 'venue_location', e.target.value)}
+                                                    placeholder="Address/City"
+                                                    className={`w-full ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-2 text-sm ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors ${!event.venue_location ? theme.text.secondary : theme.text.primary}`}
+                                                />
+                                            </div>
                                         </div>
-                                    ))}
-                                    {event.assignments.length === 0 && (
-                                        <div className={`text-center py-6 border border-dashed ${theme.canvas.border} rounded-lg ${theme.canvas.bg}`}>
-                                            <p className={`text-xs ${theme.text.secondary} italic`}>No team members assigned</p>
-                                            <button
-                                                onClick={() => handleAddAssignment(index)}
-                                                className="text-xs text-purple-400 hover:text-purple-300 mt-1.5"
-                                            >
-                                                + Assign someone
-                                            </button>
+                                    </div>
+
+                                    {/* Custom Event Fields */}
+                                    {customEventFields.length > 0 && (
+                                        <div className={`pt-2`}>
+                                            <div className={`flex items-center gap-2 ${theme.text.secondary} text-xs font-medium mb-3`}>
+                                                <Icons.Settings className="w-3.5 h-3.5" />
+                                                Additional Details
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {customEventFields.map(field => (
+                                                    <div key={field.name}>
+                                                        <label className={`block text-[10px] ${theme.text.secondary} mb-1.5`}>{field.label}</label>
+                                                        {field.type === 'select' ? (
+                                                            <select
+                                                                name={field.name}
+                                                                value={event[field.name] || ''}
+                                                                onChange={(e) => handleEventChange(index, field.name, e.target.value)}
+                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                            >
+                                                                <option value="">Select {field.label}</option>
+                                                                {field.options?.map(opt => (
+                                                                    <option key={opt} value={opt}>{opt}</option>
+                                                                ))}
+                                                            </select>
+                                                        ) : field.type === 'date' ? (
+                                                            <DatePicker
+                                                                value={event[field.name] || ''}
+                                                                onChange={(val) => handleEventChange(index, field.name, val)}
+                                                                placeholder={field.label}
+                                                                className="w-full"
+                                                                inputClassName={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                            />
+                                                        ) : (
+                                                            <input
+                                                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
+                                                                name={field.name}
+                                                                value={event[field.name] || ''}
+                                                                onChange={(e) => {
+                                                                    let val = e.target.value;
+                                                                    if (field.type === 'number') val = val === '' ? null : Number(val);
+                                                                    handleEventChange(index, field.name, val);
+                                                                }}
+                                                                placeholder={field.label}
+                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             </div>
+
+                            <div className={`flex flex-col gap-px ${theme.canvas.bg} bg-opacity-50`}>
+                                {/* Deliverables Section */}
+                                <div className={`p-5 ${theme.canvas.bg} bg-opacity-30`}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className={`flex items-center gap-2 text-sm font-medium ${theme.text.secondary}`}>
+                                            <Icons.Package className="w-4 h-4" />
+                                            Deliverables
+                                            <span className={`px-2 py-0.5 rounded-full ${theme.canvas.card} text-xs ${theme.text.secondary} font-medium border ${theme.canvas.border}`}>{event.deliverables.length}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleAddDeliverable(index)}
+                                            className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                        >
+                                            <Icons.Plus className="w-3.5 h-3.5" />
+                                            Add Item
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {event.deliverables.map((del, dIndex) => (
+                                            <div key={del.id} className={`flex items-center gap-3 ${theme.canvas.card} p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
+                                                <select
+                                                    value={del.type}
+                                                    onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
+                                                    className={`flex-1 bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                >
+                                                    <option value="" disabled>Select Type</option>
+                                                    {(config?.deliverableTypes || []).map(dt => (
+                                                        <option key={dt} value={dt}>{dt}</option>
+                                                    ))}
+                                                </select>
+                                                <div className={`w-px h-6 ${theme.canvas.border}`}></div>
+                                                <input
+                                                    type="number"
+                                                    value={del.quantity}
+                                                    onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
+                                                    className={`w-12 bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 text-center font-medium`}
+                                                    min="1"
+                                                />
+                                                <button
+                                                    onClick={() => handleRemoveDeliverable(index, dIndex)}
+                                                    className={`${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
+                                                >
+                                                    <Icons.X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {event.deliverables.length === 0 && (
+                                            <div className={`text-center py-6 border border-dashed ${theme.canvas.border} rounded-lg ${theme.canvas.bg}`}>
+                                                <p className={`text-xs ${theme.text.secondary} italic`}>No deliverables added yet</p>
+                                                <button
+                                                    onClick={() => handleAddDeliverable(index)}
+                                                    className="text-xs text-purple-400 hover:text-purple-300 mt-1.5"
+                                                >
+                                                    + Add one
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Team Section */}
+                                <div className={`p-5 ${theme.canvas.bg} bg-opacity-30 border-t ${theme.canvas.border}`}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className={`flex items-center gap-2 text-sm font-medium ${theme.text.secondary}`}>
+                                            <Icons.Users className="w-4 h-4" />
+                                            Team Assignments
+                                            <span className={`px-2 py-0.5 rounded-full ${theme.canvas.card} text-xs ${theme.text.secondary} font-medium border ${theme.canvas.border}`}>{event.assignments.length}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleAddAssignment(index)}
+                                            className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors"
+                                        >
+                                            <Icons.Plus className="w-3.5 h-3.5" />
+                                            Add Member
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {event.assignments.map((assign, aIndex) => (
+                                            <div key={assign.id} className={`grid grid-cols-[1fr,1fr,auto] gap-3 items-center ${theme.canvas.card} p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
+                                                <div className="min-w-0">
+                                                    <select
+                                                        value={assign.associate_id}
+                                                        onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
+                                                        className={`w-full bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                    >
+                                                        <option value="" disabled>Select Member</option>
+                                                        {associates.map(assoc => (
+                                                            <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className={`min-w-0 border-l ${theme.canvas.border} pl-3`}>
+                                                    <input
+                                                        type="text"
+                                                        value={assign.role}
+                                                        onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
+                                                        placeholder="Role (e.g. Lead)"
+                                                        className={`w-full bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 placeholder-zinc-500`}
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => handleRemoveAssignment(index, aIndex)}
+                                                    className={`${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
+                                                >
+                                                    <Icons.X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {event.assignments.length === 0 && (
+                                            <div className={`text-center py-6 border border-dashed ${theme.canvas.border} rounded-lg ${theme.canvas.bg}`}>
+                                                <p className={`text-xs ${theme.text.secondary} italic`}>No team members assigned</p>
+                                                <button
+                                                    onClick={() => handleAddAssignment(index)}
+                                                    className="text-xs text-purple-400 hover:text-purple-300 mt-1.5"
+                                                >
+                                                    + Assign someone
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <SlideOver
@@ -999,38 +987,40 @@ const ProjectSlideOver = ({
                     )}
                 </div>
 
-                {/* Status */}
-                <div>
-                    <label className={`block text-sm ${theme.text.secondary} mb-1`}>Status</label>
-                    <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
-                        className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                    >
-                        {(config?.statusOptions || []).map(option => (
-                            <option key={option.id} value={option.id}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Status */}
+                    <div>
+                        <label className={`block text-sm ${theme.text.secondary} mb-1`}>Status</label>
+                        <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleChange}
+                            className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                        >
+                            {(config?.statusOptions || []).map(option => (
+                                <option key={option.id} value={option.id}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                {/* Lead Source */}
-                <div>
-                    <label className={`block text-sm ${theme.text.secondary} mb-1`}>Lead Source</label>
-                    <select
-                        name="lead_source"
-                        value={formData.lead_source}
-                        onChange={handleChange}
-                        className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                    >
-                        {(config?.leadSources || []).map(source => (
-                            <option key={source} value={source}>
-                                {source}
-                            </option>
-                        ))}
-                    </select>
+                    {/* Lead Source */}
+                    <div>
+                        <label className={`block text-sm ${theme.text.secondary} mb-1`}>Lead Source</label>
+                        <select
+                            name="lead_source"
+                            value={formData.lead_source}
+                            onChange={handleChange}
+                            className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                        >
+                            {(config?.leadSources || []).map(source => (
+                                <option key={source} value={source}>
+                                    {source}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 {/* Notes */}

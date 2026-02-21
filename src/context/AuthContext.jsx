@@ -72,6 +72,15 @@ export const AuthProvider = ({ children }) => {
         // Redirect handled by UI or ProtectedRoute
     };
 
+    // Update user data in state and localStorage (for profile edits)
+    const updateUser = (updates) => {
+        setUser(prev => {
+            const updated = { ...prev, ...updates };
+            localStorage.setItem('user_data', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
     // DEV ONLY: Login as any user by ID (bypasses Google)
     const devLogin = async (userId) => {
         try {
@@ -103,6 +112,7 @@ export const AuthProvider = ({ children }) => {
         loginWithGoogle,
         devLogin,
         logout,
+        updateUser,
         isAuthenticated: !!token,
     };
 

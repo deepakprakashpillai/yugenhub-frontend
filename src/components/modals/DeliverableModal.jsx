@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
+import DatePicker from '../ui/DatePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 /**
@@ -242,12 +243,11 @@ const DeliverableModal = ({
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-xs uppercase text-zinc-500 font-bold mb-1.5">Due Date</label>
-                    <input
-                        type="date"
-                        name="due_date"
+                    <DatePicker
                         value={formData.due_date}
-                        onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-amber-500"
+                        onChange={(val) => setFormData(p => ({ ...p, due_date: val }))}
+                        placeholder="Select date"
+                        className="w-full"
                     />
                 </div>
                 <div>

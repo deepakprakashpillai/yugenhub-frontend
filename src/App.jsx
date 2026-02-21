@@ -38,12 +38,12 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) return (
     <div
-      className={`flex flex-col md:flex-row h-screen w-full`}
+      className={`flex flex-col md:flex-row h-[100dvh] w-full`}
       style={{ backgroundColor: getBgColor() }}
     >
       {/* Mobile Header Skeleton */}
-      <div className={`md:hidden flex items-center justify-between h-14 px-4 border-b ${theme.canvas.sidebar} ${theme.canvas.border}`}>
-        <Skeleton className="h-5 w-5" />
+      <div className={`md:hidden flex items-center justify-between h-[72px] px-4 border-b ${theme.canvas.sidebar} ${theme.canvas.border}`}>
+        <Skeleton className="h-7 w-7" />
         <Skeleton className="h-4 w-20" />
         <div className="flex gap-2">
           <Skeleton className="h-5 w-5" />
@@ -88,7 +88,7 @@ const ProtectedRoute = ({ children }) => {
       />
 
       {/* CONTENT AREA */}
-      <main className="flex-1 h-screen overflow-y-auto flex flex-col">
+      <main id="main-scroll-container" className="flex-1 h-[100dvh] overflow-y-auto flex flex-col scroll-smooth">
         {/* Mobile Header - only renders on mobile */}
         <MobileHeader onMenuToggle={() => setSidebarOpen(true)} />
         <div className="flex-1">

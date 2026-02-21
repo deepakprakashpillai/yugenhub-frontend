@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Building2, Users, Workflow, Layers, Bell, Download, AlertTriangle,
-    GripVertical, IndianRupee
+    GripVertical, IndianRupee, UserCircle
 } from 'lucide-react';
 import { Icons } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
@@ -22,8 +22,10 @@ import ExportSection from '../components/settings/ExportSection';
 import TemplatesSection from '../components/settings/TemplatesSection';
 import AppearanceSection from '../components/settings/AppearanceSection';
 import FinanceSection from '../components/settings/FinanceSection';
+import AccountSection from '../components/settings/AccountSection';
 
 const SECTIONS = [
+    { id: 'account', label: 'My Account', icon: UserCircle, roles: ['owner', 'admin', 'member'] },
     { id: 'org', label: 'Organisation', icon: Building2, roles: ['owner', 'admin', 'member'] },
     { id: 'team', label: 'Team', icon: Users, roles: ['owner', 'admin', 'member'] },
     { id: 'appearance', label: 'Appearance', icon: Palette, roles: ['owner', 'admin', 'member'] },
@@ -40,7 +42,7 @@ function SettingsPage() {
     const { user } = useAuth();
     const { theme } = useTheme();
     const isMobile = useIsMobile();
-    const [activeSection, setActiveSection] = useState('org');
+    const [activeSection, setActiveSection] = useState('account');
     const role = user?.role || 'member';
     const scrollRef = useRef(null);
 
@@ -85,6 +87,7 @@ function SettingsPage() {
 
     const renderSection = () => {
         switch (activeSection) {
+            case 'account': return <AccountSection />;
             case 'org': return <OrgSection role={role} />;
             case 'team': return <TeamSection role={role} />;
             case 'appearance': return <AppearanceSection role={role} />;
