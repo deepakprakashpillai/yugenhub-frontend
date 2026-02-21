@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Icons } from './Icons';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -17,12 +18,39 @@ const PAGE_TITLES = {
 
 const MobileHeader = ({ onMenuToggle }) => {
     const { theme } = useTheme();
-    const { user, notificationCount } = useAuth();
+    const { notificationCount } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
+    const [isVisible, setIsVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const container = document.getElementById('main-scroll-container');
+        if (!container) return;
+
+        const handleScroll = () => {
+            const currentScrollY = container.scrollTop;
+
+            // If we are at the top, always show
+            if (currentScrollY < 50) {
+                setIsVisible(true);
+            } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                // Scrolling down -> hide
+                setIsVisible(false);
+            } else if (currentScrollY < lastScrollY) {
+                // Scrolling up -> show
+                setIsVisible(true);
+            }
+
+            setLastScrollY(currentScrollY);
+        };
+
+        container.addEventListener('scroll', handleScroll, { passive: true });
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY]);
+
     const pageTitle = PAGE_TITLES[location.pathname] || 'Yugen';
-    const initials = user?.name ? user.name.charAt(0).toUpperCase() : '?';
 
     const handleSearchClick = () => {
         // Trigger Command Palette via keyboard event
@@ -32,16 +60,17 @@ const MobileHeader = ({ onMenuToggle }) => {
 
     return (
         <header
-            className={`md:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 border-b backdrop-blur-xl ${theme.canvas.sidebar} ${theme.canvas.border}`}
+            className={`md:hidden sticky top-0 z-50 flex items-center justify-between h-[72px] px-4 border-b backdrop-blur-xl ${theme.canvas.sidebar} ${theme.canvas.border} transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
             style={{ WebkitBackdropFilter: 'blur(20px)', backdropFilter: 'blur(20px)' }}
         >
             {/* Left: Hamburger */}
             <button
+                type="button"
                 onClick={onMenuToggle}
-                className={`p-2 -ml-1 rounded-xl ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
+                className={`relative z-50 p-3 -ml-2 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
                 aria-label="Open navigation menu"
             >
-                <Icons.Menu className="w-5 h-5" />
+                <Icons.Menu className="w-7 h-7 pointer-events-none" />
             </button>
 
             {/* Center: Page title */}
@@ -53,20 +82,22 @@ const MobileHeader = ({ onMenuToggle }) => {
             <div className="flex items-center gap-1">
                 {/* Search / Command Palette trigger */}
                 <button
+                    type="button"
                     onClick={handleSearchClick}
-                    className={`p-2 rounded-xl ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
+                    className={`relative z-50 p-3 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
                     aria-label="Search"
                 >
-                    <Search className="w-4 h-4" />
+                    <Search className="w-5 h-5 pointer-events-none" />
                 </button>
 
                 {/* Notifications */}
                 <button
+                    type="button"
                     onClick={() => navigate('/notifications')}
-                    className={`p-2 rounded-xl ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all relative`}
+                    className={`relative z-50 p-3 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
                     aria-label="Notifications"
                 >
-                    <Bell className="w-4 h-4" />
+                    <Bell className="w-5 h-5 pointer-events-none" />
                     {notificationCount > 0 && (
                         <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                     )}

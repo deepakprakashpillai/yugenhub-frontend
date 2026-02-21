@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import { googleLogout } from '@react-oauth/google';
 
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [notificationCount, setNotificationCount] = useState(0);
 
-    const refreshNotifications = async () => {
+    const refreshNotifications = useCallback(async () => {
         if (!user?.id) return;
         try {
             const res = await api.get('/notifications/unread-count');
@@ -20,20 +21,20 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error('Failed to fetch notifications', err);
         }
-    };
+    }, [user?.id]);
 
     useEffect(() => {
         // On mount, check if we have a token and valid user data
         const storedUser = localStorage.getItem('user_data');
         if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
+            setTimeout(() => setUser(JSON.parse(storedUser)), 0);
         }
-        setLoading(false);
+        setTimeout(() => setLoading(false), 0);
     }, [token]);
 
     useEffect(() => {
-        if (user?.id) refreshNotifications();
-    }, [user?.id]);
+        if (user?.id) setTimeout(() => refreshNotifications(), 0);
+    }, [user?.id, refreshNotifications]);
 
     const loginWithGoogle = async (googleData) => {
         try {
@@ -71,6 +72,15 @@ export const AuthProvider = ({ children }) => {
         // Redirect handled by UI or ProtectedRoute
     };
 
+    // Update user data in state and localStorage (for profile edits)
+    const updateUser = (updates) => {
+        setUser(prev => {
+            const updated = { ...prev, ...updates };
+            localStorage.setItem('user_data', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
     // DEV ONLY: Login as any user by ID (bypasses Google)
     const devLogin = async (userId) => {
         try {
@@ -102,6 +112,7 @@ export const AuthProvider = ({ children }) => {
         loginWithGoogle,
         devLogin,
         logout,
+        updateUser,
         isAuthenticated: !!token,
     };
 

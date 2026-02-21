@@ -12,7 +12,7 @@
           // Match these colors to theme.js defaults
           const bg = mode === 'light' ? '#fdf4ff' : '#000000';
           document.documentElement.style.backgroundColor = bg;
-          document.body.style.backgroundColor = bg;
+          if (document.body) document.body.style.backgroundColor = bg;
         } catch (e) {
           console.error(e);
         }

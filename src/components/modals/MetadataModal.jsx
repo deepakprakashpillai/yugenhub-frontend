@@ -2,31 +2,23 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import DatePicker from '../ui/DatePicker';
 
-// Field type definitions for different verticals
+// Field type definitions for different verticals — core fields only
 const VERTICAL_FIELDS = {
     knots: [
         { name: 'side', label: 'Side', type: 'select', options: ['Groom', 'Bride', 'Both'] },
+        { name: 'religion', label: 'Religion', type: 'select', options: ['Hindu', 'Christian', 'Muslim', 'Other'] },
         { name: 'groom_name', label: 'Groom Name', type: 'text' },
         { name: 'bride_name', label: 'Bride Name', type: 'text' },
         { name: 'groom_number', label: 'Groom Phone', type: 'text' },
         { name: 'bride_number', label: 'Bride Phone', type: 'text' },
-        { name: 'groom_age', label: 'Groom Age', type: 'number' },
-        { name: 'bride_age', label: 'Bride Age', type: 'number' },
-        { name: 'groom_location', label: 'Groom Location', type: 'text' },
-        { name: 'bride_location', label: 'Bride Location', type: 'text' },
-        { name: 'wedding_style', label: 'Wedding Style', type: 'select', options: ['Traditional', 'Modern', 'Destination', 'Intimate'] },
         { name: 'wedding_date', label: 'Wedding Date', type: 'date' }
     ],
     pluto: [
         { name: 'child_name', label: 'Child Name', type: 'text' },
         { name: 'child_age', label: 'Child Age', type: 'number' },
-        { name: 'child_birthday', label: 'Birthday', type: 'date' },
-        { name: 'occasion_type', label: 'Occasion', type: 'select', options: ['Birthday', 'Baptism', 'Newborn'] },
-        { name: 'father_name', label: 'Father Name', type: 'text' },
-        { name: 'mother_name', label: 'Mother Name', type: 'text' },
-        { name: 'address', label: 'Address', type: 'textarea' },
-        { name: 'theme', label: 'Theme', type: 'text' }
+        { name: 'occasion_type', label: 'Occasion', type: 'select', options: ['Birthday', 'Baptism', 'Newborn'] }
     ],
     festia: [
         { name: 'event_scale', label: 'Event Scale', type: 'select', options: ['Private', 'Corporate', 'Mass'] },
@@ -50,7 +42,7 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
 
     useEffect(() => {
         if (isOpen && project?.metadata) {
-            setFormData({ ...project.metadata });
+            setTimeout(() => setFormData({ ...project.metadata }), 0);
         }
     }, [isOpen, project]);
 
@@ -97,12 +89,11 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
                 );
             case 'date':
                 return (
-                    <input
-                        type="date"
-                        name={field.name}
+                    <DatePicker
                         value={value ? value.slice(0, 10) : ''}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                        onChange={(val) => setFormData(prev => ({ ...prev, [field.name]: val }))}
+                        placeholder={`Select ${field.label.toLowerCase()}`}
+                        className="w-full"
                     />
                 );
             case 'number':

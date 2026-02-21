@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { THEME_VARIANTS } from '../theme';
 import { useAgencyConfig } from './AgencyConfigContext';
@@ -29,25 +30,29 @@ export const ThemeProvider = ({ children }) => {
             // Only apply config theme if NO local preference exists
             const localTheme = localStorage.getItem('theme_mode');
             if (!localTheme && config.theme_mode) {
-                setThemeMode(config.theme_mode);
+                setTimeout(() => setThemeMode(config.theme_mode), 0);
             }
 
             // Accents are always Org-controlled for now
-            setAccentColor(config.accent_color || '#ef4444');
+            setTimeout(() => setAccentColor(config.accent_color || '#ef4444'), 0);
         }
     }, [config]);
 
-    // Apply 'dark' class to html element
+    // Apply mode class and CSS variables to HTML element
     useEffect(() => {
         const root = window.document.documentElement;
         console.log('ThemeContext: Setting theme mode to', themeMode); // DEBUG
         root.classList.remove('light', 'dark');
         root.classList.add(themeMode);
 
+        // Set global accent variables
+        root.style.setProperty('--accent', accentColor);
+        root.style.setProperty('--accent-glow', `${accentColor}26`); // Approx 15% opacity
+
         // Also ensure body has it, just in case cmdk portals there and needs inheritance
         document.body.classList.remove('light', 'dark');
         document.body.classList.add(themeMode);
-    }, [themeMode]);
+    }, [themeMode, accentColor]);
 
     // Construct the active theme object
     const theme = useMemo(() => {

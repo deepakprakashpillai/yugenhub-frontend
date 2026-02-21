@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import api from '../api/axios';
@@ -7,6 +7,7 @@ import { Icons } from '../components/Icons';
 import SkeletonCard from '../components/SkeletonCard';
 import EmptyState from '../components/EmptyState';
 import clsx from 'clsx';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { AssociateModal } from '../components/modals';
@@ -158,7 +159,7 @@ const AssociatesPage = () => {
         setPage(1);
     }, [debouncedSearch, roleFilter, typeFilter, statusFilter]);
 
-    const fetchAssociates = async () => {
+    const fetchAssociates = useCallback(async () => {
         setLoading(true);
         try {
             const params = {
@@ -178,11 +179,11 @@ const AssociatesPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, debouncedSearch, roleFilter, typeFilter, statusFilter]);
 
     useEffect(() => {
         fetchAssociates();
-    }, [page, debouncedSearch, roleFilter, typeFilter, statusFilter]);
+    }, [fetchAssociates]);
 
     const toggleDropdown = (name) => {
         setActiveDropdown(activeDropdown === name ? null : name);

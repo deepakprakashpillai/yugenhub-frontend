@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Icons } from '../Icons';
 import api from '../../api/axios';
 import { toast } from 'sonner';
@@ -14,7 +14,7 @@ const TemplatesSection = () => {
     const [modal, setModal] = useState({ open: false, mode: 'create', template: null });
     const [filterVertical, setFilterVertical] = useState('all');
 
-    const fetchTemplates = async () => {
+    const fetchTemplates = useCallback(async () => {
         setLoading(true);
         try {
             const params = filterVertical !== 'all' ? { vertical: filterVertical } : {};
@@ -26,11 +26,11 @@ const TemplatesSection = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filterVertical]);
 
     useEffect(() => {
         fetchTemplates();
-    }, [filterVertical]);
+    }, [filterVertical, fetchTemplates]);
 
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this template?")) return;

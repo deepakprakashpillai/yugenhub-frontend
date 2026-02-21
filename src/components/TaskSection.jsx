@@ -7,6 +7,8 @@ import TaskTable from './TaskTable';
 import SkeletonCard from './SkeletonCard';
 import EmptyState from './EmptyState';
 import clsx from 'clsx';
+ 
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TaskSection = ({
@@ -54,15 +56,21 @@ const TaskSection = ({
 
     useEffect(() => {
         fetchTasks();
+     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, showCompleted, refreshTrigger, JSON.stringify(fetchParams)]);
 
     // Reset page when toggle changes
     useEffect(() => {
         setPage(1);
+     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showCompleted, JSON.stringify(fetchParams)]);
 
     // Enrich task (helper)
-    const enrichTask = (task) => {
+     
+// eslint-disable-next-line no-unused-vars
+const enrichTask = (task) => {
         // Project info is already in the task object or can be derived? 
         // The backend doesn't populate project info extensively, but for basic display it might be enough if added.
         // Actually current backend just returns task fields. 

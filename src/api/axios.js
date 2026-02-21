@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api', // FastAPI Backend URL
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api', // FastAPI Backend URL
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,7 +33,7 @@ api.interceptors.response.use(
       console.warn("Unauthorized! Redirecting to login...");
       localStorage.removeItem('access_token');
       localStorage.removeItem('user_data');
-      window.location.href = '/login'; 
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

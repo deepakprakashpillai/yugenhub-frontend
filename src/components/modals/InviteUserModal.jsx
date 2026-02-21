@@ -1,15 +1,41 @@
-import { useState } from 'react';
-import { Mail, Shield, UserPlus, X, ChevronRight, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Mail, Shield, UserPlus, X, ChevronRight, Briefcase } from 'lucide-react';
 import api from '../../api/axios';
 import { toast } from 'sonner';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
+
+// Fallback roles if config hasn't loaded
+const FALLBACK_ROLES = [
+    { id: 'photographer', label: 'Photographer' },
+    { id: 'cinematographer', label: 'Cinematographer' },
+    { id: 'editor', label: 'Editor' },
+    { id: 'drone_pilot', label: 'Drone Pilot' },
+    { id: 'lead', label: 'Lead' },
+    { id: 'assistant', label: 'Assistant' },
+];
 
 export default function InviteUserModal({ isOpen, onClose, onInvited }) {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('member');
+    const [associateRole, setAssociateRole] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const rawRoles = config?.associateRoles?.length > 0 ? config.associateRoles : FALLBACK_ROLES;
+    // Normalize: config may return plain strings or {id, label} objects
+    const availableRoles = rawRoles.map(r => typeof r === 'string' ? { id: r, label: r } : r);
+
+    // Set default associate role when available
+    useEffect(() => {
+        if (!associateRole && availableRoles.length > 0) {
+            const leadRole = availableRoles.find(r => r.label === 'Lead');
+            setAssociateRole(leadRole ? leadRole.label : availableRoles[0].label);
+        }
+    }, [availableRoles, associateRole]);
 
     if (!isOpen) return null;
 
@@ -19,10 +45,15 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
 
         setLoading(true);
         try {
-            await api.post('/settings/team/invite', { email: email.trim(), role });
+            await api.post('/settings/team/invite', {
+                email: email.trim(),
+                role,
+                associate_role: associateRole || 'Lead',
+            });
             toast.success(`Invitation sent to ${email}`);
             setEmail('');
             setRole('member');
+            setAssociateRole('');
             onInvited?.();
             onClose();
         } catch (err) {
@@ -74,9 +105,9 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
                         </div>
                     </div>
 
-                    {/* Role Selection */}
+                    {/* Team Role Selection */}
                     <div className="space-y-2">
-                        <label className={`text-xs font-semibold ${theme.text.secondary} uppercase tracking-wide`}>Role</label>
+                        <label className={`text-xs font-semibold ${theme.text.secondary} uppercase tracking-wide`}>Team Role</label>
                         <div className="grid grid-cols-1 gap-2">
                             {[
                                 { value: 'member', label: 'Member', desc: 'Can view projects, track time, and manage assigned tasks.' },
@@ -113,6 +144,26 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
                         </div>
                     </div>
 
+                    {/* Associate Role Picker */}
+                    <div className="space-y-2">
+                        <label className={`text-xs font-semibold ${theme.text.secondary} uppercase tracking-wide flex items-center gap-1.5`}>
+                            <Briefcase size={12} />
+                            Associate Role
+                        </label>
+                        <p className={`text-[10px] ${theme.text.secondary} -mt-1`}>
+                            This member will also be added as an in-house associate with this role.
+                        </p>
+                        <select
+                            value={associateRole}
+                            onChange={e => setAssociateRole(e.target.value)}
+                            className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-3 text-sm ${theme.text.primary} focus:outline-none focus:border-zinc-700 transition-all cursor-pointer`}
+                        >
+                            {availableRoles.map(r => (
+                                <option key={r.id || r.label} value={r.label}>{r.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="pt-2 flex gap-3">
                         <button
                             type="button"
@@ -124,7 +175,7 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
                         <button
                             type="submit"
                             disabled={loading || !email.trim()}
-                            className={`flex-1 ${theme.text.inverse} bg-white text-black px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-zinc-200 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/5`}
+                            className={`flex-1 ${theme.text.inverse} bg-accent text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:brightness-110 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20`}
                         >
                             {loading ? (
                                 <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />

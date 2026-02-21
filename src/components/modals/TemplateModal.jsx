@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icons } from '../Icons';
 import api from '../../api/axios';
@@ -32,12 +33,26 @@ export const TemplateModal = ({
     const [selectedTemplateId, setSelectedTemplateId] = useState(null);
     const [filterVertical, setFilterVertical] = useState(initialVertical || 'all');
 
+    const fetchTemplates = useCallback(async () => {
+        setLoading(true);
+        try {
+            const params = filterVertical !== 'all' ? { vertical: filterVertical } : {};
+            const res = await api.get('/templates', { params });
+            setTemplates(res.data);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to load templates");
+        } finally {
+            setLoading(false);
+        }
+    }, [filterVertical]);
+
     // Fetch Templates for Selection
     useEffect(() => {
         if (isOpen && mode === 'select') {
             fetchTemplates();
         }
-    }, [isOpen, mode, filterVertical]);
+    }, [isOpen, mode, filterVertical, fetchTemplates]);
 
     // Initialize Form for Edit or Save as Template
     useEffect(() => {
@@ -84,19 +99,7 @@ export const TemplateModal = ({
         }
     }, [isOpen, mode, template, initialVertical, projectId]);
 
-    const fetchTemplates = async () => {
-        setLoading(true);
-        try {
-            const params = filterVertical !== 'all' ? { vertical: filterVertical } : {};
-            const res = await api.get('/templates', { params });
-            setTemplates(res.data);
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to load templates");
-        } finally {
-            setLoading(false);
-        }
-    };
+
 
     const handleSave = async () => {
         if (!formData.name) {
@@ -167,7 +170,7 @@ export const TemplateModal = ({
                                 <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
                                     <button
                                         onClick={() => setFilterVertical('all')}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filterVertical === 'all' ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filterVertical === 'all' ? 'bg-accent text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
                                             }`}
                                     >
                                         All Verticals
@@ -176,7 +179,7 @@ export const TemplateModal = ({
                                         <button
                                             key={v.id}
                                             onClick={() => setFilterVertical(v.id)}
-                                            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filterVertical === v.id ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                                            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filterVertical === v.id ? 'bg-accent text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
                                                 }`}
                                         >
                                             {v.label}
@@ -301,7 +304,7 @@ export const TemplateModal = ({
                         <button
                             onClick={handleSelect}
                             disabled={!selectedTemplateId}
-                            className="px-6 py-2 bg-white text-black rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 bg-accent text-white rounded-lg text-sm font-bold hover:brightness-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Import Selected
                         </button>
@@ -309,7 +312,7 @@ export const TemplateModal = ({
                         <button
                             onClick={handleSave}
                             disabled={loading}
-                            className="px-6 py-2 bg-white text-black rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                            className="px-6 py-2 bg-accent text-white rounded-lg text-sm font-bold hover:brightness-110 transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Saving...' : (mode === 'edit' ? 'Update Template' : 'Create Template')}
                         </button>

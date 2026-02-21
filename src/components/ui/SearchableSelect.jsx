@@ -26,7 +26,7 @@ const SearchableSelect = ({
     useEffect(() => {
         // Reset search when closed
         if (!isOpen) {
-            setSearchTerm('');
+            setTimeout(() => setSearchTerm(''), 0);
         }
     }, [isOpen]);
 
@@ -78,8 +78,8 @@ const SearchableSelect = ({
                             <div
                                 key={option.value}
                                 className={`relative cursor-pointer select-none py-2 pl-3 pr-9 transition-colors ${option.value === value
-                                        ? 'bg-indigo-600/10 text-indigo-500'
-                                        : `text-gray-700 hover:${theme.canvas.hover} dark:text-gray-300`
+                                    ? 'bg-indigo-600/10 text-indigo-500'
+                                    : `text-gray-700 hover:${theme.canvas.hover} dark:text-gray-300`
                                     }`}
                                 onClick={() => {
                                     onChange(option.value);

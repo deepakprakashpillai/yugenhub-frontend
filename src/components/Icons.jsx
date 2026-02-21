@@ -11,6 +11,7 @@ import {
     ChevronDown,
     ChevronUp,
     MoreVertical,
+    MoreHorizontal,
     X,
     Phone,
     Mail,
@@ -59,7 +60,13 @@ import {
     ListTodo,
     CircleDollarSign,
     Settings,
-    Menu
+    Menu,
+    GripVertical,
+    Timer,
+    Ban,
+    Eye,
+    Columns3,
+    UserCircle
 } from 'lucide-react';
 
 export const Icons = {
@@ -138,5 +145,12 @@ export const Icons = {
     ArrowUpRight,
     LayoutTemplate,
     Download,
-    Menu
+    Menu,
+    GripVertical,
+    Timer,
+    Ban,
+    Eye,
+    Columns: Columns3,
+    MoreHorizontal,
+    UserCircle
 };

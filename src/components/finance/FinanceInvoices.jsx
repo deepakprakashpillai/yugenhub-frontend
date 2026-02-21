@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getInvoices, createInvoice, getClientLedger } from '../../api/finance';
-import { getClients } from '../../api/clients';
+import { getInvoices } from '../../api/finance';
 import { getProjects } from '../../api/projects';
 import { useTheme } from '../../context/ThemeContext';
 import { FileText, Plus, Trash, Eye, Edit2, ChevronDown, ChevronUp, History } from 'lucide-react';

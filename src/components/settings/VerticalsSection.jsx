@@ -5,6 +5,7 @@ import {
     Settings, Shield, ChevronRight, Activity,
     Save, Gem, Baby, Briefcase, CornerDownRight
 } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../api/axios';
@@ -20,14 +21,14 @@ const SYSTEM_FIELDS_CONFIG = {
         color: 'rose',
         fields: [
             { label: 'Client Side', type: 'select', locked: true },
+            { label: 'Religion', type: 'select', locked: true },
             { label: 'Groom Name', type: 'text', locked: true },
             { label: 'Bride Name', type: 'text', locked: true },
             { label: 'Groom Contact', type: 'tel', locked: true },
             { label: 'Bride Contact', type: 'tel', locked: true },
-            { label: 'Date', type: 'date', locked: true },
-            { label: 'Wedding Style', type: 'text', locked: true },
+            { label: 'Wedding Date', type: 'date', locked: true },
         ],
-        keys: ['client_side', 'groom_name', 'bride_name', 'groom_number', 'bride_number', 'wedding_date', 'wedding_style', 'groom_age', 'bride_age', 'religion', 'groom_location', 'bride_location']
+        keys: ['client_side', 'side', 'religion', 'groom_name', 'bride_name', 'groom_number', 'bride_number', 'wedding_date']
     },
     children: {
         label: 'Children',
@@ -38,10 +39,8 @@ const SYSTEM_FIELDS_CONFIG = {
             { label: 'Child Name', type: 'text', locked: true },
             { label: 'Age', type: 'number', locked: true },
             { label: 'Occasion', type: 'select', locked: true },
-            { label: 'Parents', type: 'text', locked: true },
-            { label: 'Address', type: 'text', locked: true },
         ],
-        keys: ['child_name', 'child_age', 'occasion_type', 'mother_name', 'father_name', 'address']
+        keys: ['child_name', 'child_age', 'occasion_type']
     },
     general: {
         label: 'General',
@@ -56,12 +55,22 @@ const SYSTEM_FIELDS_CONFIG = {
     }
 };
 
+const EVENT_CORE_FIELDS = [
+    { label: 'Event Type', type: 'text', locked: true },
+    { label: 'Start Date', type: 'date', locked: true },
+    { label: 'Start Time', type: 'time', locked: true },
+    { label: 'End Date', type: 'date', locked: true },
+    { label: 'End Time', type: 'time', locked: true },
+    { label: 'Venue Name', type: 'text', locked: true },
+    { label: 'Venue Location', type: 'text', locked: true },
+];
+
 const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete, isCreating = false, canEdit = false }) => {
     const { theme } = useTheme();
-    // Local state for editing to prevent global re-renders
     const [draft, setDraft] = useState(vertical);
     const [newField, setNewField] = useState({ name: '', label: '', type: 'text', options: '' });
     const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState('project'); // 'project' or 'event'
 
     useEffect(() => {
         setDraft(vertical);
@@ -73,6 +82,8 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
 
     // Filter out system fields from custom fields list to avoid duplicates
     const customFields = draft.fields?.filter(f => !systemConfig.keys.includes(f.name)) || [];
+    const customEventFields = draft.event_fields || [];
+    const activeFields = activeTab === 'project' ? customFields : customEventFields;
 
     const handleAddField = () => {
         if (!newField.label.trim()) return;
@@ -81,8 +92,11 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
         const name = label.toLowerCase().replace(/\s+/g, '_');
 
         // Prevent duplicate names
-        if (customFields.find(f => f.name === name) || systemConfig.keys.includes(name)) {
-            toast.error('Field with this name already exists');
+        const existingInProject = customFields.find(f => f.name === name) || systemConfig.keys.includes(name);
+        const existingInEvent = customEventFields.find(f => f.name === name);
+
+        if ((activeTab === 'project' && existingInProject) || (activeTab === 'event' && existingInEvent)) {
+            toast.error('Field with this name already exists in this section');
             return;
         }
 
@@ -102,17 +116,20 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
             fieldObj.options = opts;
         }
 
-        const updatedFields = [...(draft.fields || []), fieldObj];
-
-        setDraft({ ...draft, fields: updatedFields });
+        if (activeTab === 'project') {
+            setDraft({ ...draft, fields: [...(draft.fields || []), fieldObj] });
+        } else {
+            setDraft({ ...draft, event_fields: [...(draft.event_fields || []), fieldObj] });
+        }
         setNewField({ name: '', label: '', type: 'text', options: '' });
     };
 
     const handleRemoveField = (fieldName) => {
-        setDraft({
-            ...draft,
-            fields: draft.fields.filter(f => f.name !== fieldName)
-        });
+        if (activeTab === 'project') {
+            setDraft({ ...draft, fields: draft.fields.filter(f => f.name !== fieldName) });
+        } else {
+            setDraft({ ...draft, event_fields: (draft.event_fields || []).filter(f => f.name !== fieldName) });
+        }
     };
 
     const handleSave = async () => {
@@ -174,10 +191,12 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
                     <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                         <div className={`flex items-center gap-2 ${theme.text.secondary} mb-4`}>
                             <Shield size={14} className="text-emerald-500" />
-                            <h4 className="text-xs font-bold uppercase tracking-widest">Core Fields</h4>
+                            <h4 className="text-xs font-bold uppercase tracking-widest">
+                                {activeTab === 'project' ? 'Core Project Fields' : 'Core Event Fields'}
+                            </h4>
                         </div>
                         <div className="space-y-2">
-                            {systemConfig.fields.map((f, i) => (
+                            {(activeTab === 'project' ? systemConfig.fields : EVENT_CORE_FIELDS).map((f, i) => (
                                 <div key={i} className={`flex items-center justify-between p-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg`}>
                                     <div className="flex items-center gap-3">
                                         <Lock size={12} className={theme.text.secondary} />
@@ -202,12 +221,29 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
                 {/* RIGHT PANEL: Custom Fields */}
                 <div className={`flex-1 flex flex-col h-full bg-white dark:bg-zinc-900 border-l ${theme.canvas.border}`}>
                     <div className={`p-6 border-b ${theme.canvas.border} flex justify-between items-center ${theme.canvas.bg}`}>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                             <Settings size={16} className="text-blue-500" />
-                            <h4 className={`text-sm font-bold ${theme.text.primary} uppercase tracking-wider`}>Custom Fields Configuration</h4>
+                            <div className="flex flex-col gap-1">
+                                <h4 className={`text-sm font-bold ${theme.text.primary} uppercase tracking-wider`}>Custom Fields</h4>
+                                <div className={`text-[10px] ${theme.text.secondary}`}>
+                                    {activeFields.length} {activeTab === 'project' ? 'Project' : 'Event'} fields
+                                </div>
+                            </div>
                         </div>
-                        <div className={`text-xs ${theme.text.secondary}`}>
-                            {customFields.length} custom fields
+                        {/* Tabs */}
+                        <div className={`flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1`}>
+                            <button
+                                onClick={() => setActiveTab('project')}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex-1 ${activeTab === 'project' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'}`}
+                            >
+                                Project Metadata
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('event')}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex-1 ${activeTab === 'event' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'}`}
+                            >
+                                Event Fields
+                            </button>
                         </div>
                     </div>
 
@@ -259,14 +295,14 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
 
                     {/* Scrollable List */}
                     <div className={`flex-1 overflow-y-auto p-6 ${theme.canvas.bg} custom-scrollbar`}>
-                        {customFields.length === 0 ? (
+                        {activeFields.length === 0 ? (
                             <div className={`h-full flex flex-col items-center justify-center ${theme.text.secondary} space-y-2 border border-dashed ${theme.canvas.border} rounded-xl`}>
                                 <List size={24} className={theme.text.secondary} />
-                                <p className="text-sm">No custom fields added yet</p>
+                                <p className="text-sm">No {activeTab} custom fields added yet</p>
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {customFields.map((f, i) => (
+                                {activeFields.map((f, i) => (
                                     <motion.div
                                         key={f.name}
                                         layout
@@ -426,17 +462,17 @@ function VerticalsSection({ role }) {
     // Derived state for creating new vertical
     const isCreating = editingId === 'new';
 
-    useEffect(() => {
-        fetchVerticals();
-    }, []);
-
-    const fetchVerticals = () => {
+    function fetchVerticals() {
         setLoading(true);
         api.get('/settings/verticals').then(r => {
             setVerticals(r.data.verticals || []);
             setLoading(false);
         });
-    };
+    }
+
+    useEffect(() => {
+        setTimeout(() => fetchVerticals(), 0);
+    }, []);
 
     const handleSaveVertical = async (updatedVertical) => {
         try {
@@ -477,7 +513,7 @@ function VerticalsSection({ role }) {
             setEditingId(null);
             await refreshConfig();
             toast.success('Vertical Deleted');
-        } catch (err) {
+        } catch {
             toast.error('Failed to delete');
         }
     };

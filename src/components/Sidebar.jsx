@@ -14,6 +14,8 @@ import {
   Settings,
   X
 } from 'lucide-react';
+
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { AGENCY_CONFIG } from '../config';
 import { useAuth } from '../context/AuthContext';
@@ -47,6 +49,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
     if (isMobile && onClose) {
       onClose();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPath]);
 
   const handleLogout = () => {
@@ -116,7 +119,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
   );
 
   const sidebarContent = (
-    <aside className={`w-64 border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen ${isMobile ? '' : 'sticky top-0'} ${theme.canvas?.sidebar || "bg-black"}`}>
+    <aside className={`${isMobile ? 'w-[80vw] max-w-[320px]' : 'w-64'} border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen ${isMobile ? '' : 'sticky top-0'} ${theme.canvas?.sidebar || "bg-black"}`}>
 
       <div className="p-6 pb-4 flex items-center justify-between">
         <h1 className={(theme.text?.heading || "") + ` ${theme.text.primary}`}>

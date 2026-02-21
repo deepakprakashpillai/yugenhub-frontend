@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { AnimatePresence } from 'framer-motion';
@@ -135,7 +135,7 @@ const VerticalPage = ({ vertical, title }) => {
 
             setProjects(prev => [savedProject, ...prev]);
             toast.success(`Project ${savedProject.code} created successfully!`);
-            setShowAddSlideOver(false);
+            setProjectSlideOver(false);
             setRefreshTrigger(p => p + 1);
 
         } catch (err) {

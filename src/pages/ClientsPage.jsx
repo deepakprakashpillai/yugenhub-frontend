@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import api from '../api/axios';
 import StatsHeader from '../components/StatsHeader';
 import { Icons } from '../components/Icons';
 import SkeletonCard from '../components/SkeletonCard';
 import EmptyState from '../components/EmptyState';
 import clsx from 'clsx';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { ClientModal } from '../components/modals';
@@ -162,7 +163,7 @@ const ClientsPage = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const fetchClients = async () => {
+    const fetchClients = useCallback(async () => {
         setLoading(true);
         try {
             const params = { page, limit: LIMIT, search: debouncedSearch };
@@ -177,11 +178,11 @@ const ClientsPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, debouncedSearch, typeFilter, sort]);
 
     useEffect(() => {
         fetchClients();
-    }, [page, debouncedSearch, typeFilter, sort]);
+    }, [fetchClients]);
 
     const toggleDropdown = (name) => {
         setActiveDropdown(activeDropdown === name ? null : name);

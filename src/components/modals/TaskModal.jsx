@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import api from '../../api/axios';
 import clsx from 'clsx';
 import Select from '../ui/Select';
+import DatePicker from '../ui/DatePicker';
 import { useAuth } from '../../context/AuthContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -44,6 +45,19 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
 
     // Internal Users State (Bypass parent prop if needed)
     const [fetchedUsers, setFetchedUsers] = useState([]);
+
+    const fetchHistory = useCallback(async () => {
+        if (!task) return;
+        setHistoryLoading(true);
+        try {
+            const res = await api.get(`/tasks/${task.id}/history`);
+            setHistory(res.data);
+        } catch (err) {
+            console.error("Failed to fetch history", err);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, [task]);
 
     // Initialize formData when modal opens or task changes
     useEffect(() => {
@@ -101,7 +115,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 })
                 .catch(err => console.error("Modal user fetch failed", err));
         }
-    }, [isOpen, task]);
+    }, [isOpen, task, fetchHistory]);
 
     // Fetch Projects when Vertical Changes
     useEffect(() => {
@@ -132,18 +146,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
         fetchProjects();
     }, [selectedVertical, isOpen]);
 
-    const fetchHistory = async () => {
-        if (!task) return;
-        setHistoryLoading(true);
-        try {
-            const res = await api.get(`/tasks/${task.id}/history`);
-            setHistory(res.data);
-        } catch (err) {
-            console.error("Failed to fetch history", err);
-        } finally {
-            setHistoryLoading(false);
-        }
-    };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -310,19 +313,14 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                             />
                         )}
 
-                        {/* Due Date (Native Picker styled minimally) */}
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                                <Icons.Calendar className={`w-4 h-4 ${theme.text.secondary} group-hover:${theme.text.primary}`} />
-                            </div>
-                            <input
-                                type="date"
-                                name="due_date"
-                                value={formData.due_date}
-                                onChange={handleChange}
-                                className={`pl-9 pr-3 py-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg text-sm ${theme.text.primary} focus:outline-none focus:border-purple-500 hover:${theme.canvas.hover} transition-colors w-36 cursor-pointer`}
-                            />
-                        </div>
+                        {/* Due Date (Calendar Picker) */}
+                        <DatePicker
+                            value={formData.due_date}
+                            onChange={(val) => handleSelectChange('due_date', val)}
+                            placeholder="Due Date"
+                            className="w-full md:w-44"
+                            icon={Icons.Calendar}
+                        />
                     </div>
                 </div>
 

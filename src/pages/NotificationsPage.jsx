@@ -29,7 +29,7 @@ const NotificationsPage = () => {
             }
         };
         fetchNotifications();
-    }, []);
+    }, [refreshNotifications]);
 
     const handleMarkAsRead = async (notificationId) => {
         try {

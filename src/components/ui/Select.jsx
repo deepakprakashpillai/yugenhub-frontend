@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
-import { AnimatePresence, motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
 /**

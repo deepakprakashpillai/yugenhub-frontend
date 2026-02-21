@@ -38,6 +38,8 @@ const AccountCard = ({ account, theme }) => {
 const FinanceAccounts = () => {
     const { theme } = useTheme();
     const [accounts, setAccounts] = useState([]);
+     
+    // eslint-disable-next-line no-unused-vars
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [newAccount, setNewAccount] = useState({ name: '', type: 'bank', opening_balance: 0 });

@@ -3,6 +3,8 @@ import SlideOver from './SlideOver';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
+import DatePicker from '../ui/DatePicker';
+import TimePicker from '../ui/TimePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 // Status Badge Component
@@ -64,11 +66,11 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
                         <option value="Completed">Completed</option>
                         <option value="Delivered">Delivered</option>
                     </select>
-                    <input
-                        type="date"
+                    <DatePicker
                         value={data.due_date?.slice(0, 10) || ''}
-                        onChange={(e) => setData({ ...data, due_date: e.target.value })}
-                        className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
+                        onChange={(val) => setData({ ...data, due_date: val })}
+                        placeholder="Due date"
+                        className="w-full"
                     />
                 </div>
                 <input
@@ -238,24 +240,28 @@ const EventSlideOver = ({
 
     useEffect(() => {
         if (isOpen && event) {
-            const start = parseDateTime(event.start_date);
-            const end = parseDateTime(event.end_date);
-            setFormData({
-                type: event.type || '',
-                venue_name: event.venue_name || '',
-                venue_location: event.venue_location || '',
-                start_date: start.date,
-                start_time: start.time,
-                end_date: end.date,
-                end_time: end.time,
-                notes: event.notes || ''
-            });
-            setDeliverables(event.deliverables || []);
-            setAssignments(event.assignments || []);
+            setTimeout(() => {
+                const start = parseDateTime(event.start_date);
+                const end = parseDateTime(event.end_date);
+                setFormData({
+                    type: event.type || '',
+                    venue_name: event.venue_name || '',
+                    venue_location: event.venue_location || '',
+                    start_date: start.date,
+                    start_time: start.time,
+                    end_date: end.date,
+                    end_time: end.time,
+                    notes: event.notes || ''
+                });
+                setDeliverables(event.deliverables || []);
+                setAssignments(event.assignments || []);
+            }, 0);
         } else if (isOpen) {
-            setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
-            setDeliverables([]);
-            setAssignments([]);
+            setTimeout(() => {
+                setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
+                setDeliverables([]);
+                setAssignments([]);
+            }, 0);
         }
     }, [isOpen, event]);
 
@@ -345,7 +351,7 @@ const EventSlideOver = ({
                                 className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs text-zinc-400 mb-1">Venue Name</label>
                                 <input
@@ -373,21 +379,19 @@ const EventSlideOver = ({
                         {/* Start Date/Time */}
                         <div>
                             <label className="block text-xs text-zinc-400 mb-1">Start Date</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="date"
-                                    name="start_date"
+                            <div className="grid grid-cols-2 gap-4">
+                                <DatePicker
                                     value={formData.start_date}
-                                    onChange={handleChange}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    onChange={(val) => setFormData(prev => ({ ...prev, start_date: val }))}
+                                    placeholder="Start date"
+                                    className="w-full"
                                 />
-                                <input
-                                    type="time"
-                                    name="start_time"
+                                <TimePicker
                                     value={formData.start_time}
-                                    onChange={handleChange}
+                                    onChange={(val) => setFormData(prev => ({ ...prev, start_time: val }))}
                                     placeholder="Time (optional)"
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    className="w-full"
+                                    inputClassName="bg-zinc-800 border-zinc-700 text-white focus:border-purple-500"
                                 />
                             </div>
                         </div>
@@ -395,21 +399,19 @@ const EventSlideOver = ({
                         {/* End Date/Time (Optional) */}
                         <div>
                             <label className="block text-xs text-zinc-400 mb-1">End Date <span className="text-zinc-600">(optional)</span></label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="date"
-                                    name="end_date"
+                            <div className="grid grid-cols-2 gap-4">
+                                <DatePicker
                                     value={formData.end_date}
-                                    onChange={handleChange}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    onChange={(val) => setFormData(prev => ({ ...prev, end_date: val }))}
+                                    placeholder="End date"
+                                    className="w-full"
                                 />
-                                <input
-                                    type="time"
-                                    name="end_time"
+                                <TimePicker
                                     value={formData.end_time}
-                                    onChange={handleChange}
+                                    onChange={(val) => setFormData(prev => ({ ...prev, end_time: val }))}
                                     placeholder="Time (optional)"
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    className="w-full"
+                                    inputClassName="bg-zinc-800 border-zinc-700 text-white focus:border-purple-500"
                                 />
                             </div>
                         </div>

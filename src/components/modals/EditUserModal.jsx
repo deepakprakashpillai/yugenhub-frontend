@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Save, X, Loader2 } from 'lucide-react';
 import api from '../../api/axios';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 
 export default function EditUserModal({ isOpen, onClose, user, onUpdated }) {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
@@ -116,7 +117,7 @@ export default function EditUserModal({ isOpen, onClose, user, onUpdated }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-white text-black px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-zinc-200 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/5"
+                            className="flex-1 bg-accent text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:brightness-110 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20"
                         >
                             {loading ? (
                                 <Loader2 size={16} className="animate-spin" />

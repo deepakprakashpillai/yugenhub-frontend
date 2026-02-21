@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 export default function RemoveUserModal({ isOpen, onClose, user, onRemoved }) {
     const [loading, setLoading] = useState(false);
     const [confirmName, setConfirmName] = useState('');
+    const [deactivateAssociate, setDeactivateAssociate] = useState(true);
 
     if (!isOpen || !user) return null;
 
@@ -14,7 +15,7 @@ export default function RemoveUserModal({ isOpen, onClose, user, onRemoved }) {
 
         setLoading(true);
         try {
-            await api.delete(`/settings/team/${user.id}`);
+            await api.delete(`/settings/team/${user.id}?deactivate_associate=${deactivateAssociate}`);
             toast.success(`${user.name} removed from team`);
             onRemoved?.();
             onClose();
@@ -83,6 +84,20 @@ export default function RemoveUserModal({ isOpen, onClose, user, onRemoved }) {
                             placeholder="Type name here..."
                         />
                     </div>
+
+                    {/* Deactivate Associate Toggle */}
+                    <label className="flex items-center gap-3 mt-4 p-3 bg-zinc-950/50 rounded-xl border border-zinc-800/50 cursor-pointer group">
+                        <input
+                            type="checkbox"
+                            checked={deactivateAssociate}
+                            onChange={e => setDeactivateAssociate(e.target.checked)}
+                            className="w-4 h-4 rounded border-zinc-700 bg-zinc-950 text-red-500 focus:ring-red-500/30 cursor-pointer"
+                        />
+                        <div>
+                            <div className="text-sm text-zinc-300 font-medium">Also deactivate linked associate</div>
+                            <div className="text-[10px] text-zinc-500 mt-0.5">If this member has an in-house associate record, it will be marked as inactive.</div>
+                        </div>
+                    </label>
 
                     <div className="flex gap-3 mt-6">
                         <button

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+ 
+// eslint-disable-next-line no-unused-vars
 import { getTransactions, createTransaction, getAccounts } from '../../api/finance';
 import { getAssociates } from '../../api/associates';
 import { getProjects } from '../../api/projects';

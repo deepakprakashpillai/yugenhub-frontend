@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import clsx from 'clsx';
+import DatePicker from '../ui/DatePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 /**
@@ -22,7 +23,7 @@ const DeliverableModal = ({
 
     useEffect(() => {
         if (isOpen) {
-            setViewMode(!!deliverable);
+            setTimeout(() => setViewMode(!!deliverable), 0);
         }
     }, [isOpen, deliverable]);
 
@@ -39,24 +40,24 @@ const DeliverableModal = ({
 
     useEffect(() => {
         if (isOpen && deliverable) {
-            setFormData({
+            setTimeout(() => setFormData({
                 title: deliverable.title || '',
                 quantity: deliverable.quantity || 1,
                 description: deliverable.description || '',
                 status: deliverable.status || 'Pending',
                 assigned_to: deliverable.assigned_to || '',
                 due_date: deliverable.due_date ? deliverable.due_date.split('T')[0] : '',
-            });
+            }), 0);
         } else if (isOpen) {
             // Reset for new deliverable
-            setFormData({
+            setTimeout(() => setFormData({
                 title: '',
                 quantity: 1,
                 description: '',
                 status: 'Pending',
                 assigned_to: '',
                 due_date: '',
-            });
+            }), 0);
         }
     }, [isOpen, deliverable]);
 
@@ -242,12 +243,11 @@ const DeliverableModal = ({
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-xs uppercase text-zinc-500 font-bold mb-1.5">Due Date</label>
-                    <input
-                        type="date"
-                        name="due_date"
+                    <DatePicker
                         value={formData.due_date}
-                        onChange={handleChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-amber-500"
+                        onChange={(val) => setFormData(p => ({ ...p, due_date: val }))}
+                        placeholder="Select date"
+                        className="w-full"
                     />
                 </div>
                 <div>

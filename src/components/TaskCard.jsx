@@ -1,3 +1,5 @@
+ 
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 import { Icons } from './Icons';
@@ -5,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 import { useTheme } from '../context/ThemeContext';
 
-const TaskCard = ({ task, onClick, onStatusChange }) => {
+const TaskCard = ({ task, onClick }) => {
     const { theme } = useTheme();
     // Helpers
     const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';

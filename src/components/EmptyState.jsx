@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 // import { Button } from './ui/button'; // Button component not created yet
 
