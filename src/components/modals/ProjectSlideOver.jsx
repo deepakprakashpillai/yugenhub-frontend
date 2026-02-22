@@ -606,16 +606,16 @@ const ProjectSlideOver = ({
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowTemplateModal(true)}
-                            className={`flex items-center gap-2 px-3 py-1.5 ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} rounded-lg text-xs font-medium transition-all hover:${theme.canvas.hover}`}
+                            className={`flex items-center gap-2 px-3 py-2 md:py-1.5 ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} rounded-lg text-xs font-medium transition-all hover:${theme.canvas.hover}`}
                         >
-                            <Icons.Download className="w-3.5 h-3.5" />
+                            <Icons.Download className="w-4 h-4 md:w-3.5 md:h-3.5" />
                             Import Template
                         </button>
                         <button
                             onClick={handleAddEvent}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
+                            className="flex items-center gap-2 px-3 py-2 md:py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
                         >
-                            <Icons.Plus className="w-3.5 h-3.5" />
+                            <Icons.Plus className="w-4 h-4 md:w-3.5 md:h-3.5" />
                             Add Event
                         </button>
                     </div>

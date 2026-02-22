@@ -90,7 +90,7 @@ const SlideOver = ({
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar md:pb-0 pb-20">
                             {children}
                         </div>
                     </motion.div>

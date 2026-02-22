@@ -23,6 +23,8 @@ const FinancePage = lazy(() => import('./pages/FinancePage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
 
+import BottomNav from './components/BottomNav';
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const { theme } = useTheme();
@@ -77,7 +79,7 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) return <Navigate to="/login" />;
 
   return (
-    <div className={`flex min-h-screen ${theme.canvas.bg} ${theme.text.primary}`}>
+    <div className={`flex min-h-[100dvh] ${theme.canvas.bg} ${theme.text.primary}`}>
       <CommandPalette />
 
       {/* SIDEBAR: Desktop = inline, Mobile = overlay drawer */}
@@ -88,13 +90,16 @@ const ProtectedRoute = ({ children }) => {
       />
 
       {/* CONTENT AREA */}
-      <main id="main-scroll-container" className="flex-1 h-[100dvh] overflow-y-auto flex flex-col scroll-smooth">
+      <main id="main-scroll-container" className="flex-1 h-[100dvh] overflow-y-auto flex flex-col scroll-smooth md:pb-0 pb-20">
         {/* Mobile Header - only renders on mobile */}
-        <MobileHeader onMenuToggle={() => setSidebarOpen(true)} />
+        <MobileHeader />
         <div className="flex-1">
           {children}
         </div>
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      <BottomNav onMenuClick={() => setSidebarOpen(true)} />
     </div>
   );
 };
