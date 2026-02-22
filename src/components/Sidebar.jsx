@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
 
   const renderNavGroup = (title, items, isVertical = false) => (
     <div className="mb-6">
-      <p className={(theme.text?.label || "") + " px-4 mb-3"}>{title}</p>
+      <p className={(theme.text?.label || "") + " px-4 mb-1.5 md:mb-3 text-[10px] md:text-xs"}>{title}</p>
       <div className="space-y-1">
         {items.map((item) => {
           const accent = theme.accents?.[item.id] || theme.accents?.default;
@@ -96,7 +96,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
                 border: isActivePath ? `1px solid ${accent.primary}44` : '1px solid transparent'
               }}
               className={`
-                ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-4 md:py-3 rounded-xl transition-all
+                ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
                 ${isActivePath
                   ? `font-black`
                   : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
@@ -108,9 +108,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
                   style={{ backgroundColor: accent.primary }}
                 />
               ) : (
-                <Icon size={16} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+                <Icon size={isMobile ? 14 : 16} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
               )}
-              <span className="text-sm md:text-sm">{item.label}</span>
+              <span className="text-xs md:text-sm">{item.label}</span>
             </NavLink>
           );
         })}
@@ -151,14 +151,14 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
               border: currentPath === '/' ? `1px solid ${theme.accents?.default?.primary}44` : '1px solid transparent'
             }}
             className={`
-              ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-4 md:py-3 rounded-xl transition-all
+              ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
               ${currentPath === '/'
                 ? `font-black`
                 : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
             `}
           >
-            <LayoutDashboard size={16} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
-            <span className="text-sm md:text-sm">DASHBOARD</span>
+            <LayoutDashboard size={isMobile ? 14 : 16} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+            <span className="text-xs md:text-sm">DASHBOARD</span>
           </NavLink>
         </div>
 
@@ -174,10 +174,10 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
             navigate('/notifications');
             if (isMobile) onClose();
           }}
-          className={`flex items-center gap-3 w-full text-left px-4 py-4 md:py-3 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
+          className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
         >
-          <Bell size={16} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
-          <span className={`${theme.text?.nav || ""} text-sm md:text-sm`}>{"NOTIFICATIONS"}</span>
+          <Bell size={isMobile ? 14 : 16} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className={`${theme.text?.nav || ""} text-xs md:text-sm`}>{"NOTIFICATIONS"}</span>
           {notificationCount > 0 && (
             <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               {notificationCount}
@@ -193,14 +193,14 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
             border: currentPath === '/settings' ? `1px solid ${theme.accents?.default?.primary}44` : '1px solid transparent'
           }}
           className={`
-            ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-4 md:py-3 rounded-xl transition-all
+            ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
             ${currentPath === '/settings'
               ? `font-black`
               : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
           `}
         >
-          <Settings size={16} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
-          <span className="text-sm md:text-sm">SETTINGS</span>
+          <Settings size={isMobile ? 14 : 16} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className="text-xs md:text-sm">SETTINGS</span>
         </NavLink>
       </div>
 
