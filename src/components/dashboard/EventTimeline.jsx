@@ -31,18 +31,18 @@ const EventTimeline = ({ events }) => {
 
                             {/* Date Circle */}
                             <div className={clsx(
-                                "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 z-10 border-[3px] shadow-xl transition-all duration-300",
-                                isNow ? "bg-purple-600 border-white/10 text-white shadow-purple-900/30 scale-105" : `${theme.canvas.card} ${theme.canvas.border} ${theme.text.secondary} group-hover:${theme.text.primary} group-hover:border-zinc-400`
+                                "w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 z-10 border-[3px] shadow-xl transition-all duration-300",
+                                isNow ? "bg-purple-600 border-white/10 text-white shadow-purple-900/30 md:scale-105" : `${theme.canvas.card} ${theme.canvas.border} ${theme.text.secondary} group-hover:${theme.text.primary} group-hover:border-zinc-400`
                             )}>
                                 <div className="flex flex-col items-center leading-none">
-                                    <span className="text-[10px] uppercase font-bold tracking-wider mb-0.5">{format(date, 'MMM')}</span>
-                                    <span className="text-xl font-black">{format(date, 'd')}</span>
+                                    <span className="text-[10px] uppercase font-bold tracking-wider mb-0 md:mb-0.5">{format(date, 'MMM')}</span>
+                                    <span className="text-lg md:text-xl font-black">{format(date, 'd')}</span>
                                 </div>
                             </div>
 
                             {/* Content Card */}
                             <div className={clsx(
-                                "flex-1 p-5 rounded-2xl border transition-all duration-300",
+                                "flex-1 p-4 md:p-5 rounded-2xl border transition-all duration-300",
                                 isNow
                                     ? "bg-gradient-to-r from-purple-500/10 to-transparent border-purple-500/20 shadow-lg shadow-purple-500/5"
                                     : `${theme.canvas.card} ${theme.canvas.border} hover:${theme.canvas.hover}`

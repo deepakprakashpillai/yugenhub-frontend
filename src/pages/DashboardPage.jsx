@@ -23,11 +23,11 @@ const DashboardPage = () => {
             <div className="fixed top-0 left-0 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-purple-900/20 rounded-full blur-[128px] pointer-events-none -translate-x-1/2 -translate-y-1/2 mix-blend-screen" />
             <div className="fixed bottom-0 right-0 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-blue-900/10 rounded-full blur-[128px] pointer-events-none translate-x-1/2 translate-y-1/2 mix-blend-screen" />
 
-            <div className="relative z-10 p-4 md:p-8 pb-20 max-w-[1600px] mx-auto space-y-10">
+            <div className="relative z-10 px-4 pt-4 md:p-8 pb-20 max-w-[1600px] mx-auto space-y-6 md:space-y-10">
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
                     <div>
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${theme.canvas.card} border ${theme.canvas.border} text-xs font-medium ${theme.text.secondary} mb-4 backdrop-blur-md`}>
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${theme.canvas.card} border ${theme.canvas.border} text-xs font-medium ${theme.text.secondary} mb-2 md:mb-4 backdrop-blur-md`}>
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                             System Operational
                         </div>

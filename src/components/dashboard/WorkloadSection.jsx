@@ -4,21 +4,21 @@ import { Icons } from '../Icons';
 const MyWorkload = ({ stats }) => {
     const { theme } = useTheme();
     return (
-        <div className="grid grid-cols-3 gap-4">
-            <div className={`p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} flex flex-col items-center justify-center text-center`}>
-                <span className={`text-3xl font-bold ${theme.text.primary} mb-1`}>{stats?.due_today || 0}</span>
-                <span className={`text-xs ${theme.text.secondary} font-medium`}>Due Today</span>
+        <div className="grid grid-cols-3 gap-2 md:gap-4">
+            <div className={`p-2 md:p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} flex flex-col items-center justify-center text-center`}>
+                <span className={`text-2xl md:text-3xl font-bold ${theme.text.primary} mb-0.5 md:mb-1`}>{stats?.due_today || 0}</span>
+                <span className={`text-[10px] md:text-xs ${theme.text.secondary} font-medium`}>Due Today</span>
             </div>
-            <div className={`p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} flex flex-col items-center justify-center text-center`}>
-                <span className={`text-3xl font-bold ${theme.text.primary} mb-1`}>{stats?.due_week || 0}</span>
-                <span className={`text-xs ${theme.text.secondary} font-medium`}>This Week</span>
+            <div className={`p-2 md:p-4 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} flex flex-col items-center justify-center text-center`}>
+                <span className={`text-2xl md:text-3xl font-bold ${theme.text.primary} mb-0.5 md:mb-1`}>{stats?.due_week || 0}</span>
+                <span className={`text-[10px] md:text-xs ${theme.text.secondary} font-medium`}>This Week</span>
             </div>
-            <div className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center ${stats?.overdue > 0 ? 'bg-red-500/10 border-red-500/30' : `${theme.canvas.card} ${theme.canvas.border}`
+            <div className={`p-2 md:p-4 rounded-xl border flex flex-col items-center justify-center text-center ${stats?.overdue > 0 ? 'bg-red-500/10 border-red-500/30' : `${theme.canvas.card} ${theme.canvas.border}`
                 }`}>
-                <span className={`text-3xl font-bold mb-1 ${stats?.overdue > 0 ? 'text-red-500' : theme.text.secondary}`}>
+                <span className={`text-2xl md:text-3xl font-bold mb-0.5 md:mb-1 ${stats?.overdue > 0 ? 'text-red-500' : theme.text.secondary}`}>
                     {stats?.overdue || 0}
                 </span>
-                <span className={`text-xs font-medium ${stats?.overdue > 0 ? 'text-red-400' : theme.text.secondary}`}>
+                <span className={`text-[10px] md:text-xs font-medium ${stats?.overdue > 0 ? 'text-red-400' : theme.text.secondary}`}>
                     Overdue
                 </span>
             </div>

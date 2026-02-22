@@ -12,7 +12,7 @@ const RecentActivity = ({ activities }) => {
     return (
         <div className="space-y-0">
             {activities.map((activity) => (
-                <div key={activity.id} className={`group flex gap-4 text-sm border-b ${theme.canvas.border} p-4 hover:${theme.canvas.hover} transition-colors first:rounded-t-2xl last:rounded-b-2xl last:border-0 items-start`}>
+                <div key={activity.id} className={`group flex gap-3 md:gap-4 text-sm border-b ${theme.canvas.border} p-3 md:p-4 hover:${theme.canvas.hover} transition-colors first:rounded-t-2xl last:rounded-b-2xl last:border-0 items-start`}>
                     <div className={`mt-1 p-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-full ${theme.text.secondary} group-hover:border-zinc-500 group-hover:text-purple-500 transition-colors shrink-0 shadow-sm`}>
                         <Icons.Activity className="w-4 h-4" />
                     </div>
