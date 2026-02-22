@@ -9,6 +9,7 @@ const EmptyState = ({
     title = "No records found",
     message = "Try adjusting your filters.",
     icon: Icon,
+    compact = false,
     action
 }) => {
     const { theme } = useTheme();
@@ -17,15 +18,15 @@ const EmptyState = ({
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed ${theme.canvas.border} rounded-3xl ${theme.canvas.bg} bg-opacity-20`}
+            className={`flex flex-col items-center justify-center ${compact ? 'py-8 px-4 rounded-2xl' : 'py-16 px-4 rounded-3xl'} text-center border-2 border-dashed ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-20`}
         >
             {Icon && (
-                <div className={`w-12 h-12 rounded-2xl ${theme.canvas.card} border ${theme.canvas.border} flex items-center justify-center mb-4 shadow-inner`}>
-                    <Icon className={`w-6 h-6 ${theme.text.secondary}`} />
+                <div className={`${compact ? 'w-10 h-10 rounded-xl mb-3' : 'w-12 h-12 rounded-2xl mb-4'} ${theme.canvas.card} border ${theme.canvas.border} flex items-center justify-center shadow-inner`}>
+                    <Icon className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} ${theme.text.secondary}`} />
                 </div>
             )}
-            <h3 className={`text-lg font-bold ${theme.text.primary} mb-1`}>{title}</h3>
-            <p className={`text-sm ${theme.text.secondary} max-w-sm mb-6`}>{message}</p>
+            <h3 className={`${compact ? 'text-base' : 'text-lg'} font-bold ${theme.text.primary} mb-1`}>{title}</h3>
+            <p className={`text-sm ${theme.text.secondary} max-w-sm ${compact ? 'mb-4' : 'mb-6'}`}>{message}</p>
 
             {action && (
                 action.to ? (

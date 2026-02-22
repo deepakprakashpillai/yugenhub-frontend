@@ -10,18 +10,18 @@ import { FINANCE_CATEGORIES, TRANSACTION_TYPES } from '../../constants';
 
 // eslint-disable-next-line
 const FinanceStatCard = ({ title, value, subtitle, icon: Icon, type, theme, onEdit, isEditable }) => (
-    <div className={`p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm relative group`}>
+    <div className={`p-3 sm:p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm relative group`}>
         <div className="flex justify-between items-start">
             <div>
-                <p className={`text-xs font-medium ${theme.text.secondary} uppercase tracking-wider`}>{title}</p>
-                <h3 className="text-2xl font-bold mt-1 flex items-center">
-                    <IndianRupee size={18} className="mr-0.5" />
+                <p className={`text-[10px] sm:text-xs font-medium ${theme.text.secondary} uppercase tracking-wider`}>{title}</p>
+                <h3 className="text-xl sm:text-2xl font-bold mt-0.5 sm:mt-1 flex items-center">
+                    <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 mr-0.5" />
                     {value?.toLocaleString('en-IN') || '0'}
                 </h3>
-                {subtitle && <p className={`text-xs mt-1 ${theme.text.secondary}`}>{subtitle}</p>}
+                {subtitle && <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${theme.text.secondary}`}>{subtitle}</p>}
             </div>
-            <div className={`p-2 rounded-lg ${type === 'positive' ? 'bg-green-50 text-green-600' : type === 'negative' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
-                <Icon size={18} />
+            <div className={`p-1.5 sm:p-2 rounded-lg ${type === 'positive' ? 'bg-green-50 text-green-600' : type === 'negative' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
         </div>
         {isEditable && (
@@ -202,8 +202,8 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {isEditingQuote ? (
-                    <div className={`p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm`}>
-                        <label className={`text-xs font-medium ${theme.text.secondary} uppercase tracking-wider block mb-2`}>
+                    <div className={`p-3 sm:p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm`}>
+                        <label className={`text-[10px] sm:text-xs font-medium ${theme.text.secondary} uppercase tracking-wider block mb-2`}>
                             Update Quote
                         </label>
                         <div className="space-y-2">
@@ -226,7 +226,7 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                                     onChange={(e) => setCreateQuoteRecord(e.target.checked)}
                                     className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
-                                <label htmlFor="createQuote" className={`text-xs ${theme.text.secondary} cursor-pointer select-none`}>Generate Quote Record</label>
+                                <label htmlFor="createQuote" className={`text-[10px] sm:text-xs ${theme.text.secondary} cursor-pointer select-none`}>Generate Quote Record</label>
                             </div>
                         </div>
                     </div>
@@ -238,13 +238,13 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                                 setCreateQuoteRecord(true); // Default check on first create
                                 setIsEditingQuote(true);
                             }}
-                            className={`p-4 rounded-xl border-2 border-dashed ${theme.canvas.border} hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all flex flex-col items-center justify-center text-center group`}
+                            className={`p-3 sm:p-4 rounded-xl border-2 border-dashed ${theme.canvas.border} hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all flex flex-col items-center justify-center text-center group`}
                         >
-                            <div className="p-2 rounded-full bg-indigo-100 text-indigo-600 mb-2 group-hover:scale-110 transition-transform">
-                                <Wallet size={20} />
+                            <div className="p-1.5 sm:p-2 rounded-full bg-indigo-100 text-indigo-600 mb-1 sm:mb-2 group-hover:scale-110 transition-transform">
+                                <Wallet className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
                             <span className={`text-sm font-bold ${theme.text.primary}`}>Set Project Quote</span>
-                            <span className={`text-xs ${theme.text.secondary}`}>Add budget to track profit</span>
+                            <span className={`text-[10px] sm:text-xs ${theme.text.secondary}`}>Add budget to track profit</span>
                         </button>
                     ) : (
                         <FinanceStatCard
@@ -291,8 +291,8 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
             </div>
 
             {/* Profit Bar */}
-            <div className={`p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border}`}>
-                <div className="flex justify-between text-xs mb-2 font-medium">
+            <div className={`p-3 sm:p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border}`}>
+                <div className="flex justify-between text-[10px] sm:text-xs mb-2 font-medium">
                     <span>Financial Overview</span>
                     <span className={profitMargin >= 30 ? "text-green-500" : "text-amber-500"}>
                         {Math.round(profitMargin)}% Margin
@@ -314,9 +314,9 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                         />
                     </div>
                 )}
-                <div className="flex gap-4 mt-2 text-xs text-gray-500">
-                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400"></div> Expenses</div>
-                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-400"></div> Profit</div>
+                <div className="flex gap-4 mt-2 text-[10px] sm:text-xs text-gray-500">
+                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-400"></div> Expenses</div>
+                    <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400"></div> Profit</div>
                 </div>
             </div>
 
@@ -335,20 +335,22 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                             : tx.subcategory;
 
                         return (
-                            <div key={tx.id} className={`flex items-center justify-between p-3 rounded-lg border ${theme.canvas.border} ${theme.canvas.hover || "bg-zinc-800/50"}`}>
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                        {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                            <div key={tx.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl border ${theme.canvas.border} ${theme.canvas.hover || "bg-zinc-800/50"}`}>
+                                <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0">
+                                    <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                        {isIncome ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                                     </div>
-                                    <div>
-                                        <p className={`font-medium ${theme.text.primary}`}>{displayTitle} {displaySubtitle && <span className="text-gray-500 text-xs">({displaySubtitle})</span>}</p>
-                                        <p className={`text-xs ${theme.text.secondary}`}>
+                                    <div className="min-w-0 flex-1">
+                                        <p className={`font-medium text-sm sm:text-base ${theme.text.primary} truncate`}>
+                                            {displayTitle} {displaySubtitle && <span className="text-gray-500 text-[10px] sm:text-xs tracking-tight">({displaySubtitle})</span>}
+                                        </p>
+                                        <p className={`text-[10px] sm:text-xs ${theme.text.secondary} line-clamp-1`}>
                                             {new Date(tx.date).toLocaleDateString()} • {tx.notes || 'No notes'}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className={`font-bold ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                                <div className="text-left sm:text-right pl-9 sm:pl-0 shrink-0 mt-[-2px] sm:mt-0">
+                                    <p className={`font-bold text-sm sm:text-base ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
                                         {isIncome ? '+' : '-'} ₹ {tx.amount.toLocaleString('en-IN')}
                                     </p>
                                 </div>
