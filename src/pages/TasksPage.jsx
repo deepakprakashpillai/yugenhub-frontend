@@ -176,12 +176,12 @@ const TasksPage = () => {
     ];
 
     return (
-        <div className="p-4 md:p-8 pb-32 max-w-[1800px] mx-auto min-h-screen relative">
+        <div className="p-3 sm:p-4 md:p-8 pb-32 max-w-[1800px] mx-auto min-h-screen relative">
             {/* Header + Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 sm:mb-6">
                 <div>
-                    <h1 className={`text-2xl md:text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Tasks</h1>
-                    <p className={`${theme.text.secondary} text-sm mt-1`}>Manage your deliverables and to-dos</p>
+                    <h1 className={`text-xl sm:text-2xl md:text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Tasks</h1>
+                    <p className={`${theme.text.secondary} text-[10px] sm:text-sm mt-0.5 sm:mt-1`}>Manage your deliverables and to-dos</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
@@ -192,7 +192,7 @@ const TasksPage = () => {
                                 key={vm.key}
                                 onClick={() => setViewMode(vm.key)}
                                 className={clsx(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all",
+                                    "flex items-center gap-1.5 px-3 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all",
                                     viewMode === vm.key ? "shadow" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={viewMode === vm.key ? {
@@ -212,7 +212,7 @@ const TasksPage = () => {
                         <button
                             onClick={() => setTab('my_tasks')}
                             className={clsx(
-                                "px-4 py-1.5 rounded-lg text-xs font-bold uppercase transition-all",
+                                "px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all",
                                 tab === 'my_tasks' ? "shadow" : `${theme.text.secondary} ${theme.canvas.hover}`
                             )}
                             style={tab === 'my_tasks' ? {
@@ -226,7 +226,7 @@ const TasksPage = () => {
                             <button
                                 onClick={() => setTab('all_tasks')}
                                 className={clsx(
-                                    "px-4 py-1.5 rounded-lg text-xs font-bold uppercase transition-all",
+                                    "px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all",
                                     tab === 'all_tasks' ? "shadow" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={tab === 'all_tasks' ? {
@@ -243,13 +243,13 @@ const TasksPage = () => {
 
             {/* Category Tabs (for Kanban view) */}
             {viewMode === 'kanban' && (
-                <div className={`flex gap-1 p-1 rounded-xl border ${theme.canvas.border} ${theme.canvas.card} mb-4 overflow-x-auto`}>
+                <div className={`flex gap-1 p-1 rounded-xl border ${theme.canvas.border} ${theme.canvas.card} mb-3 sm:mb-4 overflow-x-auto`}>
                     {CATEGORY_TABS.map(ct => (
                         <button
                             key={ct.key}
                             onClick={() => setCategoryTab(ct.key)}
                             className={clsx(
-                                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap",
+                                "flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap",
                                 categoryTab === ct.key
                                     ? "shadow-sm"
                                     : `${theme.text.secondary} ${theme.canvas.hover}`

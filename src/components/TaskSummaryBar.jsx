@@ -21,7 +21,7 @@ const TaskSummaryBar = ({ summary = {}, groups = {} }) => {
     };
 
     return (
-        <div className="flex items-center gap-6 overflow-x-auto pb-4 mb-2 scrollbar-hide px-1">
+        <div className="flex items-center gap-3 sm:gap-6 overflow-x-auto pb-2 sm:pb-4 mb-2 scrollbar-hide px-1">
             {/* eslint-disable-next-line */}
             {stats.map(({ key, label, icon: Icon, isCritical }) => {
                 const val = getValue(key);
@@ -32,12 +32,12 @@ const TaskSummaryBar = ({ summary = {}, groups = {} }) => {
                     <div
                         key={key}
                         className={clsx(
-                            "flex items-center gap-2 text-xs font-medium whitespace-nowrap transition-all",
+                            "flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-medium whitespace-nowrap transition-all",
                             isCritical && val > 0 ? "text-red-500" : (val === 0 ? "opacity-40" : theme.text.secondary)
                         )}
                     >
-                        <Icon className={clsx("w-3.5 h-3.5", isCritical && val > 0 ? "text-red-500" : theme.text.secondary)} />
-                        <span className={clsx("font-bold tabular-nums text-sm", isCritical && val > 0 ? "text-red-500" : theme.text.primary)}>{val}</span>
+                        <Icon className={clsx("w-3 h-3 sm:w-3.5 sm:h-3.5", isCritical && val > 0 ? "text-red-500" : theme.text.secondary)} />
+                        <span className={clsx("font-bold tabular-nums text-xs sm:text-sm", isCritical && val > 0 ? "text-red-500" : theme.text.primary)}>{val}</span>
                         <span className="hidden sm:inline opacity-70">{label}</span>
                     </div>
                 );
