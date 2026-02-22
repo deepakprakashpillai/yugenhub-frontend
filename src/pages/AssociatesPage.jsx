@@ -20,20 +20,24 @@ const AssociateCard = ({ associate, theme }) => (
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         whileTap={{ scale: 0.98 }}
-        className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-4 hover:${theme.canvas.hover} transition-colors group flex flex-col h-full`}
+        className={`${theme.canvas.card} border ${theme.canvas.border} rounded-xl p-3 md:p-4 hover:${theme.canvas.hover} transition-colors group flex flex-col h-full`}
     >
-        <div className="flex justify-between items-start mb-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm">
-                {associate.name.charAt(0)}
+        <div className="flex justify-between items-start mb-2 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    {associate.name.charAt(0)}
+                </div>
+                <div className="min-w-0">
+                    <h3 className={`text-base md:text-lg font-bold ${theme.text.primary} group-hover:text-purple-400 transition-colors truncate`}>{associate.name}</h3>
+                    <div className={`text-[10px] font-mono ${theme.text.secondary} uppercase tracking-widest truncate`}>{associate.employment_type}</div>
+                </div>
             </div>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${associate.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border shrink-0 whitespace-nowrap ${associate.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                 `${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border}`
                 }`}>
                 {associate.primary_role}
             </span>
         </div>
-        <h3 className={`text-lg font-bold ${theme.text.primary} mb-0.5 group-hover:text-purple-400 transition-colors`}>{associate.name}</h3>
-        <span className={`text-[10px] font-mono ${theme.text.secondary} uppercase tracking-widest`}>{associate.employment_type}</span>
 
         <div className={`space-y-1 mt-2 text-xs ${theme.text.secondary} flex-1`}>
             <div className="flex items-center gap-2">
@@ -225,7 +229,7 @@ const AssociatesPage = () => {
     };
 
     return (
-        <div className="p-4 md:p-8 pb-20 max-w-[1600px] mx-auto min-h-screen relative">
+        <div className="p-3 md:p-8 pb-24 md:pb-20 max-w-[1600px] mx-auto min-h-screen relative">
             {/* Opaque Overlay for closing dropdowns - High Z-Index Logic */}
             {activeDropdown && (
                 <div
@@ -234,12 +238,12 @@ const AssociatesPage = () => {
                 />
             )}
 
-            <h1 className={`text-2xl md:text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter`}>Associates</h1>
+            <h1 className={`text-2xl md:text-4xl font-black mb-4 md:mb-8 ${theme.text.primary} uppercase tracking-tighter`}>Associates</h1>
 
             <StatsHeader type="associates" />
 
             {/* Toolbar - Z-50 to stay above overlay when active filters needed, but needs interaction */}
-            <div className={`flex flex-col xl:flex-row justify-between items-center mb-8 gap-4 ${theme.canvas.bg} bg-opacity-50 p-3 rounded-2xl border ${theme.canvas.border} backdrop-blur-sm sticky top-0 z-50`}>
+            <div className={`flex flex-col xl:flex-row justify-between items-center mb-6 md:mb-8 gap-2 md:gap-4 ${theme.canvas.bg} bg-opacity-50 p-2 md:p-3 rounded-2xl border ${theme.canvas.border} backdrop-blur-sm sticky top-0 z-50`}>
                 <div className="relative w-full xl:w-1/3">
                     <Icons.Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${theme.text.secondary}`} />
                     <input
@@ -247,7 +251,7 @@ const AssociatesPage = () => {
                         placeholder="Search team by name, city or phone..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className={`w-full ${theme.canvas.input || theme.canvas.card} ${theme.text.primary} pl-12 pr-4 py-3 rounded-xl border ${theme.canvas.border} focus:border-white/20 focus:outline-none placeholder:${theme.text.secondary}`}
+                        className={`w-full ${theme.canvas.input || theme.canvas.card} ${theme.text.primary} pl-12 pr-4 py-2 md:py-3 rounded-xl border ${theme.canvas.border} focus:border-white/20 focus:outline-none placeholder:${theme.text.secondary} text-sm md:text-base`}
                         style={{
                             outlineColor: activeDropdown ? 'transparent' : accent.primary
                         }}
@@ -262,7 +266,7 @@ const AssociatesPage = () => {
                         <button
                             onClick={() => toggleDropdown('role')}
                             className={clsx(
-                                "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
                                 roleFilter || activeDropdown === 'role' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
                             style={roleFilter || activeDropdown === 'role' ? {
@@ -290,7 +294,7 @@ const AssociatesPage = () => {
                         <button
                             onClick={() => toggleDropdown('type')}
                             className={clsx(
-                                "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
                                 typeFilter || activeDropdown === 'type' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
                             style={typeFilter || activeDropdown === 'type' ? {
@@ -318,7 +322,7 @@ const AssociatesPage = () => {
                         <button
                             onClick={() => toggleDropdown('status')}
                             className={clsx(
-                                "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
                                 statusFilter || activeDropdown === 'status' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
                             style={statusFilter || activeDropdown === 'status' ? {
@@ -402,7 +406,7 @@ const AssociatesPage = () => {
             )}
 
             {!loading && totalPages > 1 && (
-                <div className={`flex justify-center items-center gap-4 mt-12 ${theme.canvas.bg} bg-opacity-50 py-3 px-6 rounded-full w-fit mx-auto border ${theme.canvas.border} backdrop-blur-sm shadow-2xl`}>
+                <div className={`flex justify-center items-center gap-2 md:gap-4 mt-6 md:mt-12 ${theme.canvas.bg} bg-opacity-50 py-2 px-4 md:py-3 md:px-6 rounded-full w-fit mx-auto border ${theme.canvas.border} backdrop-blur-sm shadow-2xl`}>
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(p => Math.max(1, p - 1))}

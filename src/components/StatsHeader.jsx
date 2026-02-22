@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
- 
+
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
@@ -13,7 +13,7 @@ const StatCard = ({ label, value, trend, delay }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay }}
-            className={`${theme.canvas.card} backdrop-blur-md border ${theme.canvas.border} p-3 md:p-6 rounded-xl md:rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group ${theme.canvas.hover} transition-colors`}
+            className={`${theme.canvas.card} backdrop-blur-md border ${theme.canvas.border} p-3 sm:p-4 md:p-6 rounded-xl md:rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group ${theme.canvas.hover} transition-colors`}
         >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity hidden md:block">
                 <div className="w-16 h-16 bg-gradient-to-br from-white to-transparent rounded-full blur-xl" />
@@ -71,7 +71,7 @@ const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
         }
 
         return (
-            <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 md:mb-8">
                 <StatCard label="Active" value={stats.active} delay={0} />
                 <StatCard label="Ongoing" value={stats.ongoing} delay={0.1} />
                 <StatCard label="This Month" value={stats.this_month} delay={0.2} />
@@ -82,7 +82,7 @@ const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
     // --- Clients Logic ---
     if (type === 'clients') {
         return (
-            <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 md:mb-8">
                 <StatCard label="Total Clients" value={stats.total} delay={0} />
                 <StatCard label="Active Clients" value={stats.active} delay={0.1} />
                 <StatCard label="New This Month" value={stats.this_month} delay={0.2} />
@@ -93,7 +93,7 @@ const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
     // --- Associates Logic ---
     if (type === 'associates') {
         return (
-            <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 md:mb-8">
                 <StatCard label="Total Team" value={stats.total} delay={0} />
                 <StatCard label="Active Members" value={stats.active} delay={0.1} />
                 <StatCard label="Joined This Month" value={stats.this_month} delay={0.2} />
