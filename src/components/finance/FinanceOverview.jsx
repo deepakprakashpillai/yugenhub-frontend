@@ -7,19 +7,18 @@ import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet } from 'lucide-react'
 import { Skeleton } from '../ui/Skeleton';
 import TransactionItem from './TransactionItem';
 
-// eslint-disable-next-line
 const StatCard = ({ title, value, icon: Icon, trend, type, theme }) => (
-    <div className={`p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm`}>
+    <div className={`p-4 sm:p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm`}>
         <div className="flex justify-between items-start">
             <div>
-                <p className={`text-sm font-medium ${theme.text.secondary}`}>{title}</p>
-                <h3 className="text-2xl font-bold mt-2 flex items-center">
-                    <IndianRupee size={20} className="mr-1" />
+                <p className={`text-[11px] sm:text-sm font-medium ${theme.text.secondary}`}>{title}</p>
+                <h3 className="text-xl sm:text-2xl font-bold mt-1 sm:mt-2 flex items-center">
+                    <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 mr-0.5 sm:mr-1" />
                     {value?.toLocaleString('en-IN') || '0'}
                 </h3>
             </div>
-            <div className={`p-2 rounded-lg ${type === 'positive' ? 'bg-green-100 text-green-600' : type === 'negative' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-                <Icon size={20} />
+            <div className={`p-1.5 sm:p-2 rounded-lg ${type === 'positive' ? 'bg-green-100 text-green-600' : type === 'negative' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
         </div>
     </div>
@@ -72,8 +71,8 @@ const FinanceOverview = ({ refreshTrigger }) => {
     }
 
     return (
-        <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="space-y-4 sm:space-y-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 <StatCard
                     title="Total Income"
                     value={data?.income}
@@ -104,10 +103,10 @@ const FinanceOverview = ({ refreshTrigger }) => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
                 {/* Recent Transactions */}
-                <div className={`col-span-2 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} p-6`}>
-                    <h3 className={`text-lg font-bold ${theme.text.primary} mb-4`}>Recent Transactions</h3>
+                <div className={`col-span-2 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} p-4 sm:p-6`}>
+                    <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} mb-3 sm:mb-4`}>Recent Transactions</h3>
                     <div className="space-y-3">
                         {recentTransactions.map(tx => (
                             <TransactionItem
@@ -125,12 +124,12 @@ const FinanceOverview = ({ refreshTrigger }) => {
                 </div>
 
                 {/* Financial Health Chart Placeholder */}
-                <div className={`rounded-xl border ${theme.canvas.card} ${theme.canvas.border} p-6 flex flex-col justify-center items-center text-center`}>
-                    <div className="p-4 bg-blue-500/10 rounded-full mb-3">
-                        <Wallet className="w-8 h-8 text-blue-500" />
+                <div className={`rounded-xl border ${theme.canvas.card} ${theme.canvas.border} p-4 sm:p-6 flex flex-col justify-center items-center text-center`}>
+                    <div className="p-3 sm:p-4 bg-blue-500/10 rounded-full mb-3">
+                        <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
                     </div>
-                    <h4 className={`font-medium ${theme.text.primary}`}>Financial Health</h4>
-                    <p className={`text-sm ${theme.text.secondary} mt-2`}>
+                    <h4 className={`font-medium text-sm sm:text-base ${theme.text.primary}`}>Financial Health</h4>
+                    <p className={`text-[11px] sm:text-sm ${theme.text.secondary} mt-1 sm:mt-2`}>
                         {data?.income > data?.expenses ? "You're profitable! Keep it up." : "Expenses exceed income. Review spending."}
                     </p>
                     <div className="mt-6 w-full">

@@ -9,37 +9,37 @@ const InvoiceItem = ({ invoice, theme, onEditInvoice, projectCode, isHistory = f
     const isQuote = invoice.invoice_no?.startsWith('QT');
 
     return (
-        <div className={`p-4 rounded-lg border ${theme.canvas.card} ${theme.canvas.border} flex justify-between items-center ${isHistory ? 'bg-gray-50/50 dark:bg-zinc-800/30 ml-8 border-l-4 border-l-gray-300 dark:border-l-zinc-600' : 'bg-white dark:bg-zinc-800'}`}>
-            <div className="flex items-center space-x-4">
-                <div className={`p-2 rounded-full ${isQuote ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
-                    <FileText size={18} />
+        <div className={`p-3 sm:p-4 rounded-lg border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 ${theme.canvas.card} ${theme.canvas.border} ${isHistory ? 'bg-gray-50/50 dark:bg-zinc-800/30 ml-4 sm:ml-8 border-l-4 border-l-gray-300 dark:border-l-zinc-600' : 'bg-white dark:bg-zinc-800'}`}>
+            <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
+                <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${isQuote ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                    <FileText className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                 </div>
                 <div>
-                    <div className="flex items-center gap-2">
-                        <p className={`font-medium ${theme.text.primary}`}>{invoice.invoice_no}</p>
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <p className={`font-medium text-sm sm:text-base ${theme.text.primary}`}>{invoice.invoice_no}</p>
                         {isQuote && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">QUOTE</span>
+                            <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">QUOTE</span>
                         )}
-                        {isHistory && <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-700 text-gray-500">HISTORY</span>}
+                        {isHistory && <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-700 text-gray-500">HISTORY</span>}
                     </div>
-                    <p className={`text-xs ${theme.text.secondary}`}>
+                    <p className={`text-[10px] sm:text-xs ${theme.text.secondary}`}>
                         {new Date(invoice.created_at).toLocaleDateString()} • {projectCode && <span className="font-medium text-indigo-500 mr-1">{projectCode} •</span>} {invoice.line_items?.length || 0} items
                     </p>
                 </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-                <div className="text-right mr-4">
-                    <p className={`font-bold ${theme.text.primary}`}>₹ {invoice.total_amount.toLocaleString('en-IN')}</p>
+            <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-4 border-t sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0 border-gray-100 dark:border-zinc-800">
+                <div className="text-left sm:text-right sm:mr-4">
+                    <p className={`font-bold text-sm sm:text-base ${theme.text.primary}`}>₹ {invoice.total_amount.toLocaleString('en-IN')}</p>
                 </div>
 
                 {/* Actions: Only Edit */}
                 <button
                     onClick={() => onEditInvoice(invoice)}
-                    className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg tooltip"
+                    className="p-1.5 sm:p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg tooltip"
                     title="Edit"
                 >
-                    <Edit2 size={16} />
+                    <Edit2 className="w-4 h-4 sm:w-4 sm:h-4" />
                 </button>
             </div>
         </div>
@@ -121,15 +121,15 @@ const FinanceInvoices = ({ refreshTrigger, onNewInvoice, onEditInvoice }) => {
 
     return (
         <div className="h-full">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-semibold">Quotes & Invoices</h2>
+                    <h2 className="text-lg sm:text-xl font-semibold">Quotes & Invoices</h2>
                 </div>
                 <button
                     onClick={onNewInvoice}
-                    className={`flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors`}
+                    className={`flex items-center gap-1 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors`}
                 >
-                    <Plus className="w-4 h-4" /> New Quote / Invoice
+                    <Plus className="w-4 h-4" /> <span className="hidden sm:inline">New Quote / Invoice</span><span className="sm:hidden">New</span>
                 </button>
             </div>
 

@@ -86,19 +86,19 @@ const TransactionItem = ({ transaction, theme, associates, projects }) => {
     };
 
     return (
-        <div className={`p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} hover:shadow-md transition-shadow group`}>
+        <div className={`p-3 sm:p-4 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} hover:shadow-md transition-shadow group`}>
             <div className="flex justify-between items-start">
-                <div className="flex gap-4">
+                <div className="flex gap-3 sm:gap-4">
                     {/* Icon Box */}
-                    <div className={`p-3 rounded-xl h-fit ${colorClass}`}>
-                        <Icon size={20} />
+                    <div className={`p-2 sm:p-3 rounded-xl h-fit ${colorClass}`}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
 
                     {/* Content */}
                     <div>
                         {/* Title Row */}
-                        <div className="flex items-center gap-2">
-                            <h4 className={`font-bold text-base ${theme.text.primary}`}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className={`font-bold text-sm sm:text-base ${theme.text.primary}`}>
                                 {displayTitle}
                             </h4>
                             {vertical && getVerticalBadge(vertical)}
@@ -117,11 +117,11 @@ const TransactionItem = ({ transaction, theme, associates, projects }) => {
                         )}
 
                         {/* Metadata */}
-                        <div className={`text-xs mt-1.5 flex items-center gap-2 ${theme.text.secondary}`}>
+                        <div className={`text-[10px] sm:text-xs mt-1 sm:mt-1.5 flex flex-wrap items-center gap-1 sm:gap-2 ${theme.text.secondary}`}>
                             <span>{new Date(transaction.date).toLocaleDateString()}</span>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span>{new Date(transaction.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span className="capitalize">{transaction.source}</span>
                         </div>
                     </div>
@@ -129,7 +129,7 @@ const TransactionItem = ({ transaction, theme, associates, projects }) => {
 
                 {/* Amount Section */}
                 <div className="text-right">
-                    <p className={`text-lg font-bold ${amountColor}`}>
+                    <p className={`text-sm sm:text-lg font-bold ${amountColor}`}>
                         {isIncome ? '+' : '-'} ₹{transaction.amount.toLocaleString('en-IN')}
                     </p>
                 </div>

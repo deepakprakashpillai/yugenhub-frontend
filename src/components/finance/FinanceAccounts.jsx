@@ -16,9 +16,9 @@ const AccountCard = ({ account, theme }) => {
     };
 
     return (
-        <div className={`p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm flex flex-col justify-between`}>
-            <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-lg bg-blue-50 text-blue-600`}>
+        <div className={`p-4 sm:p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm flex flex-col justify-between`}>
+            <div className="flex justify-between items-start mb-3 sm:mb-4">
+                <div className={`p-2 sm:p-3 rounded-lg bg-blue-50 text-blue-600 scale-[0.8] sm:scale-100 origin-top-left`}>
                     {getIcon(account.type)}
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.bg} border ${theme.canvas.border}`}>
@@ -26,8 +26,8 @@ const AccountCard = ({ account, theme }) => {
                 </span>
             </div>
             <div>
-                <h3 className="text-lg font-semibold">{account.name}</h3>
-                <p className={`text-2xl font-bold mt-1`}>
+                <h3 className="text-base sm:text-lg font-semibold">{account.name}</h3>
+                <p className={`text-xl sm:text-2xl font-bold mt-1`}>
                     ₹ {account.current_balance.toLocaleString('en-IN')}
                 </p>
             </div>
@@ -38,7 +38,7 @@ const AccountCard = ({ account, theme }) => {
 const FinanceAccounts = () => {
     const { theme } = useTheme();
     const [accounts, setAccounts] = useState([]);
-     
+
     // eslint-disable-next-line no-unused-vars
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -77,13 +77,13 @@ const FinanceAccounts = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Accounts</h2>
+                <h2 className="text-lg sm:text-xl font-semibold">Accounts</h2>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="flex items-center space-x-1 sm:space-x-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
-                    <Plus size={16} />
-                    <span>Add Account</span>
+                    <Plus className="w-4 h-4 sm:w-4 sm:h-4" />
+                    <span className="text-sm">Add Account</span>
                 </button>
             </div>
 
@@ -134,7 +134,7 @@ const FinanceAccounts = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {accounts.map(account => (
                     <AccountCard key={account.id} account={account} theme={theme} />
                 ))}
