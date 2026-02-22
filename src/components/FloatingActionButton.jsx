@@ -13,7 +13,7 @@ const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={clsx(
-                "fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40",
+                "fixed bottom-20 right-4 md:bottom-8 md:right-8 z-40",
                 "flex items-center gap-2 px-5 py-3.5",
                 "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500",
                 "text-white font-semibold rounded-full",
