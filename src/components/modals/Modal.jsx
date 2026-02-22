@@ -71,7 +71,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
                         </div>
 
                         {/* Body */}
-                        <div className={`p-6 ${isMobile ? 'max-h-[75vh] pb-8' : 'max-h-[70vh]'} overflow-y-auto custom-scrollbar`}>
+                        <div className={`p-6 ${isMobile ? 'max-h-[75vh] pb-8' : 'max-h-[70vh]'} overflow-y-auto`}>
                             {children}
                         </div>
                     </motion.div>

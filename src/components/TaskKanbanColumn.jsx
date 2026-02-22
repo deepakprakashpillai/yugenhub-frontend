@@ -109,7 +109,7 @@ const TaskKanbanColumn = ({ status, tasks = [], overdueCount = 0, onTaskClick, o
                 ref={setNodeRef}
                 className={clsx(
                     "flex-1 overflow-y-auto p-2 space-y-4 min-h-[120px] max-h-[calc(100vh-340px)]",
-                    "scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+                    ""
                 )}
             >
                 <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>

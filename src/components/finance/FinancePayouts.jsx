@@ -60,7 +60,7 @@ const FinancePayouts = ({ refreshTrigger }) => {
             </div>
 
             {/* List */}
-            <div className="space-y-2 sm:space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+            <div className="space-y-2 sm:space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
                 {transactions.map(tx => (
                     <TransactionItem
                         key={tx.id}

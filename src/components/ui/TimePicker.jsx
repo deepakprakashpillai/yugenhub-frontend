@@ -143,7 +143,7 @@ export default function TimePicker({
 
                     <div className="flex h-48 gap-1">
                         {/* Hours */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 space-y-1 relative" style={{ scrollBehavior: 'smooth' }}>
+                        <div className="flex-1 overflow-y-auto px-1 space-y-1 relative" style={{ scrollBehavior: 'smooth' }}>
                             {hours.map(hour => {
                                 const isSelected = hour === h;
                                 return (
@@ -164,7 +164,7 @@ export default function TimePicker({
                             })}
                         </div>
                         {/* Minutes */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 space-y-1 relative" style={{ scrollBehavior: 'smooth' }}>
+                        <div className="flex-1 overflow-y-auto px-1 space-y-1 relative" style={{ scrollBehavior: 'smooth' }}>
                             {minutes.map(minute => {
                                 const isSelected = minute === m;
                                 return (
@@ -185,7 +185,7 @@ export default function TimePicker({
                             })}
                         </div>
                         {/* AM/PM */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar px-1 space-y-1 relative" style={{ scrollBehavior: 'smooth' }}>
+                        <div className="flex-1 overflow-y-auto px-1 space-y-1 relative" style={{ scrollBehavior: 'smooth' }}>
                             {periods.map(period => {
                                 const isSelected = period === ampm;
                                 return (

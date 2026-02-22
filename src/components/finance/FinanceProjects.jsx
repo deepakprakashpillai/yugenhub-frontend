@@ -191,7 +191,7 @@ const FinanceProjects = () => {
                         />
                     </div>
 
-                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+                    <div className="flex-1 overflow-y-auto pr-2">
                         {isSearching ? (
                             // SEARCH RESULTS VIEW
                             <div className="space-y-2">

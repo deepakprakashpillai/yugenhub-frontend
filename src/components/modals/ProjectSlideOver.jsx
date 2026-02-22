@@ -804,7 +804,7 @@ const ProjectSlideOver = ({
                                             Add Item
                                         </button>
                                     </div>
-                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                         {event.deliverables.map((del, dIndex) => (
                                             <div key={del.id} className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 ${theme.canvas.card} p-3 sm:p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors relative`}>
                                                 <select
@@ -866,7 +866,7 @@ const ProjectSlideOver = ({
                                             Add Member
                                         </button>
                                     </div>
-                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                         {event.assignments.map((assign, aIndex) => (
                                             <div key={assign.id} className={`flex flex-col sm:grid sm:grid-cols-[1fr,1fr,auto] gap-2 sm:gap-3 items-start sm:items-center ${theme.canvas.card} p-3 sm:p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors relative`}>
                                                 <div className="w-full min-w-0 pr-8 sm:pr-0">

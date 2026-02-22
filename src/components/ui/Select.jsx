@@ -85,7 +85,7 @@ const Select = ({
                         transition={{ duration: 0.15 }}
                         className={`absolute left-0 z-50 mt-2 w-full min-w-[180px] ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl overflow-hidden backdrop-blur-sm`}
                     >
-                        <div className="max-h-60 overflow-y-auto custom-scrollbar p-1">
+                        <div className="max-h-60 overflow-y-auto p-1">
                             {options.map((option) => {
                                 const Icon = option.icon;
                                 const isSelected = option.value === value;
