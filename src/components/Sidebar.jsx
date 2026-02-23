@@ -77,9 +77,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
   ];
 
   const renderNavGroup = (title, items, isVertical = false) => (
-    <div className="mb-6">
-      <p className={(theme.text?.label || "") + " px-4 mb-1.5 md:mb-3 text-[10px] md:text-xs"}>{title}</p>
-      <div className="space-y-1">
+    <div className="mb-5">
+      <p className={(theme.text?.label || "") + " px-3.5 mb-1.5 md:mb-2 text-xs"}>{title}</p>
+      <div className="space-y-0.5">
         {items.map((item) => {
           const accent = theme.accents?.[item.id] || theme.accents?.default;
           const Icon = item.icon;
@@ -96,7 +96,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
                 border: isActivePath ? `1px solid ${accent.primary}44` : '1px solid transparent'
               }}
               className={`
-                ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+                ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-3.5 py-2.5 rounded-xl transition-all
                 ${isActivePath
                   ? `font-black`
                   : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
@@ -108,9 +108,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
                   style={{ backgroundColor: accent.primary }}
                 />
               ) : (
-                <Icon size={isMobile ? 14 : 16} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+                <Icon size={15} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
               )}
-              <span className="text-xs md:text-sm">{item.label}</span>
+              <span className="text-[13px]">{item.label}</span>
             </NavLink>
           );
         })}
@@ -121,7 +121,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
   const sidebarContent = (
     <aside className={`${isMobile ? 'w-[80vw] max-w-[320px]' : 'w-64'} border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen ${isMobile ? '' : 'sticky top-0'} ${theme.canvas?.sidebar || "bg-black"}`}>
 
-      <div className="p-6 pb-4 flex items-center justify-between">
+      <div className="p-4 pb-3 flex items-center justify-between">
         <h1 className={(theme.text?.heading || "") + ` ${theme.text.primary}`}>
           {currentConfig.brand?.name || AGENCY_CONFIG?.brand?.name}
           <span style={{ color: theme.accents?.default?.primary }}>
@@ -139,9 +139,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
         )}
       </div>
 
-      <nav className="flex-1 px-4 overflow-y-auto scrollbar-hide pt-2">
+      <nav className="flex-1 px-3.5 overflow-y-auto scrollbar-hide pt-2">
         {/* DASHBOARD LINK */}
-        <div className="mb-6">
+        <div className="mb-5">
           <NavLink
             to="/"
             style={{
@@ -151,14 +151,14 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
               border: currentPath === '/' ? `1px solid ${theme.accents?.default?.primary}44` : '1px solid transparent'
             }}
             className={`
-              ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+              ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-3.5 py-2.5 rounded-xl transition-all
               ${currentPath === '/'
                 ? `font-black`
                 : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
             `}
           >
-            <LayoutDashboard size={isMobile ? 14 : 16} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
-            <span className="text-xs md:text-sm">DASHBOARD</span>
+            <LayoutDashboard size={15} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+            <span className="text-[13px]">DASHBOARD</span>
           </NavLink>
         </div>
 
@@ -168,18 +168,18 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
       </nav>
 
       {/* NOTIFICATIONS & SETTINGS - Fixed at bottom of nav area */}
-      <div className={`px-4 mb-4 md:mb-2 pt-2 border-t ${theme.canvas.border} space-y-2 md:space-y-1`}>
+      <div className={`px-3.5 mb-4 md:mb-2 pt-2 border-t ${theme.canvas.border} space-y-1`}>
         <button
           onClick={() => {
             navigate('/notifications');
             if (isMobile) onClose();
           }}
-          className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
+          className={`flex items-center gap-3 w-full text-left px-3.5 py-2.5 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
         >
-          <Bell size={isMobile ? 14 : 16} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
-          <span className={`${theme.text?.nav || ""} text-xs md:text-sm`}>{"NOTIFICATIONS"}</span>
+          <Bell size={15} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className={`${theme.text?.nav || ""} text-[13px]`}>{"NOTIFICATIONS"}</span>
           {notificationCount > 0 && (
-            <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span className="ml-auto bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
               {notificationCount}
             </span>
           )}
@@ -193,36 +193,40 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
             border: currentPath === '/settings' ? `1px solid ${theme.accents?.default?.primary}44` : '1px solid transparent'
           }}
           className={`
-            ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all
+            ${theme.text?.nav || ""} flex items-center gap-3 w-full text-left px-3.5 py-2.5 rounded-xl transition-all
             ${currentPath === '/settings'
               ? `font-black`
               : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
           `}
         >
-          <Settings size={isMobile ? 14 : 16} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
-          <span className="text-xs md:text-sm">SETTINGS</span>
+          <Settings size={15} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className="text-[13px]">SETTINGS</span>
         </NavLink>
       </div>
 
       {/* USER FOOTER */}
-      <div className={`p-4 ${theme.canvas.card} border-t ${theme.canvas.border} mt-auto relative`} ref={userMenuRef}>
+      <div className={`p-3.5 ${theme.canvas.card} border-t ${theme.canvas.border} mt-auto relative`} ref={userMenuRef}>
 
         {/* User Menu Popup */}
         {showUserMenu && (
-          <div className={`absolute bottom-full left-4 right-4 mb-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 z-50`}>
-            <button
-              onClick={() => navigate('/dev-login')}
-              className={`w-full px-4 py-3 text-left text-xs font-bold text-amber-500 ${theme.canvas.hover} flex items-center gap-2 transition-colors`}
-            >
-              <Code size={14} />
-              DEV LOGIN
-            </button>
-            <div className={`h-px ${theme.canvas.border}`} />
+          <div className={`absolute bottom-full left-3.5 right-3.5 mb-2 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200 z-50`}>
+            {import.meta.env.DEV && (
+              <>
+                <button
+                  onClick={() => navigate('/dev-login')}
+                  className={`w-full px-3.5 py-2.5 text-left text-xs font-bold text-amber-500 ${theme.canvas.hover} flex items-center gap-2.5 transition-colors`}
+                >
+                  <Code size={15} />
+                  DEV LOGIN
+                </button>
+                <div className={`h-px ${theme.canvas.border}`} />
+              </>
+            )}
             <button
               onClick={handleLogout}
-              className={`w-full px-4 py-3 text-left text-xs font-bold text-red-400 ${theme.canvas.hover} flex items-center gap-2 transition-colors`}
+              className={`w-full px-3.5 py-2.5 text-left text-xs font-bold text-red-400 ${theme.canvas.hover} flex items-center gap-2.5 transition-colors`}
             >
-              <LogOut size={14} />
+              <LogOut size={15} />
               LOGOUT
             </button>
           </div>

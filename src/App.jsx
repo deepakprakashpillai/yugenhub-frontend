@@ -115,7 +115,9 @@ function AppRoutes() {
     }>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/dev-login" element={<DevLoginPage />} />
+        {import.meta.env.DEV && (
+          <Route path="/dev-login" element={<DevLoginPage />} />
+        )}
 
         <Route path="/" element={
           <ProtectedRoute>
