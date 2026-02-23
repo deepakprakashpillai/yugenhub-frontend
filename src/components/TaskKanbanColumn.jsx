@@ -31,7 +31,7 @@ const TaskKanbanColumn = ({ status, tasks = [], overdueCount = 0, onTaskClick, o
                 <button
                     onClick={() => setCollapsed(!collapsed)}
                     className={clsx(
-                        "w-full flex items-center justify-between px-4 py-3 border-t-2",
+                        "w-full flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-t-2",
                         meta.accent,
                         theme.canvas.card
                     )}
@@ -57,7 +57,7 @@ const TaskKanbanColumn = ({ status, tasks = [], overdueCount = 0, onTaskClick, o
 
                 {/* Accordion Body */}
                 {!collapsed && (
-                    <div ref={setNodeRef} className={clsx("p-3 space-y-2", theme.canvas.bg, isOver && "bg-purple-500/5")}>
+                    <div ref={setNodeRef} className={clsx("p-2 sm:p-3 space-y-2", theme.canvas.bg, isOver && "bg-purple-500/5")}>
                         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
                             {tasks.length === 0 ? (
                                 <div className={`text-center py-4 text-xs ${theme.text.secondary} italic`}>
@@ -109,7 +109,7 @@ const TaskKanbanColumn = ({ status, tasks = [], overdueCount = 0, onTaskClick, o
                 ref={setNodeRef}
                 className={clsx(
                     "flex-1 overflow-y-auto p-2 space-y-4 min-h-[120px] max-h-[calc(100vh-340px)]",
-                    "scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+                    ""
                 )}
             >
                 <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>

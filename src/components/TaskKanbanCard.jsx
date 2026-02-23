@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
- 
+
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
@@ -122,7 +122,7 @@ const TaskKanbanCard = ({ task, onClick, onTaskUpdate, users = [] }) => {
             ref={setNodeRef}
             style={style}
             className={clsx(
-                "group relative rounded-xl border p-3 transition-all cursor-pointer",
+                "group relative rounded-xl border p-2.5 sm:p-3 transition-all cursor-pointer",
                 isDragging
                     ? "opacity-50 shadow-2xl scale-[1.02] border-purple-500/50 bg-zinc-900"
                     : `${theme.canvas.card} ${theme.canvas.border} hover:border-zinc-600`,
@@ -169,7 +169,7 @@ const TaskKanbanCard = ({ task, onClick, onTaskUpdate, users = [] }) => {
 
             {/* Title */}
             <h4 className={clsx(
-                "text-sm font-semibold leading-snug mb-2",
+                "text-xs sm:text-sm font-semibold leading-snug mb-2",
                 task.status === 'done' ? `line-through ${theme.text.secondary}` : theme.text.primary
             )}>
                 {task.title}
@@ -178,7 +178,7 @@ const TaskKanbanCard = ({ task, onClick, onTaskUpdate, users = [] }) => {
             {/* Footer: Due Date + Assignee */}
             <div className="flex items-center justify-between">
                 <div className={clsx(
-                    "text-[11px] flex items-center gap-1",
+                    "text-[10px] sm:text-[11px] flex items-center gap-1",
                     isOverdue ? "text-red-400 font-bold" : theme.text.secondary
                 )}>
                     {task.due_date ? (
@@ -195,14 +195,13 @@ const TaskKanbanCard = ({ task, onClick, onTaskUpdate, users = [] }) => {
                     )}
                 </div>
 
-                {/* Assignee inline dropdown */}
                 <InlineDropdown
                     value={task.assigned_to || ''}
                     options={assigneeOpts}
                     onChange={(val) => handleInlineUpdate('assigned_to', val || null)}
                     alignRight
                     trigger={
-                        <div className={`w-6 h-6 rounded-full ${theme.canvas.bg} border ${theme.canvas.border} flex items-center justify-center text-[10px] font-bold hover:border-zinc-600 transition-colors`}
+                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full ${theme.canvas.bg} border ${theme.canvas.border} flex items-center justify-center text-[9px] sm:text-[10px] font-bold hover:border-zinc-600 transition-colors`}
                             title={assigneeName || 'Unassigned'}
                         >
                             {assigneeName ? assigneeName.charAt(0).toUpperCase() : '?'}

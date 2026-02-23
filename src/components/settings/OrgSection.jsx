@@ -44,7 +44,7 @@ function OrgSection({ role }) {
                     </button>
                 )}
             </div>
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6 space-y-5`}>
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 md:p-6 space-y-5`}>
                 {[
                     { key: 'org_name', label: 'Organisation Name', icon: Building2, placeholder: 'Your agency name' },
                     { key: 'org_email', label: 'Contact Email', icon: Mail, placeholder: 'contact@agency.com' },

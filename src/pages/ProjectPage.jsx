@@ -111,11 +111,11 @@ const VerticalTemplate = ({ project }) => {
         if (filteredFields.length === 0) return null;
 
         return (
-            <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t ${theme.canvas.border}`}>
+            <div className={`grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t ${theme.canvas.border}`}>
                 {filteredFields.map(field => (
                     <div key={field.name}>
-                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>{field.label}</h4>
-                        <p className={`${theme.text.primary} font-medium`}>{metadata[field.name] || '—'}</p>
+                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>{field.label}</h4>
+                        <p className={`${theme.text.primary} font-medium text-sm sm:text-base truncate`}>{metadata[field.name] || '—'}</p>
                     </div>
                 ))}
             </div>
@@ -124,68 +124,72 @@ const VerticalTemplate = ({ project }) => {
 
     if (verticalType === 'wedding') {
         return (
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
-                <h3 className={`text-lg font-bold ${theme.text.primary} mb-6 flex items-center gap-2`}>
-                    <Icons.Heart className="w-5 h-5 text-pink-500" />
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 sm:p-6`}>
+                <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} mb-4 sm:mb-6 flex items-center gap-2`}>
+                    <Icons.Heart className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" />
                     Wedding Details
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                     {/* Groom Side */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-10 h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
-                                <span className="text-lg">👰</span>
+                    <div className="flex flex-col gap-3 sm:gap-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
+                                <span className="text-base sm:text-lg">👰</span>
                             </div>
                             <div>
                                 <h4 className={`text-sm font-bold ${theme.text.primary}`}>Groom</h4>
-                                <p className={`text-xs ${theme.text.secondary}`}>Side</p>
+                                <p className={`text-[10px] sm:text-xs ${theme.text.secondary}`}>Side</p>
                             </div>
                         </div>
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Name</label>
-                            <p className={`${theme.text.primary} text-lg`}>{metadata.groom_name || '—'}</p>
-                        </div>
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Contact</label>
-                            <p className={`${theme.text.primary} font-mono`}>{metadata.groom_number || '—'}</p>
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Name</label>
+                                <p className={`${theme.text.primary} text-sm sm:text-base md:text-lg break-words`}>{metadata.groom_name || '—'}</p>
+                            </div>
+                            <div>
+                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Contact</label>
+                                <p className={`${theme.text.primary} text-xs sm:text-sm md:text-base font-mono break-words`}>{metadata.groom_number || '—'}</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* Bride Side */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-10 h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
-                                <span className="text-lg">🤵</span>
+                    <div className="flex flex-col gap-3 sm:gap-4 pt-3 sm:pt-4 md:pt-0 border-t md:border-0 border-zinc-800/30">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
+                                <span className="text-base sm:text-lg">🤵</span>
                             </div>
                             <div>
                                 <h4 className={`text-sm font-bold ${theme.text.primary}`}>Bride</h4>
-                                <p className={`text-xs ${theme.text.secondary}`}>Side</p>
+                                <p className={`text-[10px] sm:text-xs ${theme.text.secondary}`}>Side</p>
                             </div>
                         </div>
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Name</label>
-                            <p className={`${theme.text.primary} text-lg`}>{metadata.bride_name || '—'}</p>
-                        </div>
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Contact</label>
-                            <p className={`${theme.text.primary} font-mono`}>{metadata.bride_number || '—'}</p>
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Name</label>
+                                <p className={`${theme.text.primary} text-sm sm:text-base md:text-lg break-words`}>{metadata.bride_name || '—'}</p>
+                            </div>
+                            <div>
+                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Contact</label>
+                                <p className={`${theme.text.primary} text-xs sm:text-sm md:text-base font-mono break-words`}>{metadata.bride_number || '—'}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t ${theme.canvas.border}`}>
+                <div className={`grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-5 md:pt-6 border-t ${theme.canvas.border}`}>
                     <div>
-                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Style</h4>
-                        <p className={`${theme.text.primary}`}>{metadata.wedding_style || '—'}</p>
+                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Style</h4>
+                        <p className={`${theme.text.primary} text-sm sm:text-base truncate`}>{metadata.wedding_style || '—'}</p>
                     </div>
                     <div>
-                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Religion</h4>
-                        <p className={`${theme.text.primary}`}>{metadata.religion || '—'}</p>
+                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Religion</h4>
+                        <p className={`${theme.text.primary} text-sm sm:text-base truncate`}>{metadata.religion || '—'}</p>
                     </div>
                     <div>
-                        <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Client Side</h4>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 capitalize">
+                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Client Side</h4>
+                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-purple-500/10 text-purple-400 capitalize">
                             {metadata.side || 'both'}
                         </span>
                     </div>
@@ -198,45 +202,45 @@ const VerticalTemplate = ({ project }) => {
 
     if (verticalType === 'children') {
         return (
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
-                <h3 className={`text-lg font-bold ${theme.text.primary} mb-6 flex items-center gap-2`}>
-                    <Icons.Star className="w-5 h-5 text-yellow-500" />
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 sm:p-6`}>
+                <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} mb-4 sm:mb-6 flex items-center gap-2`}>
+                    <Icons.Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
                     Event Details
                 </h3>
 
-                <div className="flex items-start gap-6">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/20">
+                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl sm:text-3xl shadow-lg shadow-orange-500/20">
                         👶
                     </div>
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex-1 grid grid-cols-2 gap-3 sm:gap-6">
                         <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Child's Name</h4>
-                            <p className={`text-2xl font-bold ${theme.text.primary}`}>{metadata.child_name || '—'}</p>
+                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Child's Name</h4>
+                            <p className={`text-lg sm:text-2xl font-bold ${theme.text.primary} truncate`}>{metadata.child_name || '—'}</p>
                         </div>
                         <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Occasion</h4>
-                            <div className="flex items-center gap-2">
-                                <span className="px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-sm font-medium capitalize">
+                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Occasion</h4>
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-xs sm:text-sm font-medium capitalize">
                                     {metadata.occasion_type || 'Birthday'}
                                 </span>
                                 {metadata.child_age && (
-                                    <span className={`px-3 py-1 rounded-full ${theme.canvas.hover || "bg-zinc-800"} ${theme.text.primary} text-sm`}>
+                                    <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full ${theme.canvas.hover || "bg-zinc-800"} ${theme.text.primary} text-[10px] sm:text-sm`}>
                                         Turned {metadata.child_age}
                                     </span>
                                 )}
                             </div>
                         </div>
                         <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Parents</h4>
-                            <p className={`${theme.text.primary}`}>
+                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Parents</h4>
+                            <p className={`${theme.text.primary} text-sm sm:text-base`}>
                                 {metadata.father_name && metadata.mother_name
                                     ? `${metadata.father_name} & ${metadata.mother_name}`
                                     : (metadata.father_name || metadata.mother_name || '—')}
                             </p>
                         </div>
                         <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Address</h4>
-                            <p className={`${theme.text.primary} text-sm line-clamp-2`}>{metadata.address || '—'}</p>
+                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Address</h4>
+                            <p className={`${theme.text.primary} text-xs sm:text-sm line-clamp-2`}>{metadata.address || '—'}</p>
                         </div>
                     </div>
                 </div>
@@ -293,11 +297,13 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
     const [showPriorityMenu, setShowPriorityMenu] = useState(false);
     const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
     const [isEditingDate, setIsEditingDate] = useState(false);
+    const [showActionMenu, setShowActionMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     const priorityRef = useRef(null);
     const assigneeRef = useRef(null);
     const dateRef = useRef(null);
+    const actionRef = useRef(null);
 
     // Close menus on click outside
     useEffect(() => {
@@ -305,6 +311,7 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
             if (priorityRef.current && !priorityRef.current.contains(event.target)) setShowPriorityMenu(false);
             if (assigneeRef.current && !assigneeRef.current.contains(event.target)) setShowAssigneeMenu(false);
             if (dateRef.current && !dateRef.current.contains(event.target)) setIsEditingDate(false);
+            if (actionRef.current && !actionRef.current.contains(event.target)) setShowActionMenu(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -502,19 +509,37 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
             </div>
             <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                 <StatusBadge status={task.status} />
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="relative" ref={actionRef}>
                     <button
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        className={`p-1.5 rounded-lg hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
+                        onClick={(e) => { e.stopPropagation(); setShowActionMenu(!showActionMenu); }}
+                        className={`p-1.5 rounded-lg sm:hover:${theme.canvas.card} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${showActionMenu ? 'opacity-100' : ''}`}
                     >
-                        <Icons.Edit className="w-4 h-4" />
+                        <Icons.More className="w-4 h-4" />
                     </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        className={`p-1.5 rounded-lg hover:bg-red-500/20 ${theme.text.secondary} hover:text-red-400 transition-colors`}
-                    >
-                        <Icons.Trash className="w-4 h-4" />
-                    </button>
+
+                    <AnimatePresence>
+                        {showActionMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                            >
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onEdit(); }}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                >
+                                    <Icons.Edit className="w-4 h-4" /> Edit Task
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onDelete(); }}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                >
+                                    <Icons.Trash className="w-4 h-4" /> Delete Task
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
@@ -524,6 +549,17 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
 // Assignment Item Component with Edit/Delete
 const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
     const { theme } = useTheme();
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) setShowMenu(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const name = assignment.associate_name || assignment.name || 'Unknown';
 
     return (
@@ -541,19 +577,37 @@ const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
                 <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.card} ${theme.text.secondary}`}>
                     {assignment.role}
                 </span>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="relative" ref={menuRef}>
                     <button
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        className={`p-1.5 rounded-lg hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
+                        onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                        className={`p-1.5 rounded-lg sm:hover:${theme.canvas.card} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${showMenu ? 'opacity-100' : ''}`}
                     >
-                        <Icons.Edit className="w-4 h-4" />
+                        <Icons.More className="w-4 h-4" />
                     </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        className={`p-1.5 rounded-lg hover:bg-red-500/20 ${theme.text.secondary} hover:text-red-400 transition-colors`}
-                    >
-                        <Icons.Trash className="w-4 h-4" />
-                    </button>
+
+                    <AnimatePresence>
+                        {showMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                            >
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowMenu(false); onEdit(); }}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                >
+                                    <Icons.Edit className="w-4 h-4" /> Edit Member
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowMenu(false); onDelete(); }}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                >
+                                    <Icons.Trash className="w-4 h-4" /> Remove Member
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
@@ -579,6 +633,17 @@ const EventSection = ({
     users // Added users prop
 }) => {
     const { theme } = useTheme();
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) setShowMenu(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const formatDate = (dateStr) => {
         if (!dateStr) return 'TBD';
         const date = new Date(dateStr);
@@ -622,17 +687,17 @@ const EventSection = ({
                     </div>
                     <div>
                         <h3 className={`text-xl font-bold ${theme.text.primary}`}>{event.type}</h3>
-                        <div className={`flex items-center gap-3 text-sm ${theme.text.secondary} mt-1 flex-wrap`}>
-                            <span className="flex items-center gap-1">
-                                <Icons.Calendar className="w-4 h-4" />
-                                {formatDate(event.start_date)}
-                                {hasEndDate && (
-                                    <> → {formatDate(event.end_date)}</>
-                                )}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm flex-wrap ${theme.text.secondary} mt-1`}>
+                            <span className="flex items-center gap-1.5 break-words">
+                                <Icons.Calendar className="w-3.5 h-3.5 shrink-0" />
+                                <span className="line-clamp-1 sm:line-clamp-none">
+                                    {formatDate(event.start_date)}
+                                    {hasEndDate && <> → {formatDate(event.end_date)}</>}
+                                </span>
                             </span>
                             {(startTime || endTime) && (
-                                <span className="flex items-center gap-1">
-                                    <Icons.Clock className="w-4 h-4" />
+                                <span className="flex items-center gap-1.5 shrink-0">
+                                    <Icons.Clock className="w-3.5 h-3.5" />
                                     {startTime || '—'}
                                     {endTime && <> → {endTime}</>}
                                 </span>
@@ -647,18 +712,37 @@ const EventSection = ({
                     <div className="text-right text-sm hidden sm:block">
                         <span className={`${theme.text.secondary} mr-1`}>{event.assignments?.length || 0} Team</span>
                     </div>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onEditEvent(); }}
-                        className={`p-2 rounded-lg hover:${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
-                    >
-                        <Icons.Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDeleteEvent(); }}
-                        className={`p-2 rounded-lg hover:bg-red-500/20 ${theme.text.secondary} hover:text-red-400 transition-colors`}
-                    >
-                        <Icons.Trash className="w-4 h-4" />
-                    </button>
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                            className={`p-2 rounded-lg sm:hover:${theme.canvas.hover} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors ${showMenu ? `sm:${theme.canvas.hover} sm:${theme.text.primary}` : ''}`}
+                        >
+                            <Icons.More className="w-5 h-5" />
+                        </button>
+                        <AnimatePresence>
+                            {showMenu && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                                >
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowMenu(false); onEditEvent(); }}
+                                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                    >
+                                        <Icons.Edit className="w-4 h-4" /> Edit Event
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowMenu(false); onDeleteEvent(); }}
+                                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                    >
+                                        <Icons.Trash className="w-4 h-4" /> Delete Event
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                     <button onClick={onToggle} className="p-2">
                         <Icons.ChevronDown className={clsx(
                             `w-5 h-5 ${theme.text.secondary} transition-transform`,
@@ -730,6 +814,7 @@ const EventSection = ({
                                         title="No deliverables yet"
                                         message="Add deliverables to track for this event."
                                         icon={Icons.Package}
+                                        compact={true}
                                         action={{
                                             label: "Add Deliverable",
                                             onClick: onAddDeliverable
@@ -769,6 +854,7 @@ const EventSection = ({
                                         title="No team assigned"
                                         message="Assign team members to this event."
                                         icon={Icons.Users}
+                                        compact={true}
                                         action={{
                                             label: "Assign Member",
                                             onClick: onAddTeamMember
@@ -805,6 +891,20 @@ const ProjectPage = () => {
     const [metadataModal, setMetadataModal] = useState(false);
     const [saveTemplateModal, setSaveTemplateModal] = useState(false); // NEW
     const [statusDropdown, setStatusDropdown] = useState(false);
+    const [headerMenu, setHeaderMenu] = useState(false);
+
+    const headerMenuRefMobile = useRef(null);
+    const headerMenuRefDesktop = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const inMobile = headerMenuRefMobile.current?.contains(event.target);
+            const inDesktop = headerMenuRefDesktop.current?.contains(event.target);
+            if (!inMobile && !inDesktop) setHeaderMenu(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Task Integration (Unified for both general tasks and deliverables)
     const [tasks, setTasks] = useState([]);
@@ -1128,69 +1228,156 @@ const ProjectPage = () => {
     return (
         <div className="p-4 md:p-8 pb-20 max-w-[1400px] mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
-                    <Icons.ArrowLeft className="w-5 h-5" /> Back
-                </button>
-                <div className="flex items-center gap-3">
-                    <span className={`${theme.text.secondary} font-mono text-sm`}>{project.code}</span>
-                    <div className="w-48 ml-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
+                <div className="flex items-center justify-between w-full sm:w-auto">
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
+                            <Icons.ArrowLeft className="w-5 h-5" />
+                            <span className="hidden sm:inline">Back</span>
+                        </button>
+                        <span className={`${theme.text.secondary} font-mono text-sm`}>{project.code}</span>
+                    </div>
+
+                    {/* Mobile Actions: Status + 3-Dot */}
+                    <div className="flex sm:hidden items-center gap-2">
+                        <div className="relative">
+                            <button
+                                onClick={() => setStatusDropdown(!statusDropdown)}
+                                className="flex items-center gap-2"
+                            >
+                                <StatusBadge status={project.status} />
+                                <Icons.ChevronDown className={`w-4 h-4 ${theme.text.secondary}`} />
+                            </button>
+                            {statusDropdown && (
+                                <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                                    {(config?.statusOptions || []).filter(s => s.id !== project.status).map(status => (
+                                        <button
+                                            key={status.id}
+                                            onClick={() => handleStatusChange(status.id)}
+                                            className={`w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} capitalize transition-colors flex items-center gap-2 group`}
+                                        >
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
+                                            {status.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="relative" ref={headerMenuRefMobile}>
+                            <button
+                                onClick={() => setHeaderMenu(!headerMenu)}
+                                className={`flex items-center justify-center p-2 rounded-lg ${theme.canvas.card} sm:hover:${theme.canvas.hover} border ${theme.canvas.border} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors ${headerMenu ? `sm:${theme.canvas.hover} sm:${theme.text.primary}` : ''}`}
+                            >
+                                <Icons.More className="w-5 h-5" />
+                            </button>
+                            <AnimatePresence>
+                                {headerMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className={`absolute right-0 top-full mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                                    >
+                                        <button
+                                            onClick={() => { setHeaderMenu(false); setMetadataModal(true); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                        >
+                                            <Icons.Edit className="w-4 h-4" /> Edit Details
+                                        </button>
+                                        <button
+                                            onClick={() => { setHeaderMenu(false); setSaveTemplateModal(true); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors border-t ${theme.canvas.border}`}
+                                        >
+                                            <Icons.LayoutTemplate className="w-4 h-4" /> Save as Template
+                                        </button>
+                                        <button
+                                            onClick={() => { setHeaderMenu(false); setDeleteProjectModal(true); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                        >
+                                            <Icons.Trash className="w-4 h-4" /> Delete Project
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Desktop Actions */}
+                <div className="hidden sm:flex items-center gap-4 w-full sm:w-auto">
+                    <div className="w-48">
                         <ProgressBar total={projectTotal} completed={projectCompleted} />
                     </div>
 
-                    {/* Status Transition Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setStatusDropdown(!statusDropdown)}
-                            className="flex items-center gap-2"
-                        >
-                            <StatusBadge status={project.status} />
-                            <Icons.ChevronDown className={`w-4 h-4 ${theme.text.secondary}`} />
-                        </button>
-                        {statusDropdown && (
-                            <div className={`absolute top-full left-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
-                                {(config?.statusOptions || []).filter(s => s.id !== project.status).map(status => (
-                                    <button
-                                        key={status.id}
-                                        onClick={() => handleStatusChange(status.id)}
-                                        className={`w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} capitalize transition-colors flex items-center gap-2 group`}
-                                    >
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
-                                        {status.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="relative">
+                            <button
+                                onClick={() => setStatusDropdown(!statusDropdown)}
+                                className="flex items-center gap-2"
+                            >
+                                <StatusBadge status={project.status} />
+                                <Icons.ChevronDown className={`w-4 h-4 ${theme.text.secondary}`} />
+                            </button>
+                            {statusDropdown && (
+                                <div className={`absolute top-full left-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                                    {(config?.statusOptions || []).filter(s => s.id !== project.status).map(status => (
+                                        <button
+                                            key={status.id}
+                                            onClick={() => handleStatusChange(status.id)}
+                                            className={`w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} capitalize transition-colors flex items-center gap-2 group`}
+                                        >
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
+                                            {status.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
-                    <button
-                        onClick={() => setMetadataModal(true)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${theme.canvas.card} hover:${theme.canvas.hover} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} text-sm font-medium transition-colors`}
-                    >
-                        <Icons.Edit className="w-4 h-4" />
-                        Edit Details
-                    </button>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setSaveTemplateModal(true)}
-                            className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} rounded-lg text-sm font-medium transition-colors border ${theme.canvas.border}`}
-                        >
-                            <Icons.LayoutTemplate className="w-4 h-4" />
-                            Save as Template
-                        </button>
-                        <button
-                            onClick={() => setDeleteProjectModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-medium transition-colors"
-                        >
-                            <Icons.Trash className="w-4 h-4" />
-                            Delete Project
-                        </button>
+                        <div className="relative" ref={headerMenuRefDesktop}>
+                            <button
+                                onClick={() => setHeaderMenu(!headerMenu)}
+                                className={`flex items-center justify-center p-2 rounded-lg ${theme.canvas.card} sm:hover:${theme.canvas.hover} border ${theme.canvas.border} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors ${headerMenu ? `sm:${theme.canvas.hover} sm:${theme.text.primary}` : ''}`}
+                            >
+                                <Icons.More className="w-5 h-5" />
+                            </button>
+
+                            <AnimatePresence>
+                                {headerMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className={`absolute right-0 top-full mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                                    >
+                                        <button
+                                            onClick={() => { setHeaderMenu(false); setMetadataModal(true); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                        >
+                                            <Icons.Edit className="w-4 h-4" /> Edit Details
+                                        </button>
+                                        <button
+                                            onClick={() => { setHeaderMenu(false); setSaveTemplateModal(true); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors border-t ${theme.canvas.border}`}
+                                        >
+                                            <Icons.LayoutTemplate className="w-4 h-4" /> Save as Template
+                                        </button>
+                                        <button
+                                            onClick={() => { setHeaderMenu(false); setDeleteProjectModal(true); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                        >
+                                            <Icons.Trash className="w-4 h-4" /> Delete Project
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className={`flex items-center gap-6 mb-8 border-b ${theme.canvas.border} overflow-x-auto`}>
+            <div className={`flex items-center gap-4 md:gap-6 mb-6 md:mb-8 border-b ${theme.canvas.border} overflow-x-auto`}>
                 {tabs.map(tab => (
                     <button
                         key={tab.id}

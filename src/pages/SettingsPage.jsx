@@ -103,7 +103,7 @@ function SettingsPage() {
     };
 
     return (
-        <div className={`min-h-screen ${theme.canvas.bg} ${theme.text.secondary} p-4 md:p-8 md:pl-12`}>
+        <div className={`min-h-screen ${theme.canvas.bg} ${theme.text.secondary} p-3 pb-24 md:p-8 md:pl-12`}>
             <div className={`max-w-6xl mx-auto ${isMobile ? '' : 'flex gap-12'}`}>
                 {/* --- MOBILE: Carousel-style horizontal scroller --- */}
                 {isMobile ? (
@@ -128,7 +128,7 @@ function SettingsPage() {
                                     <button
                                         key={section.id}
                                         onClick={() => setActiveSection(section.id)}
-                                        className={`snap-center shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive
+                                        className={`snap-center shrink-0 flex items-center gap-1.5 md:gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${isActive
                                             ? `${theme.text.primary}`
                                             : `${theme.text.secondary} opacity-50`
                                             }`}

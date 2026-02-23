@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
 
   const renderNavGroup = (title, items, isVertical = false) => (
     <div className="mb-6">
-      <p className={(theme.text?.label || "") + " px-4 mb-3"}>{title}</p>
+      <p className={(theme.text?.label || "") + " px-4 mb-1.5 md:mb-3 text-[10px] md:text-xs"}>{title}</p>
       <div className="space-y-1">
         {items.map((item) => {
           const accent = theme.accents?.[item.id] || theme.accents?.default;
@@ -108,9 +108,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
                   style={{ backgroundColor: accent.primary }}
                 />
               ) : (
-                <Icon size={14} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+                <Icon size={isMobile ? 14 : 16} className={isActivePath ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
               )}
-              {item.label}
+              <span className="text-xs md:text-sm">{item.label}</span>
             </NavLink>
           );
         })}
@@ -131,15 +131,15 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
         {isMobile && (
           <button
             onClick={onClose}
-            className={`p-2 rounded-xl ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
+            className={`p-3 rounded-xl ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all outline-none md:min-h-[48px] min-h-[48px] flex items-center justify-center`}
             aria-label="Close navigation menu"
           >
-            <X size={18} />
+            <X size={24} />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 px-4 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-4 overflow-y-auto scrollbar-hide pt-2">
         {/* DASHBOARD LINK */}
         <div className="mb-6">
           <NavLink
@@ -157,8 +157,8 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
                 : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
             `}
           >
-            <LayoutDashboard size={14} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
-            DASHBOARD
+            <LayoutDashboard size={isMobile ? 14 : 16} className={currentPath === '/' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+            <span className="text-xs md:text-sm">DASHBOARD</span>
           </NavLink>
         </div>
 
@@ -168,13 +168,16 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
       </nav>
 
       {/* NOTIFICATIONS & SETTINGS - Fixed at bottom of nav area */}
-      <div className={`px-4 mb-2 pt-2 border-t ${theme.canvas.border} space-y-1`}>
+      <div className={`px-4 mb-4 md:mb-2 pt-2 border-t ${theme.canvas.border} space-y-2 md:space-y-1`}>
         <button
-          onClick={() => navigate('/notifications')}
+          onClick={() => {
+            navigate('/notifications');
+            if (isMobile) onClose();
+          }}
           className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
         >
-          <Bell size={14} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
-          <span className={theme.text?.nav || ""}>{"NOTIFICATIONS"}</span>
+          <Bell size={isMobile ? 14 : 16} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className={`${theme.text?.nav || ""} text-xs md:text-sm`}>{"NOTIFICATIONS"}</span>
           {notificationCount > 0 && (
             <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               {notificationCount}
@@ -196,8 +199,8 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
               : `${theme.canvas.inactive} ${theme.canvas.hover} group`}
           `}
         >
-          <Settings size={14} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
-          SETTINGS
+          <Settings size={isMobile ? 14 : 16} className={currentPath === '/settings' ? 'text-inherit' : `${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <span className="text-xs md:text-sm">SETTINGS</span>
         </NavLink>
       </div>
 

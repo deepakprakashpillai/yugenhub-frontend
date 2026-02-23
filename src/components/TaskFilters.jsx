@@ -42,9 +42,9 @@ const TaskFilters = ({ filters, onChange }) => {
     const hasActiveFilters = filters.search || filters.status !== 'all' || filters.priority !== 'all';
 
     return (
-        <div className={`flex flex-wrap items-center gap-3 p-4 ${theme.canvas.bg} bg-opacity-50 border ${theme.canvas.border} rounded-2xl mb-8`}>
+        <div className={`flex flex-wrap items-center gap-2 sm:gap-3 p-3 sm:p-4 ${theme.canvas.bg} bg-opacity-50 border ${theme.canvas.border} rounded-2xl mb-4 sm:mb-8`}>
             {/* Search */}
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative flex-1 min-w-full sm:min-w-[200px]">
                 <Icons.Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${theme.text.secondary}`} />
                 <input
                     type="text"

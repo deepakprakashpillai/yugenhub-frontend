@@ -513,7 +513,7 @@ const CalendarPage = () => {
                                                                 onMouseLeave={() => setHoveredMoreDay(null)}
                                                             >
                                                                 <div className={`text-[10px] uppercase font-bold ${theme.text.secondary} mb-2 px-1`}>Hidden Items</div>
-                                                                <div className="space-y-1 max-h-[200px] overflow-y-auto custom-scrollbar overflow-visible p-1">
+                                                                <div className="space-y-1 max-h-[200px] overflow-y-auto overflow-visible p-1">
                                                                     {dayEvents.slice(4).map((evt) => (
                                                                         <div
                                                                             key={evt.id}

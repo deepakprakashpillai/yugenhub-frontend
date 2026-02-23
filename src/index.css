@@ -55,21 +55,58 @@ input[type="number"]:hover::-webkit-outer-spin-button {
 }
 
 /* Custom Scrollbar Utilities */
-.scrollbar-thin::-webkit-scrollbar {
+/* Global Sleek Scrollbar - Hover Only Visibility */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+}
+
+*:hover {
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.dark *:hover {
+  scrollbar-color: rgba(113, 113, 122, 0.5) transparent;
+}
+
+/* Webkit specific styles */
+*::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.scrollbar-track-transparent::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
+/* Default state: invisible */
+*::-webkit-scrollbar-thumb {
+  background-color: transparent;
   border-radius: 20px;
+  transition: background-color 0.3s ease;
 }
 
-.dark .scrollbar-thumb-zinc-600::-webkit-scrollbar-thumb {
-  background-color: #52525b;
-  border-radius: 20px;
+/* Hover state on the container: visible */
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  /* gray-400 */
+}
+
+/* Hover state on the thumb itself */
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7);
+  /* gray-500 */
+}
+
+/* Dark mode hover on container */
+.dark *:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(113, 113, 122, 0.5);
+  /* zinc-500 */
+}
+
+/* Dark mode hover on thumb */
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(161, 161, 170, 0.7);
+  /* zinc-400 */
 }

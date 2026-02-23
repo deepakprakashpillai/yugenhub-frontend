@@ -95,12 +95,12 @@ const MemberDashboard = ({ user }) => {
                         />
                     ) : (
                         myTasks.map((task) => (
-                            <div key={task.id} className={`flex items-center justify-between p-4 rounded-xl ${theme.canvas.bg} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-all`}>
+                            <div key={task.id} className={`flex items-center justify-between p-5 md:p-4 rounded-xl ${theme.canvas.bg} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-all cursor-pointer`}>
                                 <div>
-                                    <h3 className={`font-medium ${theme.text.primary} mb-1`}>{task.title}</h3>
-                                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary}`}>
+                                    <h3 className={`font-medium ${theme.text.primary} mb-1 text-base md:text-sm`}>{task.title}</h3>
+                                    <div className={`flex items-center gap-3 text-sm md:text-xs ${theme.text.secondary}`}>
                                         <span className="flex items-center gap-1">
-                                            <Icons.Calendar className="w-3 h-3" />
+                                            <Icons.Calendar className="w-4 h-4 md:w-3 md:h-3" />
                                             {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Date'}
                                         </span>
                                         {task.status === 'urgent' && (

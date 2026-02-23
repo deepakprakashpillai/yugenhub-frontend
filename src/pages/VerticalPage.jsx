@@ -176,7 +176,7 @@ const VerticalPage = ({ vertical, title }) => {
 
     return (
         <div className={`p-4 md:p-8 pb-20 max-w-[1600px] mx-auto ${theme.text.primary}`}>
-            <h1 className={`text-2xl md:text-4xl font-black mb-8 ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
+            <h1 className={`text-2xl md:text-4xl font-black mb-4 md:mb-8 ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
                 {title}
             </h1>
 

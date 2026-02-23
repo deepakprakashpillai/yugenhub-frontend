@@ -16,7 +16,7 @@ const PAGE_TITLES = {
     '/settings': 'Settings',
 };
 
-const MobileHeader = ({ onMenuToggle }) => {
+const MobileHeader = () => {
     const { theme } = useTheme();
     const { notificationCount } = useAuth();
     const location = useLocation();
@@ -52,26 +52,13 @@ const MobileHeader = ({ onMenuToggle }) => {
 
     const pageTitle = PAGE_TITLES[location.pathname] || 'Yugen';
 
-    const handleSearchClick = () => {
-        // Trigger Command Palette via keyboard event
-        // We dispatch on document because CommandPalette listens on document
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }));
-    };
-
     return (
         <header
-            className={`md:hidden sticky top-0 z-50 flex items-center justify-between h-[72px] px-4 border-b backdrop-blur-xl ${theme.canvas.sidebar} ${theme.canvas.border} transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
+            className={`md:hidden sticky top-0 z-40 flex items-center justify-between h-[64px] px-4 border-b backdrop-blur-xl ${theme.canvas.sidebar} ${theme.canvas.border} transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
             style={{ WebkitBackdropFilter: 'blur(20px)', backdropFilter: 'blur(20px)' }}
         >
-            {/* Left: Hamburger */}
-            <button
-                type="button"
-                onClick={onMenuToggle}
-                className={`relative z-50 p-3 -ml-2 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
-                aria-label="Open navigation menu"
-            >
-                <Icons.Menu className="w-7 h-7 pointer-events-none" />
-            </button>
+            {/* Left Box (Invisible, just for flex balance) */}
+            <div className="w-10"></div>
 
             {/* Center: Page title */}
             <span className={`text-sm font-bold uppercase tracking-widest ${theme.text.primary}`}>
@@ -79,27 +66,17 @@ const MobileHeader = ({ onMenuToggle }) => {
             </span>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-1">
-                {/* Search / Command Palette trigger */}
-                <button
-                    type="button"
-                    onClick={handleSearchClick}
-                    className={`relative z-50 p-3 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
-                    aria-label="Search"
-                >
-                    <Search className="w-5 h-5 pointer-events-none" />
-                </button>
-
+            <div className="flex items-center gap-1 w-10 justify-end">
                 {/* Notifications */}
                 <button
                     type="button"
                     onClick={() => navigate('/notifications')}
-                    className={`relative z-50 p-3 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all`}
+                    className={`relative z-50 p-3 rounded-xl cursor-pointer pointer-events-auto ${theme.text.secondary} hover:${theme.text.primary} active:scale-95 transition-all w-[48px] h-[48px] flex items-center justify-center`}
                     aria-label="Notifications"
                 >
                     <Bell className="w-5 h-5 pointer-events-none" />
                     {notificationCount > 0 && (
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
                     )}
                 </button>
             </div>

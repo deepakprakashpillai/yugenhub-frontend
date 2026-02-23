@@ -606,16 +606,16 @@ const ProjectSlideOver = ({
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowTemplateModal(true)}
-                            className={`flex items-center gap-2 px-3 py-1.5 ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} rounded-lg text-xs font-medium transition-all hover:${theme.canvas.hover}`}
+                            className={`flex items-center gap-2 px-3 py-2 md:py-1.5 ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary} rounded-lg text-xs font-medium transition-all hover:${theme.canvas.hover}`}
                         >
-                            <Icons.Download className="w-3.5 h-3.5" />
+                            <Icons.Download className="w-4 h-4 md:w-3.5 md:h-3.5" />
                             Import Template
                         </button>
                         <button
                             onClick={handleAddEvent}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
+                            className="flex items-center gap-2 px-3 py-2 md:py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-medium transition-all border border-purple-500/20 hover:border-purple-500/30"
                         >
-                            <Icons.Plus className="w-3.5 h-3.5" />
+                            <Icons.Plus className="w-4 h-4 md:w-3.5 md:h-3.5" />
                             Add Event
                         </button>
                     </div>
@@ -666,38 +666,38 @@ const ProjectSlideOver = ({
                                             <Icons.Clock className="w-3.5 h-3.5" />
                                             Timing
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                             <div>
                                                 <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Start</label>
-                                                <div className="flex gap-2 h-[38px]">
+                                                <div className="flex flex-col sm:flex-row gap-2 sm:h-[38px]">
                                                     <DatePicker
                                                         value={event.start_date}
                                                         onChange={(val) => handleEventChange(index, 'start_date', val)}
                                                         placeholder="Start date"
-                                                        className="flex-1 w-1/2"
+                                                        className="w-full sm:w-1/2"
                                                     />
                                                     <TimePicker
                                                         value={event.start_time}
                                                         onChange={(val) => handleEventChange(index, 'start_time', val)}
                                                         placeholder="Time"
-                                                        className="flex-1 w-1/2"
+                                                        className="w-full sm:w-1/2"
                                                     />
                                                 </div>
                                             </div>
-                                            <div>
+                                            <div className="mt-2 lg:mt-0">
                                                 <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>End</label>
-                                                <div className="flex gap-2 h-[38px]">
+                                                <div className="flex flex-col sm:flex-row gap-2 sm:h-[38px]">
                                                     <DatePicker
                                                         value={event.end_date}
                                                         onChange={(val) => handleEventChange(index, 'end_date', val)}
                                                         placeholder="End date"
-                                                        className="flex-1 w-1/2"
+                                                        className="w-full sm:w-1/2"
                                                     />
                                                     <TimePicker
                                                         value={event.end_time}
                                                         onChange={(val) => handleEventChange(index, 'end_time', val)}
                                                         placeholder="Time"
-                                                        className="flex-1 w-1/2"
+                                                        className="w-full sm:w-1/2"
                                                     />
                                                 </div>
                                             </div>
@@ -710,7 +710,7 @@ const ProjectSlideOver = ({
                                             <Icons.MapPin className="w-3.5 h-3.5" />
                                             Venue
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className={`text-[10px] ${theme.text.secondary} mb-1 block`}>Name</label>
                                                 <input
@@ -804,30 +804,33 @@ const ProjectSlideOver = ({
                                             Add Item
                                         </button>
                                     </div>
-                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                         {event.deliverables.map((del, dIndex) => (
-                                            <div key={del.id} className={`flex items-center gap-3 ${theme.canvas.card} p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
+                                            <div key={del.id} className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 ${theme.canvas.card} p-3 sm:p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors relative`}>
                                                 <select
                                                     value={del.type}
                                                     onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                                    className={`flex-1 bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                    className={`w-full sm:flex-1 bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer pr-8 sm:pr-0`}
                                                 >
                                                     <option value="" disabled>Select Type</option>
                                                     {(config?.deliverableTypes || []).map(dt => (
                                                         <option key={dt} value={dt}>{dt}</option>
                                                     ))}
                                                 </select>
-                                                <div className={`w-px h-6 ${theme.canvas.border}`}></div>
-                                                <input
-                                                    type="number"
-                                                    value={del.quantity}
-                                                    onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
-                                                    className={`w-12 bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 text-center font-medium`}
-                                                    min="1"
-                                                />
+                                                <div className={`hidden sm:block w-px h-6 ${theme.canvas.border}`}></div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                                                    <span className={`sm:hidden text-xs ${theme.text.secondary}`}>Qty:</span>
+                                                    <input
+                                                        type="number"
+                                                        value={del.quantity}
+                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
+                                                        className={`flex-1 sm:w-12 bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 sm:text-center font-medium`}
+                                                        min="1"
+                                                    />
+                                                </div>
                                                 <button
                                                     onClick={() => handleRemoveDeliverable(index, dIndex)}
-                                                    className={`${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
+                                                    className={`absolute right-2 top-2 sm:relative sm:right-auto sm:top-auto ${theme.text.secondary} hover:text-red-400 p-1.5 opacity-100 sm:opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
                                                 >
                                                     <Icons.X className="w-4 h-4" />
                                                 </button>
@@ -863,10 +866,10 @@ const ProjectSlideOver = ({
                                             Add Member
                                         </button>
                                     </div>
-                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                         {event.assignments.map((assign, aIndex) => (
-                                            <div key={assign.id} className={`grid grid-cols-[1fr,1fr,auto] gap-3 items-center ${theme.canvas.card} p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
-                                                <div className="min-w-0">
+                                            <div key={assign.id} className={`flex flex-col sm:grid sm:grid-cols-[1fr,1fr,auto] gap-2 sm:gap-3 items-start sm:items-center ${theme.canvas.card} p-3 sm:p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors relative`}>
+                                                <div className="w-full min-w-0 pr-8 sm:pr-0">
                                                     <select
                                                         value={assign.associate_id}
                                                         onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
@@ -878,7 +881,7 @@ const ProjectSlideOver = ({
                                                         ))}
                                                     </select>
                                                 </div>
-                                                <div className={`min-w-0 border-l ${theme.canvas.border} pl-3`}>
+                                                <div className={`w-full min-w-0 sm:border-l ${theme.canvas.border} sm:pl-3 mt-1 sm:mt-0`}>
                                                     <input
                                                         type="text"
                                                         value={assign.role}
@@ -889,7 +892,7 @@ const ProjectSlideOver = ({
                                                 </div>
                                                 <button
                                                     onClick={() => handleRemoveAssignment(index, aIndex)}
-                                                    className={`${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
+                                                    className={`absolute right-2 top-2 sm:relative sm:right-auto sm:top-auto ${theme.text.secondary} hover:text-red-400 p-1.5 opacity-100 sm:opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
                                                 >
                                                     <Icons.X className="w-4 h-4" />
                                                 </button>

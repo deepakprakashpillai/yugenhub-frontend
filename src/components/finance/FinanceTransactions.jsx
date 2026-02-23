@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
- 
+
 // eslint-disable-next-line no-unused-vars
 import { getTransactions, createTransaction, getAccounts } from '../../api/finance';
 import { getAssociates } from '../../api/associates';
@@ -47,8 +47,8 @@ const FinanceTransactions = ({ refreshTrigger }) => {
 
     return (
         <div className="h-full">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Transactions</h2>
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">Transactions</h2>
                 <div className="flex gap-2">
                     <button className={`p-2 rounded-lg border ${theme.canvas.border} hover:bg-gray-100 dark:hover:bg-gray-800`}>
                         <Filter size={18} />
@@ -63,7 +63,7 @@ const FinanceTransactions = ({ refreshTrigger }) => {
                 </div>
             </div>
 
-            <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-2">
+            <div className="space-y-2 sm:space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-2">
                 {transactions.map(tx => (
                     <TransactionItem
                         key={tx.id}

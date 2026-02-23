@@ -48,19 +48,19 @@ const FinancePayouts = ({ refreshTrigger }) => {
     return (
         <div className="h-full">
             {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Associate Payouts</h2>
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">Associate Payouts</h2>
                 <button
                     onClick={() => setShowTransactionSlideOver(true)}
-                    className="flex items-center space-x-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                    className="flex items-center space-x-1 sm:space-x-2 px-3 py-1.5 sm:px-3 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
                 >
-                    <Plus size={16} />
-                    <span>New Payout</span>
+                    <Plus className="w-4 h-4 sm:w-4 sm:h-4" />
+                    <span className="text-sm">New Payout</span>
                 </button>
             </div>
 
             {/* List */}
-            <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+            <div className="space-y-2 sm:space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
                 {transactions.map(tx => (
                     <TransactionItem
                         key={tx.id}

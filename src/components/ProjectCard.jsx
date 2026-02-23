@@ -119,7 +119,7 @@ const ProjectCard = ({ project, onRefresh }) => {
 
             {/* --- CARD HEADER (Navigation Zone) --- */}
             <div
-                className="p-6 pb-2 cursor-pointer group/header"
+                className="p-4 pb-2 md:p-6 md:pb-2 cursor-pointer group/header"
                 onClick={() => navigate(`/projects/${project._id}`)}
             >
                 <div className="flex justify-between items-start mb-4">
@@ -200,7 +200,7 @@ const ProjectCard = ({ project, onRefresh }) => {
             {!expanded && (
                 <div
                     onClick={() => setExpanded(true)}
-                    className={`px-6 py-4 mt-auto border-t ${theme.canvas.border} flex items-center justify-between text-xs ${theme.text.secondary} cursor-pointer group/footer hover:${theme.canvas.hover} transition-colors`}
+                    className={`px-4 py-3 md:px-6 md:py-4 mt-auto border-t ${theme.canvas.border} flex items-center justify-between text-xs ${theme.text.secondary} cursor-pointer group/footer hover:${theme.canvas.hover} transition-colors`}
                 >
                     <div className="flex items-center gap-2 flex-wrap">
                         {/* Vertical-specific badges */}
@@ -267,9 +267,9 @@ const ProjectCard = ({ project, onRefresh }) => {
                         // So adding stopPropagation to the AnimatePresence div is smart.
                         className={`overflow-hidden ${theme.canvas.bg} cursor-default`} // Change cursor to default inside
                     >
-                        <div className={`px-6 py-6 border-t ${theme.canvas.border} relative`}>
+                        <div className={`px-4 py-4 md:px-6 md:py-6 border-t ${theme.canvas.border} relative`}>
                             {/* Vertical Line */}
-                            <div className={`absolute left-[3.25rem] top-6 bottom-6 w-px ${theme.canvas.border}`} />
+                            <div className={`absolute left-[2.25rem] md:left-[3.25rem] top-4 md:top-6 bottom-4 md:bottom-6 w-px ${theme.canvas.border}`} />
 
                             <div className="space-y-6">
                                 {project.events?.length > 0 ? (

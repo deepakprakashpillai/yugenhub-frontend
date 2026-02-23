@@ -188,7 +188,7 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
                     </div>
 
                     {/* System Fields List (Read Only) */}
-                    <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-6">
                         <div className={`flex items-center gap-2 ${theme.text.secondary} mb-4`}>
                             <Shield size={14} className="text-emerald-500" />
                             <h4 className="text-xs font-bold uppercase tracking-widest">
@@ -294,7 +294,7 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
                     </div>
 
                     {/* Scrollable List */}
-                    <div className={`flex-1 overflow-y-auto p-6 ${theme.canvas.bg} custom-scrollbar`}>
+                    <div className={`flex-1 overflow-y-auto p-6 ${theme.canvas.bg}`}>
                         {activeFields.length === 0 ? (
                             <div className={`h-full flex flex-col items-center justify-center ${theme.text.secondary} space-y-2 border border-dashed ${theme.canvas.border} rounded-xl`}>
                                 <List size={24} className={theme.text.secondary} />

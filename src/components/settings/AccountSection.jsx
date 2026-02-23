@@ -64,7 +64,7 @@ function AccountSection() {
     const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', member: 'Member' };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div>
                 <h2 className={`text-3xl font-bold ${theme.text.primary} flex items-center gap-3`}>
@@ -76,7 +76,7 @@ function AccountSection() {
             </div>
 
             {/* Profile Card */}
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6 md:p-8 max-w-2xl`}>
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 md:p-8 max-w-2xl`}>
                 {/* Avatar & Role Badge */}
                 <div className="flex items-center gap-5 mb-8">
                     <div className={`w-16 h-16 rounded-2xl ${theme.canvas.bg} border ${theme.canvas.border} flex items-center justify-center text-2xl font-bold ${theme.text.secondary} overflow-hidden shadow-inner shrink-0`}>
@@ -89,8 +89,8 @@ function AccountSection() {
                     <div>
                         <h3 className={`text-lg font-bold ${theme.text.primary}`}>{account?.name}</h3>
                         <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 mt-1 rounded-lg border ${account?.role === 'owner' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' :
-                                account?.role === 'admin' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' :
-                                    'text-zinc-400 bg-zinc-500/10 border-zinc-500/20'
+                            account?.role === 'admin' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' :
+                                'text-zinc-400 bg-zinc-500/10 border-zinc-500/20'
                             }`}>
                             {ROLE_LABELS[account?.role] || 'Member'}
                         </span>

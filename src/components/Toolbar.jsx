@@ -4,8 +4,6 @@ import { Icons } from './Icons';
 import clsx from 'clsx';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useTheme } from '../context/ThemeContext';
-import { useIsMobile } from '../hooks/useMediaQuery';
-import { SlidersHorizontal } from 'lucide-react';
 
 const Toolbar = ({
     search, setSearch,
@@ -14,16 +12,7 @@ const Toolbar = ({
     viewMode, setViewMode,
     view, setView
 }) => {
-    const isMobile = useIsMobile();
-    // We will combine 'view' and 'filter' into a single UI concept "Filter"
-    // However, we still need to pass them separately to the parent/API.
-    // Logic:
-    // - "Upcoming" -> view='upcoming', filter='all'
-    // - "All Projects" -> view='all', filter='all'
-    // - Specific Status -> view='all', filter='status_id'
-
     const [activeDropdown, setActiveDropdown] = useState(null); // 'filter', 'sort' or null
-    const [showMobileFilters, setShowMobileFilters] = useState(false);
     const toolbarRef = useRef(null);
     const { config } = useAgencyConfig();
     const { theme } = useTheme();
@@ -54,7 +43,7 @@ const Toolbar = ({
     };
 
     return (
-        <div ref={toolbarRef} className={`flex flex-col md:flex-row justify-between items-center mb-8 gap-3 md:gap-4 ${theme.canvas.card} p-3 md:p-4 rounded-xl border ${theme.canvas.border} backdrop-blur-sm sticky top-0 z-10 transition-all`}>
+        <div ref={toolbarRef} className={`flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 gap-3 md:gap-4 ${theme.canvas.card} p-2 md:p-4 rounded-xl border ${theme.canvas.border} backdrop-blur-sm sticky top-0 z-50 transition-all`}>
 
             {/* 1. Search Bar */}
             <div className="relative w-full md:w-1/3">
@@ -73,25 +62,7 @@ const Toolbar = ({
                 />
             </div>
 
-            {/* Mobile: filter toggle button */}
-            {isMobile && (
-                <button
-                    onClick={() => setShowMobileFilters(!showMobileFilters)}
-                    className={clsx(
-                        "flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-colors",
-                        showMobileFilters ? '' : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary}`
-                    )}
-                    style={showMobileFilters ? { borderColor: accent.primary, color: accent.primary } : {}}
-                >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    Filters
-                </button>
-            )}
-
-            <div className={clsx(
-                "items-center gap-3 w-full md:w-auto flex-wrap",
-                isMobile ? (showMobileFilters ? 'flex' : 'hidden') : 'flex'
-            )}>
+            <div className="flex items-center justify-end md:justify-start gap-3 w-full md:w-auto flex-wrap mt-2 md:mt-0">
 
 
 
@@ -114,7 +85,7 @@ const Toolbar = ({
                     </button>
 
                     {activeDropdown === 'filter' && (
-                        <div className={`absolute top-full right-0 mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                        <div className={`absolute top-full right-0 mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {/* Special Views */}
                             <button
                                 onClick={() => { setView('all'); setFilter('all'); setActiveDropdown(null); }}
@@ -194,7 +165,7 @@ const Toolbar = ({
                     </button>
 
                     {activeDropdown === 'sort' && (
-                        <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-20 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                        <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {[
                                 { id: 'newest', label: 'Newest First' },
                                 { id: 'oldest', label: 'Oldest First' },

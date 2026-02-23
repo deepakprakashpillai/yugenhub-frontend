@@ -333,7 +333,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                         onChange={handleChange}
                         rows={6}
                         placeholder="Add a more detailed description..."
-                        className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-3 ${theme.text.primary} focus:outline-none focus:${theme.canvas.card} focus:border-purple-500 transition-all resize-none text-sm leading-relaxed custom-scrollbar placeholder:${theme.text.secondary} hover:${theme.canvas.hover}`}
+                        className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-3 ${theme.text.primary} focus:outline-none focus:${theme.canvas.card} focus:border-purple-500 transition-all resize-none text-sm leading-relaxed placeholder:${theme.text.secondary} hover:${theme.canvas.hover}`}
                     />
                 </div>
 
@@ -363,7 +363,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                         <h4 className={`text-xs uppercase ${theme.text.secondary} font-bold mb-4 flex items-center gap-2`}>
                             <Icons.History className="w-3 h-3" /> Recent Activity
                         </h4>
-                        <div className="space-y-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="space-y-4 max-h-48 overflow-y-auto pr-2">
                             {historyLoading ? (
                                 <div className={`${theme.text.secondary} text-xs italic`}>Loading history...</div>
                             ) : history.length === 0 ? (

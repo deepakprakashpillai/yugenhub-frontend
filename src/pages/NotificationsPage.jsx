@@ -86,9 +86,9 @@ const NotificationsPage = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <div className="p-4 md:p-8 max-w-[800px] mx-auto min-h-screen">
+        <div className="p-3 md:p-8 pb-24 md:pb-8 max-w-[800px] mx-auto min-h-screen">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-8">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
@@ -134,7 +134,7 @@ const NotificationsPage = () => {
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={clsx(
-                                "w-full text-left p-4 rounded-xl border transition-all flex items-start gap-4",
+                                "w-full text-left p-3 md:p-4 rounded-xl border transition-all flex items-start gap-3 md:gap-4",
                                 notification.read
                                     ? `${theme.canvas.bg} border-transparent hover:${theme.canvas.hover} opacity-70`
                                     : `${theme.canvas.card} ${theme.canvas.border} hover:border-${theme.accent?.primary || 'purple-500'}`
