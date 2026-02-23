@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    container_name: yugenhub-frontend
+    env_file:
+      - .env
+    ports:
+      - "3000:80"
+    restart: always
