@@ -1,26 +1,33 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>yugenhub</title>
-    <script>
-      (function() {
-        try {
-          const mode = localStorage.getItem('theme_mode') || 'dark';
-          // Match these colors to theme.js defaults
-          const bg = mode === 'light' ? '#fdf4ff' : '#000000';
-          document.documentElement.style.backgroundColor = bg;
-          if (document.body) document.body.style.backgroundColor = bg;
-        } catch (e) {
-          console.error(e);
-        }
-      })();
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>yugenhub</title>
+  <script>
+    (function () {
+      try {
+        const mode = localStorage.getItem('theme_mode') || 'dark';
+        // Match these colors to theme.js defaults
+        const bg = mode === 'light' ? '#fdf4ff' : '#000000';
+        document.documentElement.style.backgroundColor = bg;
+        if (document.body) document.body.style.backgroundColor = bg;
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

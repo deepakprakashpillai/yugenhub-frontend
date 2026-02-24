@@ -22,6 +22,7 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const FinancePage = lazy(() => import('./pages/FinancePage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
+import ReloadPrompt from './components/PWA/ReloadPrompt';
 
 import BottomNav from './components/BottomNav';
 
@@ -81,6 +82,7 @@ const ProtectedRoute = ({ children }) => {
   return (
     <div className={`flex min-h-[100dvh] ${theme.canvas.bg} ${theme.text.primary}`}>
       <CommandPalette />
+      <ReloadPrompt />
 
       {/* SIDEBAR: Desktop = inline, Mobile = overlay drawer */}
       <Sidebar

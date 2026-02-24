@@ -22,6 +22,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useTheme } from '../context/ThemeContext';
 import { ROLES } from '../constants';
+import InstallPrompt from './PWA/InstallPrompt';
 
 export default function Sidebar({ isOpen, onClose, isMobile }) {
   const location = useLocation();
@@ -168,6 +169,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
       </nav>
 
       {/* NOTIFICATIONS & SETTINGS - Fixed at bottom of nav area */}
+      <InstallPrompt isMobile={isMobile} />
       <div className={`px-3.5 mb-4 md:mb-2 pt-2 border-t ${theme.canvas.border} space-y-1`}>
         <button
           onClick={() => {
