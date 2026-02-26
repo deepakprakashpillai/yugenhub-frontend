@@ -32,6 +32,10 @@ export const PERMISSIONS = {
     MANAGE_SETTINGS: 'manage_settings',
     MANAGE_WORKFLOW: 'manage_workflow',
     EXPORT_DATA: 'export_data',
+
+    // Access Control
+    MANAGE_ACCESS: 'manage_access',  // Owner only: configure who sees what
+    VIEW_FINANCE: 'view_finance',
 };
 
 /**
@@ -48,6 +52,8 @@ export const ROLE_PERMISSIONS = {
         PERMISSIONS.MANAGE_SETTINGS,
         PERMISSIONS.MANAGE_WORKFLOW,
         PERMISSIONS.EXPORT_DATA,
+        PERMISSIONS.MANAGE_ACCESS,
+        PERMISSIONS.VIEW_FINANCE,
     ],
     [ROLES.ADMIN]: [
         PERMISSIONS.VIEW_ALL_CALENDAR,
@@ -56,6 +62,7 @@ export const ROLE_PERMISSIONS = {
         PERMISSIONS.CREATE_PROJECT,
         PERMISSIONS.DELETE_PROJECT,
         PERMISSIONS.EXPORT_DATA,
+        PERMISSIONS.VIEW_FINANCE,
     ],
     [ROLES.MEMBER]: [
         PERMISSIONS.CREATE_PROJECT,

@@ -3,7 +3,7 @@ import {
     Plus, Edit3, Trash2, Check, X,
     MoreVertical, Lock, LayoutGrid, List,
     Settings, Shield, ChevronRight, Activity,
-    Save, Gem, Baby, Briefcase, CornerDownRight
+    Save, Gem, Baby, Briefcase, CornerDownRight, IndianRupee
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -184,6 +184,26 @@ const VerticalCard = ({ vertical, isEditing, onEdit, onSave, onCancel, onDelete,
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Finance Summary Toggle */}
+                    <div className={`px-6 py-4 border-b ${theme.canvas.border}`}>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <label className={`text-xs ${theme.text.secondary} uppercase tracking-wider font-semibold flex items-center gap-1.5`}>
+                                    <IndianRupee size={12} /> Finance Summary
+                                </label>
+                                <p className={`text-[10px] ${theme.text.secondary} mt-0.5`}>Include in overview stats</p>
+                            </div>
+                            <button
+                                onClick={() => setDraft({ ...draft, include_in_finance_summary: !draft.include_in_finance_summary })}
+                                className={`relative w-10 h-5 rounded-full transition-colors ${draft.include_in_finance_summary !== false ? 'bg-emerald-500' : 'bg-zinc-700'
+                                    }`}
+                            >
+                                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${draft.include_in_finance_summary !== false ? 'translate-x-5' : 'translate-x-0'
+                                    }`} />
+                            </button>
                         </div>
                     </div>
 

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Crown, ShieldCheck, UserCircle, Mail, Phone, Edit2, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Crown, ShieldCheck, UserCircle, Mail, Phone, Edit2, RefreshCw, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import api from '../../api/axios';
 import { InviteUserModal, EditUserModal } from '../modals';
 import RemoveUserModal from '../modals/RemoveUserModal';
+import ManageAccessModal from '../modals/ManageAccessModal';
 import { useTheme } from '../../context/ThemeContext';
 import { ROLES } from '../../constants';
 
@@ -22,8 +23,10 @@ function TeamSection({ role }) {
     const [inviteModal, setInviteModal] = useState(false);
     const [removeUser, setRemoveUser] = useState(null);
     const [editUser, setEditUser] = useState(null);
+    const [accessUser, setAccessUser] = useState(null);
 
-    const canManage = role === ROLES.OWNER || role === ROLES.ADMIN;
+    const isOwner = role === ROLES.OWNER;
+    const canManage = isOwner || role === ROLES.ADMIN;
 
     const fetchTeam = async () => {
         setLoading(true);
@@ -46,6 +49,8 @@ function TeamSection({ role }) {
             toast.error(err.response?.data?.detail || 'Failed to update role');
         }
     };
+
+
 
     const StatusBadge = ({ status }) => {
         const isPending = status === 'pending';
@@ -172,6 +177,18 @@ function TeamSection({ role }) {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Owner-only: Manage Access Button */}
+                            {isOwner && member.role !== ROLES.OWNER && (
+                                <div className={`mt-3 pt-3 border-t ${theme.canvas.border}`}>
+                                    <button
+                                        onClick={() => setAccessUser(member)}
+                                        className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border ${theme.canvas.border} ${theme.text.secondary} hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all`}
+                                    >
+                                        <Shield size={13} /> Manage Access
+                                    </button>
+                                </div>
+                            )}
                         </motion.div>
                     );
                 })}
@@ -195,6 +212,13 @@ function TeamSection({ role }) {
                 onClose={() => setRemoveUser(null)}
                 user={removeUser}
                 onRemoved={fetchTeam}
+            />
+
+            <ManageAccessModal
+                isOpen={!!accessUser}
+                onClose={() => setAccessUser(null)}
+                user={accessUser}
+                onUpdated={fetchTeam}
             />
         </div>
     );
