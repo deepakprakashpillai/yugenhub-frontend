@@ -2,6 +2,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { toast } from 'sonner';
 
 const Login = () => {
     const { loginWithGoogle, isAuthenticated } = useAuth();
@@ -19,13 +20,13 @@ const Login = () => {
         if (result.success) {
             navigate('/');
         } else {
-            alert(`Login Failed: ${result.error}`);
+            toast.error(`Login Failed: ${result.error}`);
         }
     };
 
     const handleError = () => {
         console.log('Login Failed');
-        alert("Google Login failed to initialize.");
+        toast.error("Google Login failed to initialize.");
     };
 
     return (

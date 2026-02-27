@@ -11,8 +11,9 @@ import FloatingActionButton from '../components/FloatingActionButton';
 import { ClientModal } from '../components/modals';
 import { v4 as uuidv4 } from 'uuid';
 import { useTheme } from '../context/ThemeContext';
+import { toast } from 'sonner';
 
-const ClientCard = ({ client, theme, onDelete }) => (
+const ClientCard = ({ client, theme, onEdit, onDelete }) => (
     <motion.div
         layout
         initial={{ opacity: 0, scale: 0.95 }}
@@ -64,6 +65,9 @@ const ClientCard = ({ client, theme, onDelete }) => (
             </div>
             <div className="flex items-center gap-2">
                 <div className={`text-[10px] font-mono ${theme.text.secondary} mr-1`}>{client.total_projects} Projects</div>
+                <button onClick={(e) => { e.stopPropagation(); onEdit(client); }} className={`p-1.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-purple-500/10 hover:text-purple-500 transition-colors`} title="Edit Client">
+                    <Icons.Edit className="w-3.5 h-3.5" />
+                </button>
                 <button onClick={(e) => { e.stopPropagation(); onDelete(client); }} className={`p-1.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-red-500/10 hover:text-red-500 transition-colors`} title="Delete Client">
                     <Icons.Trash className="w-3.5 h-3.5" />
                 </button>
@@ -72,7 +76,7 @@ const ClientCard = ({ client, theme, onDelete }) => (
     </motion.div>
 );
 
-const ClientTable = ({ clients, theme, onDelete }) => (
+const ClientTable = ({ clients, theme, onEdit, onDelete }) => (
     <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border}`}>
         <table className={`w-full text-left text-sm ${theme.text.secondary} ${theme.canvas.bg} bg-opacity-50`}>
             <thead className={`text-xs uppercase ${theme.canvas.bg} bg-opacity-80 ${theme.text.secondary} font-medium`}>
@@ -121,6 +125,9 @@ const ClientTable = ({ clients, theme, onDelete }) => (
                             {client.total_projects}
                         </td>
                         <td className="px-6 py-4 text-right">
+                            <button onClick={(e) => { e.stopPropagation(); onEdit(client); }} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:bg-purple-500/10 hover:text-purple-500 transition-colors mr-2`} title="Edit Client">
+                                <Icons.Edit className="w-4 h-4" />
+                            </button>
                             <button onClick={(e) => { e.stopPropagation(); onDelete(client); }} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:bg-red-500/10 hover:text-red-500 transition-colors`} title="Delete Client">
                                 <Icons.Trash className="w-4 h-4" />
                             </button>
@@ -214,7 +221,7 @@ const ClientsPage = () => {
             setClientModal({ open: false, client: null });
         } catch (err) {
             console.error(err);
-            alert('Failed to save client');
+            toast.error('Failed to save client');
         } finally {
             setActionLoading(false);
         }
@@ -226,11 +233,10 @@ const ClientsPage = () => {
         try {
             await api.delete(`/clients/${client._id}`);
             await fetchClients();
-            // Assuming you have toast imported, but using alert as fallback matching save
-            alert('Client deleted successfully');
+            toast.success('Client deleted successfully');
         } catch (err) {
             console.error(err);
-            alert('Failed to delete client');
+            toast.error('Failed to delete client');
         }
     };
 
@@ -379,7 +385,7 @@ const ClientsPage = () => {
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                         >
                             {clients.map(client => (
-                                <ClientCard key={client._id} client={client} theme={theme} onDelete={handleDeleteClient} />
+                                <ClientCard key={client._id} client={client} theme={theme} onEdit={(c) => setClientModal({ open: true, client: c })} onDelete={handleDeleteClient} />
                             ))}
                         </motion.div>
                     ) : (
@@ -387,7 +393,7 @@ const ClientsPage = () => {
                             key="list"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         >
-                            <ClientTable clients={clients} theme={theme} onDelete={handleDeleteClient} />
+                            <ClientTable clients={clients} theme={theme} onEdit={(c) => setClientModal({ open: true, client: c })} onDelete={handleDeleteClient} />
                         </motion.div>
                     )}
                 </AnimatePresence>

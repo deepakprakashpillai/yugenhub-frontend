@@ -4,6 +4,7 @@ import { Icons } from '../Icons';
 import clsx from 'clsx';
 import DatePicker from '../ui/DatePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import { toast } from 'sonner';
 
 /**
  * DeliverableModal - Specialized for managing Event Deliverables.
@@ -69,7 +70,7 @@ const DeliverableModal = ({
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.title.trim()) {
-            alert('Deliverable Name is required');
+            toast.error('Deliverable Name is required');
             return;
         }
 

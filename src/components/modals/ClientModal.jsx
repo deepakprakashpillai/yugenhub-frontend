@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
+import { toast } from 'sonner';
 
 const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }) => {
     const { theme } = useTheme();
@@ -37,7 +38,7 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.name.trim()) {
-            alert('Client name is required');
+            toast.error('Client name is required');
             return;
         }
         onSave(formData);

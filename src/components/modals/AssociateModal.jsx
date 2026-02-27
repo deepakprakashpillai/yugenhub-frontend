@@ -3,6 +3,7 @@ import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import { toast } from 'sonner';
 
 const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = false }) => {
     const { theme } = useTheme();
@@ -43,11 +44,11 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.name.trim()) {
-            alert('Associate name is required');
+            toast.error('Associate name is required');
             return;
         }
         if (!formData.role.trim()) {
-            alert('Role is required');
+            toast.error('Role is required');
             return;
         }
         onSave(formData);
