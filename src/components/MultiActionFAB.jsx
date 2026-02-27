@@ -13,7 +13,7 @@ const MultiActionFAB = ({ actions = [], mainLabel = 'Add', className }) => {
 
     return (
         <div
-            className={clsx("fixed bottom-20 right-6 md:bottom-8 md:right-8 z-40 flex flex-col items-end gap-3", className)}
+            className={clsx("fixed bottom-24 right-5 md:bottom-8 md:right-8 z-[100] flex flex-col items-end gap-3", className)}
             style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
             <AnimatePresence>
