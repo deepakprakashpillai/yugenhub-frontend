@@ -4,6 +4,7 @@ import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
+import api from '../../api/axios';
 
 const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = false }) => {
     const { theme } = useTheme();
@@ -16,8 +17,23 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
         email: '',
         phone: '',
         location: '',
-        notes: ''
+        notes: '',
+        employment_type: 'Freelance',
+        linked_user_id: ''
     });
+
+    const [users, setUsers] = useState([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setLoadingUsers(true);
+            api.get('/users')
+                .then(res => setUsers(res.data || []))
+                .catch(err => console.error("Failed to fetch users for linking", err))
+                .finally(() => setLoadingUsers(false));
+        }
+    }, [isOpen]);
 
     const roleOptions = config?.associateRoles || [];
 
@@ -26,13 +42,15 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
             setTimeout(() => setFormData({
                 name: associate.name || '',
                 role: associate.role || '',
-                email: associate.email || '',
-                phone: associate.phone || '',
-                location: associate.location || '',
-                notes: associate.notes || ''
+                email: associate.email_id || associate.email || '',
+                phone: associate.phone_number || associate.phone || '',
+                location: associate.base_city || associate.location || '',
+                notes: associate.notes || '',
+                employment_type: associate.employment_type || 'Freelance',
+                linked_user_id: associate.linked_user_id || ''
             }), 0);
         } else if (isOpen) {
-            setTimeout(() => setFormData({ name: '', role: '', email: '', phone: '', location: '', notes: '' }), 0);
+            setTimeout(() => setFormData({ name: '', role: '', email: '', phone: '', location: '', notes: '', employment_type: 'Freelance', linked_user_id: '' }), 0);
         }
     }, [isOpen, associate]);
 
@@ -83,6 +101,38 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
                             <option key={role} value={role}>{role}</option>
                         ))}
                     </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label className={`block text-sm ${theme.text.secondary} mb-1`}>Employment Type</label>
+                        <select
+                            name="employment_type"
+                            value={formData.employment_type}
+                            onChange={handleChange}
+                            className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                        >
+                            <option value="Freelance">Freelance</option>
+                            <option value="In-house">In-house</option>
+                            <option value="Contract">Contract</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={`block text-sm ${theme.text.secondary} mb-1`}>Link User Account (Optional)</label>
+                        <select
+                            name="linked_user_id"
+                            value={formData.linked_user_id}
+                            onChange={handleChange}
+                            className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                            disabled={loadingUsers}
+                        >
+                            <option value="">No linked account</option>
+                            {users.map(u => (
+                                <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                            ))}
+                        </select>
+                        <p className={`text-[10px] ${theme.text.secondary} mt-1`}>Linking allows the user to see tasks assigned to this associate.</p>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
