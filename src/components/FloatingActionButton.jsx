@@ -25,7 +25,7 @@ const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
                 layout: { duration: 0.3 }
             }}
             className={clsx(
-                "fixed bottom-20 right-4 md:bottom-8 md:right-8 z-[100]",
+                "fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[100]",
                 "flex items-center justify-center overflow-hidden",
                 "text-white font-black uppercase tracking-tight",
                 "rounded-2xl",
