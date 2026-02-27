@@ -183,12 +183,15 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         }
 
         let projectName = p.metadata?.project_type || 'Project';
-        if (p.vertical === 'knots') {
-            const groom = p.metadata?.groom_name || '';
-            const bride = p.metadata?.bride_name || '';
-            projectName = (groom || bride) ? `${groom} & ${bride}` : 'Wedding';
-        } else if (p.vertical === 'pluto' && p.metadata?.child_name) {
-            projectName = p.metadata.child_name;
+        const verticalConfig = config?.verticals?.find(v => v.id === p.vertical);
+        const template = verticalConfig?.title_template;
+        if (template) {
+            const meta = p.metadata || {};
+            let resolved = template.replace(/\{(\w+)\}/g, (_, fn) => {
+                const val = meta[fn];
+                return val && typeof val === 'string' ? val.split(' ')[0] : (val ? String(val) : '');
+            }).trim().replace(/^[&\s]+|[&\s]+$/g, '');
+            if (resolved && resolved !== '&') projectName = resolved;
         }
 
         const label = clientName ? `${projectName} - ${clientName}` : `${projectName} (${p.code})`;

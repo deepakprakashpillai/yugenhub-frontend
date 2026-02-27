@@ -67,7 +67,7 @@ const ProgressBar = ({ total, completed, className }) => {
     );
 };
 
-// Template Switcher Component
+// Template Switcher Component — Config-Driven
 const VerticalTemplate = ({ project }) => {
     const { config } = useAgencyConfig();
     const { theme } = useTheme();
@@ -75,218 +75,56 @@ const VerticalTemplate = ({ project }) => {
 
     // Find config for this vertical
     const configVertical = config?.verticals?.find(v => v.id === verticalId);
-
-    // Determine type with fallback
-    let verticalType = configVertical?.type;
-    if (!verticalType) {
-        if (verticalId === 'knots') verticalType = 'wedding';
-        else if (verticalId === 'pluto') verticalType = 'children';
-        else verticalType = 'general';
-    }
-
-    // System Fields Configuration
-    const SYSTEM_FIELDS = {
-        wedding: [
-            'client_side', 'religion', 'groom_name', 'groom_number', 'bride_name',
-            'bride_number', 'groom_age', 'bride_age', 'wedding_style',
-            'groom_location', 'bride_location'
-        ],
-        children: [
-            'child_name', 'child_age', 'occasion_type', 'mother_name',
-            'father_name', 'address'
-        ]
-    };
-
-    const customFields = configVertical?.fields || [];
+    const fields = configVertical?.fields || [];
     const metadata = project?.metadata || {};
 
-    // Helper to render custom fields
-    const renderCustomFields = () => {
-        if (!customFields.length) return null;
+    // If no fields configured, check for any metadata to display
+    const hasAnyData = fields.some(f => metadata[f.name]) || Object.keys(metadata).length > 0;
 
-        // Filter out system fields
-        const systemFields = SYSTEM_FIELDS[verticalType] || [];
-        const filteredFields = customFields.filter(f => !systemFields.includes(f.name));
-
-        if (filteredFields.length === 0) return null;
-
+    if (!hasAnyData && fields.length === 0) {
         return (
-            <div className={`grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t ${theme.canvas.border}`}>
-                {filteredFields.map(field => (
-                    <div key={field.name}>
-                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>{field.label}</h4>
-                        <p className={`${theme.text.primary} font-medium text-sm sm:text-base truncate`}>{metadata[field.name] || '—'}</p>
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
-    if (verticalType === 'wedding') {
-        return (
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 sm:p-6`}>
-                <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} mb-4 sm:mb-6 flex items-center gap-2`}>
-                    <Icons.Heart className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" />
-                    Wedding Details
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                    {/* Groom Side */}
-                    <div className="flex flex-col gap-3 sm:gap-4">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
-                                <span className="text-base sm:text-lg">👰</span>
-                            </div>
-                            <div>
-                                <h4 className={`text-sm font-bold ${theme.text.primary}`}>Groom</h4>
-                                <p className={`text-[10px] sm:text-xs ${theme.text.secondary}`}>Side</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            <div>
-                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Name</label>
-                                <p className={`${theme.text.primary} text-sm sm:text-base md:text-lg break-words`}>{metadata.groom_name || '—'}</p>
-                            </div>
-                            <div>
-                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Contact</label>
-                                <p className={`${theme.text.primary} text-xs sm:text-sm md:text-base font-mono break-words`}>{metadata.groom_number || '—'}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bride Side */}
-                    <div className="flex flex-col gap-3 sm:gap-4 pt-3 sm:pt-4 md:pt-0 border-t md:border-0 border-zinc-800/30">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${theme.canvas.hover || "bg-zinc-800"} flex items-center justify-center`}>
-                                <span className="text-base sm:text-lg">🤵</span>
-                            </div>
-                            <div>
-                                <h4 className={`text-sm font-bold ${theme.text.primary}`}>Bride</h4>
-                                <p className={`text-[10px] sm:text-xs ${theme.text.secondary}`}>Side</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                            <div>
-                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Name</label>
-                                <p className={`${theme.text.primary} text-sm sm:text-base md:text-lg break-words`}>{metadata.bride_name || '—'}</p>
-                            </div>
-                            <div>
-                                <label className={`block text-[10px] sm:text-xs ${theme.text.secondary} mb-0.5 sm:mb-1`}>Contact</label>
-                                <p className={`${theme.text.primary} text-xs sm:text-sm md:text-base font-mono break-words`}>{metadata.bride_number || '—'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={`grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-5 md:pt-6 border-t ${theme.canvas.border}`}>
-                    <div>
-                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Style</h4>
-                        <p className={`${theme.text.primary} text-sm sm:text-base truncate`}>{metadata.wedding_style || '—'}</p>
-                    </div>
-                    <div>
-                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Religion</h4>
-                        <p className={`${theme.text.primary} text-sm sm:text-base truncate`}>{metadata.religion || '—'}</p>
-                    </div>
-                    <div>
-                        <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Client Side</h4>
-                        <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-purple-500/10 text-purple-400 capitalize">
-                            {metadata.side || 'both'}
-                        </span>
-                    </div>
-                </div>
-
-                {renderCustomFields()}
+            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
+                <p className={`${theme.text.secondary} italic`}>No additional details configured for this vertical.</p>
             </div>
         );
     }
 
-    if (verticalType === 'children') {
-        return (
-            <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 sm:p-6`}>
-                <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} mb-4 sm:mb-6 flex items-center gap-2`}>
-                    <Icons.Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
-                    Event Details
-                </h3>
-
-                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-                    <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl sm:text-3xl shadow-lg shadow-orange-500/20">
-                        👶
-                    </div>
-                    <div className="flex-1 grid grid-cols-2 gap-3 sm:gap-6">
-                        <div>
-                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Child's Name</h4>
-                            <p className={`text-lg sm:text-2xl font-bold ${theme.text.primary} truncate`}>{metadata.child_name || '—'}</p>
-                        </div>
-                        <div>
-                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Occasion</h4>
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                                <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-xs sm:text-sm font-medium capitalize">
-                                    {metadata.occasion_type || 'Birthday'}
-                                </span>
-                                {metadata.child_age && (
-                                    <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full ${theme.canvas.hover || "bg-zinc-800"} ${theme.text.primary} text-[10px] sm:text-sm`}>
-                                        Turned {metadata.child_age}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Parents</h4>
-                            <p className={`${theme.text.primary} text-sm sm:text-base`}>
-                                {metadata.father_name && metadata.mother_name
-                                    ? `${metadata.father_name} & ${metadata.mother_name}`
-                                    : (metadata.father_name || metadata.mother_name || '—')}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>Address</h4>
-                            <p className={`${theme.text.primary} text-xs sm:text-sm line-clamp-2`}>{metadata.address || '—'}</p>
-                        </div>
-                    </div>
-                </div>
-
-                {renderCustomFields()}
-            </div>
-        );
-    }
-
-    // General / Other
     return (
-        <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-6`}>
-            <h3 className={`text-lg font-bold ${theme.text.primary} mb-6 flex items-center gap-2`}>
-                <Icons.Briefcase className="w-5 h-5 text-blue-500" />
-                Project Details
+        <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-4 sm:p-6`}>
+            <h3 className={`text-base sm:text-lg font-bold ${theme.text.primary} mb-4 sm:mb-6 flex items-center gap-2`}>
+                <Icons.Briefcase className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                {configVertical?.label || 'Project'} Details
             </h3>
 
-            {(customFields.length > 0 || metadata.project_type || metadata.company_name) ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {metadata.project_type && (
-                        <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Project Type</h4>
-                            <p className={`${theme.text.primary} font-medium`}>{metadata.project_type}</p>
-                        </div>
-                    )}
-                    {/* Fallback for Festia migration */}
-                    {metadata.company_name && (
-                        <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Company</h4>
-                            <p className={`${theme.text.primary} font-medium`}>{metadata.company_name}</p>
-                        </div>
-                    )}
-                    {metadata.event_scale && (
-                        <div>
-                            <h4 className={`text-xs ${theme.text.secondary} uppercase tracking-wider mb-1`}>Scale</h4>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 capitalize">
-                                {metadata.event_scale}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <p className={`${theme.text.secondary} italic`}>No additional details.</p>
-            )}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+                {fields.map(field => {
+                    const value = metadata[field.name];
+                    if (!value && value !== 0) return null;
 
-            {renderCustomFields()}
+                    return (
+                        <div key={field.name}>
+                            <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>
+                                {field.label}
+                            </h4>
+                            {field.type === 'date' ? (
+                                <p className={`${theme.text.primary} font-medium text-sm sm:text-base`}>
+                                    {new Date(value).toLocaleDateString('en-IN', {
+                                        day: 'numeric', month: 'short', year: 'numeric'
+                                    })}
+                                </p>
+                            ) : field.type === 'select' ? (
+                                <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-purple-500/10 text-purple-400 capitalize`}>
+                                    {value}
+                                </span>
+                            ) : field.type === 'tel' ? (
+                                <p className={`${theme.text.primary} text-xs sm:text-sm font-mono break-words`}>{value}</p>
+                            ) : (
+                                <p className={`${theme.text.primary} font-medium text-sm sm:text-base truncate`}>{value}</p>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };
@@ -881,6 +719,10 @@ const ProjectPage = () => {
     const [expandedEvents, setExpandedEvents] = useState({});
     const [actionLoading, setActionLoading] = useState(false);
 
+    // Vertical config for has_events check
+    const configVertical = config?.verticals?.find(v => v.id === project?.vertical?.toLowerCase());
+    const hasEvents = configVertical?.has_events !== false;
+
     // Modal states
     const [deleteProjectModal, setDeleteProjectModal] = useState(false);
     const [eventModal, setEventModal] = useState({ open: false, event: null, eventId: null });
@@ -926,7 +768,7 @@ const ProjectPage = () => {
     });
 
     const [activeTab, setActiveTab] = useState('overview');
-    const [taskModal, setTaskModal] = useState({ open: false, task: null, eventId: null }); // Unified: eventId for deliverables
+    const [taskModal, setTaskModal] = useState({ open: false, task: null, eventId: null, isDeliverable: false }); // Unified: eventId for event deliverables, isDeliverable for project deliverables
 
     const fetchProject = useCallback(async () => {
         setLoading(true);
@@ -996,11 +838,16 @@ const ProjectPage = () => {
         try {
             const payload = { ...formData };
 
-            // If eventId is set, this is a deliverable
+            // If eventId is set, this is an event deliverable
             if (taskModal.eventId) {
                 payload.type = 'project';
                 payload.project_id = id;
                 payload.event_id = taskModal.eventId;
+                payload.category = 'deliverable';
+            } else if (!hasEvents && taskModal.isDeliverable) {
+                // Project-level deliverable (non-event vertical)
+                payload.type = 'project';
+                payload.project_id = id;
                 payload.category = 'deliverable';
             } else {
                 // General project task
@@ -1092,22 +939,23 @@ const ProjectPage = () => {
 
     // Removed Legacy Deliverable CRUD
 
-    // === TEAM MEMBER CRUD ===
+    // === TEAM MEMBER CRUD (supports both event-level and project-level) ===
     const handleSaveTeamMember = async (memberData) => {
         setActionLoading(true);
         try {
+            const eventId = teamMemberModal.eventId;
             if (teamMemberModal.assignment) {
                 // Update existing
-                await api.patch(
-                    `/projects/${id}/events/${teamMemberModal.eventId}/assignments/${teamMemberModal.assignment.id}`,
-                    memberData
-                );
+                const url = eventId
+                    ? `/projects/${id}/events/${eventId}/assignments/${teamMemberModal.assignment.id}`
+                    : `/projects/${id}/assignments/${teamMemberModal.assignment.id}`;
+                await api.patch(url, memberData);
             } else {
                 // Add new
-                await api.post(
-                    `/projects/${id}/events/${teamMemberModal.eventId}/assignments`,
-                    { id: uuidv4(), ...memberData }
-                );
+                const url = eventId
+                    ? `/projects/${id}/events/${eventId}/assignments`
+                    : `/projects/${id}/assignments`;
+                await api.post(url, { id: uuidv4(), ...memberData });
             }
             await fetchProject();
             setTeamMemberModal({ open: false, eventId: null, assignment: null });
@@ -1122,9 +970,11 @@ const ProjectPage = () => {
     const handleDeleteTeamMember = async () => {
         setActionLoading(true);
         try {
-            await api.delete(
-                `/projects/${id}/events/${deleteTeamMemberModal.eventId}/assignments/${deleteTeamMemberModal.assignment.id}`
-            );
+            const eventId = deleteTeamMemberModal.eventId;
+            const url = eventId
+                ? `/projects/${id}/events/${eventId}/assignments/${deleteTeamMemberModal.assignment.id}`
+                : `/projects/${id}/assignments/${deleteTeamMemberModal.assignment.id}`;
+            await api.delete(url);
             await fetchProject();
             setDeleteTeamMemberModal({ open: false, eventId: null, assignment: null });
         } catch (err) {
@@ -1465,55 +1315,129 @@ const ProjectPage = () => {
                 </div>
             )}
 
-            {/* Events Section */}
-            <div className="mb-8">
-                <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2 mb-4`}>
-                    <Icons.Calendar className={`w-5 h-5 ${theme.text.secondary}`} />
-                    Events ({project.events?.length || 0})
-                </h3>
+            {/* Events Section (only for event-based verticals) */}
+            {hasEvents && (
+                <div className="mb-8">
+                    <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2 mb-4`}>
+                        <Icons.Calendar className={`w-5 h-5 ${theme.text.secondary}`} />
+                        Events ({project.events?.length || 0})
+                    </h3>
 
-                {project.events && project.events.length > 0 ? (
-                    <div className="space-y-4">
-                        {project.events.map((event, index) => (
-                            <EventSection
-                                key={event.id || index}
-                                event={event}
-                                index={index}
-                                isExpanded={expandedEvents[index]}
-                                onToggle={() => toggleEvent(index)}
-                                onEditEvent={() => setEventModal({ open: true, event, eventId: event.id })}
-                                onDeleteEvent={() => setDeleteEventModal({ open: true, event })}
-                                users={users}
-                                onUpdateTask={handleUpdateTaskInline}
+                    {project.events && project.events.length > 0 ? (
+                        <div className="space-y-4">
+                            {project.events.map((event, index) => (
+                                <EventSection
+                                    key={event.id || index}
+                                    event={event}
+                                    index={index}
+                                    isExpanded={expandedEvents[index]}
+                                    onToggle={() => toggleEvent(index)}
+                                    onEditEvent={() => setEventModal({ open: true, event, eventId: event.id })}
+                                    onDeleteEvent={() => setDeleteEventModal({ open: true, event })}
+                                    users={users}
+                                    onUpdateTask={handleUpdateTaskInline}
 
-                                // NEW: Pass Tasks linked to this Event
-                                eventTasks={tasks.filter(t => t.event_id === event.id)}
+                                    eventTasks={tasks.filter(t => t.event_id === event.id)}
 
-                                // Use unified TaskModal for event deliverables
-                                onAddDeliverable={() => setTaskModal({ open: true, task: null, eventId: event.id })}
-                                onEditDeliverable={(task) => setTaskModal({ open: true, task, eventId: event.id })}
-                                onDeleteDeliverable={(task) => setDeleteDeliverableModal({ open: true, task })}
+                                    onAddDeliverable={() => setTaskModal({ open: true, task: null, eventId: event.id })}
+                                    onEditDeliverable={(task) => setTaskModal({ open: true, task, eventId: event.id })}
+                                    onDeleteDeliverable={(task) => setDeleteDeliverableModal({ open: true, task })}
 
-                                onAddTeamMember={() => setTeamMemberModal({ open: true, eventId: event.id, assignment: null })}
-                                onEditTeamMember={(asgn) => setTeamMemberModal({ open: true, eventId: event.id, assignment: asgn })}
-                                onDeleteTeamMember={(asgn) => setDeleteTeamMemberModal({ open: true, eventId: event.id, assignment: asgn })}
+                                    onAddTeamMember={() => setTeamMemberModal({ open: true, eventId: event.id, assignment: null })}
+                                    onEditTeamMember={(asgn) => setTeamMemberModal({ open: true, eventId: event.id, assignment: asgn })}
+                                    onDeleteTeamMember={(asgn) => setDeleteTeamMemberModal({ open: true, eventId: event.id, assignment: asgn })}
+                                />
+                            ))}
+                        </div>
+                    ) : null}
+
+                    <button
+                        onClick={() => setEventModal({ open: true, event: null, eventId: null })}
+                        className={`w-full mt-4 border-2 border-dashed ${theme.canvas.border} hover:border-zinc-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 ${theme.text.secondary} hover:${theme.text.primary} transition-all group hover:${theme.canvas.hover}`}
+                    >
+                        <div className={`w-12 h-12 rounded-xl ${theme.canvas.card} group-hover:${theme.canvas.hover} flex items-center justify-center transition-colors`}>
+                            <Icons.Plus className="w-6 h-6" />
+                        </div>
+                        <span className="text-lg font-medium">Add New Event</span>
+                        <span className={`text-sm ${theme.text.secondary}`}>Click to add a new event to this project</span>
+                    </button>
+                </div>
+            )}
+
+            {/* Project-Level Deliverables & Team (for non-event verticals) */}
+            {!hasEvents && (
+                <div className="mb-8 space-y-8">
+                    {/* Project Deliverables */}
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2`}>
+                                <Icons.Package className={`w-5 h-5 ${theme.text.secondary}`} />
+                                Deliverables ({deliverables.length})
+                            </h3>
+                            <button
+                                onClick={() => setTaskModal({ open: true, task: null, eventId: null, isDeliverable: true })}
+                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} border ${theme.canvas.border} rounded-lg font-bold text-sm transition-colors`}
+                            >
+                                <Icons.Plus className="w-4 h-4" /> Add Deliverable
+                            </button>
+                        </div>
+                        {deliverables.length === 0 ? (
+                            <EmptyState
+                                title="No deliverables yet"
+                                message="Add deliverables to track for this project."
+                                onClear={() => setTaskModal({ open: true, task: null, eventId: null, isDeliverable: true })}
                             />
-                        ))}
+                        ) : (
+                            <div className="space-y-3">
+                                {deliverables.map(task => (
+                                    <TaskItem
+                                        key={task.id}
+                                        task={task}
+                                        onEdit={() => setTaskModal({ open: true, task, eventId: null, isDeliverable: true })}
+                                        onDelete={() => setDeleteDeliverableModal({ open: true, task })}
+                                        onUpdate={handleUpdateTaskInline}
+                                        users={users}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                ) : null}
 
-                {/* Skeleton Add Event Button */}
-                <button
-                    onClick={() => setEventModal({ open: true, event: null, eventId: null })}
-                    className={`w-full mt-4 border-2 border-dashed ${theme.canvas.border} hover:border-zinc-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 ${theme.text.secondary} hover:${theme.text.primary} transition-all group hover:${theme.canvas.hover}`}
-                >
-                    <div className={`w-12 h-12 rounded-xl ${theme.canvas.card} group-hover:${theme.canvas.hover} flex items-center justify-center transition-colors`}>
-                        <Icons.Plus className="w-6 h-6" />
+                    {/* Project Team */}
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2`}>
+                                <Icons.Users className={`w-5 h-5 ${theme.text.secondary}`} />
+                                Team ({project.assignments?.length || 0})
+                            </h3>
+                            <button
+                                onClick={() => setTeamMemberModal({ open: true, eventId: null, assignment: null })}
+                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} border ${theme.canvas.border} rounded-lg font-bold text-sm transition-colors`}
+                            >
+                                <Icons.Plus className="w-4 h-4" /> Add Member
+                            </button>
+                        </div>
+                        {(!project.assignments || project.assignments.length === 0) ? (
+                            <EmptyState
+                                title="No team members"
+                                message="Assign associates to this project."
+                                onClear={() => setTeamMemberModal({ open: true, eventId: null, assignment: null })}
+                            />
+                        ) : (
+                            <div className="space-y-3">
+                                {project.assignments.map(asgn => (
+                                    <AssignmentItem
+                                        key={asgn.id}
+                                        assignment={asgn}
+                                        onEdit={() => setTeamMemberModal({ open: true, eventId: null, assignment: asgn })}
+                                        onDelete={() => setDeleteTeamMemberModal({ open: true, eventId: null, assignment: asgn })}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    <span className="text-lg font-medium">Add New Event</span>
-                    <span className={`text-sm ${theme.text.secondary}`}>Click to add a new event to this project</span>
-                </button>
-            </div>
+                </div>
+            )}
 
             {/* === MODALS === */}
 

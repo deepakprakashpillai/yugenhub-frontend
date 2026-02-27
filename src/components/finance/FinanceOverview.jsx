@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { ArrowUpRight, ArrowDownRight, IndianRupee, Wallet } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 import TransactionItem from './TransactionItem';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 const StatCard = ({ title, value, icon: Icon, trend, type, theme }) => (
     <div className={`p-4 sm:p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm`}>
@@ -26,6 +27,7 @@ const StatCard = ({ title, value, icon: Icon, trend, type, theme }) => (
 
 const FinanceOverview = ({ refreshTrigger }) => {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const [data, setData] = useState(null);
     const [recentTransactions, setRecentTransactions] = useState([]);
     const [associates, setAssociates] = useState([]);
@@ -115,6 +117,7 @@ const FinanceOverview = ({ refreshTrigger }) => {
                                 theme={theme}
                                 associates={associates}
                                 projects={projects}
+                                config={config}
                             />
                         ))}
                         {recentTransactions.length === 0 && (

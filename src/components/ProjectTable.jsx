@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useMemo } from 'react';
 import clsx from 'clsx';
 import { Icons } from './Icons';
 
@@ -18,6 +18,46 @@ const ProjectTable = ({ projects, onRefresh }) => {
         setExpandedId(expandedId === id ? null : id);
     };
 
+    // Determine vertical config for dynamic columns
+    // Use the first project's vertical to determine columns (all projects on a page share the same vertical)
+    const verticalConfig = useMemo(() => {
+        if (!projects.length) return null;
+        const vId = projects[0]?.vertical;
+        return config?.verticals?.find(v => v.id === vId) || null;
+    }, [projects, config]);
+
+    const tableFields = verticalConfig?.table_fields || [];
+    const allFields = verticalConfig?.fields || [];
+    const hasEvents = verticalConfig?.has_events !== false;
+
+    // Resolve title from template
+    const resolveTitle = (project) => {
+        const meta = project.metadata || {};
+        const template = verticalConfig?.title_template;
+
+        if (template) {
+            let resolved = template;
+            resolved = resolved.replace(/\{(\w+)\}/g, (match, fieldName) => {
+                const val = meta[fieldName];
+                if (val && typeof val === 'string') return val.split(' ')[0];
+                if (val) return String(val);
+                return '';
+            });
+            resolved = resolved.trim().replace(/^[&\s]+|[&\s]+$/g, '').replace(/\s*&\s*&\s*/g, ' & ');
+            if (resolved && resolved !== '&' && resolved.trim()) return resolved;
+        }
+
+        return project.title || meta.client_name || 'Untitled Project';
+    };
+
+    // Get dynamic column definitions
+    const dynamicCols = tableFields
+        .map(fieldName => allFields.find(f => f.name === fieldName))
+        .filter(Boolean);
+
+    // Total columns for colSpan
+    const totalCols = 3 + dynamicCols.length + (hasEvents ? 1 : 0) + 1; // Code + Title + Status + dynamic + event? + Actions
+
     if (!projects.length) return null;
 
     return (
@@ -28,7 +68,12 @@ const ProjectTable = ({ projects, onRefresh }) => {
                         <th className="px-6 py-4">Code</th>
                         <th className="px-6 py-4">Title / Client</th>
                         <th className="px-6 py-4">Status</th>
-                        <th className="px-6 py-4">Next Event</th>
+                        {/* Dynamic columns from config */}
+                        {dynamicCols.map(col => (
+                            <th key={col.name} className="px-6 py-4">{col.label}</th>
+                        ))}
+                        {/* Next Event column (only for event-based) */}
+                        {hasEvents && <th className="px-6 py-4">Next Event</th>}
                         <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
@@ -36,6 +81,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
                     {projects.map((project) => {
                         const nextEvent = project.events?.find(e => new Date(e.start_date) > new Date()) || null;
                         const isExpanded = expandedId === project._id;
+                        const meta = project.metadata || {};
 
                         return (
                             <Fragment key={project._id}>
@@ -47,25 +93,19 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                         {project.code}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className={`font-medium ${theme.text.primary}`}>{project.title}</div>
-                                        <div className={`text-xs ${theme.text.secondary} flex items-center gap-2`}>
-                                            <span>{project.metadata?.client_name}</span>
-                                            {project.vertical === 'knots' && project.metadata?.religion && (
-                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${theme.canvas.card} ${theme.text.secondary} border ${theme.canvas.border}`}>
-                                                    {project.metadata.religion}
-                                                </span>
-                                            )}
+                                        <div className={`font-medium ${theme.text.primary}`}>{resolveTitle(project)}</div>
+                                        <div className={`text-xs ${theme.text.secondary}`}>
+                                            {meta.client_name}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         {(() => {
                                             const sc = config?.statusOptions?.find(s => s.id === project.status);
                                             const color = sc?.color || '#71717a';
-                                            // const label = sc?.label || project.status; // Label shown in select
 
                                             const handleStatusChange = async (e) => {
                                                 const newStatus = e.target.value;
-                                                e.stopPropagation(); // Prevent row expand
+                                                e.stopPropagation();
                                                 if (newStatus === project.status) return;
 
                                                 try {
@@ -97,7 +137,6 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                                             </option>
                                                         ))}
                                                     </select>
-                                                    {/* Custom Chevron for Select */}
                                                     <Icons.ChevronDown
                                                         className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none opacity-50"
                                                         style={{ color: color }}
@@ -106,17 +145,32 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                             );
                                         })()}
                                     </td>
-                                    <td className="px-6 py-4">
-                                        {nextEvent ? (
-                                            <div className={`flex items-center gap-2 ${theme.text.primary}`}>
-                                                <Icons.Calendar className="w-3 h-3 text-red-500" />
-                                                <span>{new Date(nextEvent.start_date).toLocaleDateString()}</span>
-                                                <span className="text-xs opacity-50">({nextEvent.type})</span>
-                                            </div>
-                                        ) : (
-                                            <span className={`${theme.text.secondary}`}>-</span>
-                                        )}
-                                    </td>
+
+                                    {/* Dynamic field columns */}
+                                    {dynamicCols.map(col => (
+                                        <td key={col.name} className={`px-6 py-4 ${theme.text.primary}`}>
+                                            {col.type === 'date' && meta[col.name]
+                                                ? new Date(meta[col.name]).toLocaleDateString()
+                                                : meta[col.name] || <span className={theme.text.secondary}>-</span>
+                                            }
+                                        </td>
+                                    ))}
+
+                                    {/* Next Event column */}
+                                    {hasEvents && (
+                                        <td className="px-6 py-4">
+                                            {nextEvent ? (
+                                                <div className={`flex items-center gap-2 ${theme.text.primary}`}>
+                                                    <Icons.Calendar className="w-3 h-3 text-red-500" />
+                                                    <span>{new Date(nextEvent.start_date).toLocaleDateString()}</span>
+                                                    <span className="text-xs opacity-50">({nextEvent.type})</span>
+                                                </div>
+                                            ) : (
+                                                <span className={`${theme.text.secondary}`}>-</span>
+                                            )}
+                                        </td>
+                                    )}
+
                                     <td className="px-6 py-4 text-right">
                                         <button
                                             className={clsx(
@@ -133,7 +187,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                 <AnimatePresence>
                                     {isExpanded && (
                                         <tr>
-                                            <td colSpan="5" className={`p-0 border-b ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-20 shadow-inner`}>
+                                            <td colSpan={totalCols} className={`p-0 border-b ${theme.canvas.border} ${theme.canvas.bg} bg-opacity-20 shadow-inner`}>
                                                 <motion.div
                                                     initial={{ opacity: 0, height: 0 }}
                                                     animate={{ opacity: 1, height: 'auto' }}
@@ -142,33 +196,52 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                                 >
                                                     <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                                                        {/* SECTION 1: Events */}
+                                                        {/* SECTION 1: Events (if event-based) or Metadata */}
                                                         <div className="col-span-2 space-y-3">
-                                                            <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Event Schedule</h4>
-
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                                {project.events?.map((evt, idx) => (
-                                                                    <div key={idx} className={`${theme.canvas.card} border ${theme.canvas.border} p-3 rounded-lg flex items-start gap-3`}>
-                                                                        <div className={`${theme.canvas.bg} p-2 rounded-md`}>
-                                                                            <Icons.Calendar className={`w-4 h-4 ${theme.text.secondary}`} />
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className={`text-sm font-medium ${theme.text.primary}`}>{evt.type}</p>
-                                                                            <p className={`text-xs ${theme.text.secondary}`}>{new Date(evt.start_date).toLocaleDateString()} • {evt.venue_name || 'TBD'}</p>
-                                                                        </div>
+                                                            {hasEvents ? (
+                                                                <>
+                                                                    <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Event Schedule</h4>
+                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                        {project.events?.map((evt, idx) => (
+                                                                            <div key={idx} className={`${theme.canvas.card} border ${theme.canvas.border} p-3 rounded-lg flex items-start gap-3`}>
+                                                                                <div className={`${theme.canvas.bg} p-2 rounded-md`}>
+                                                                                    <Icons.Calendar className={`w-4 h-4 ${theme.text.secondary}`} />
+                                                                                </div>
+                                                                                <div>
+                                                                                    <p className={`text-sm font-medium ${theme.text.primary}`}>{evt.type}</p>
+                                                                                    <p className={`text-xs ${theme.text.secondary}`}>{new Date(evt.start_date).toLocaleDateString()} • {evt.venue_name || 'TBD'}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                        {(!project.events || project.events.length === 0) && (
+                                                                            <p className={`text-sm ${theme.text.secondary} italic`}>No events found.</p>
+                                                                        )}
                                                                     </div>
-                                                                ))}
-                                                                {(!project.events || project.events.length === 0) && (
-                                                                    <p className={`text-sm ${theme.text.secondary} italic`}>No events found.</p>
-                                                                )}
-                                                            </div>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Project Details</h4>
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        {(verticalConfig?.fields || []).map(f => {
+                                                                            const val = meta[f.name];
+                                                                            if (!val) return null;
+                                                                            return (
+                                                                                <div key={f.name}>
+                                                                                    <p className={`text-[10px] uppercase tracking-wider ${theme.text.secondary} font-medium`}>{f.label}</p>
+                                                                                    <p className={`text-sm ${theme.text.primary}`}>{f.type === 'date' ? new Date(val).toLocaleDateString() : val}</p>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </>
+                                                            )}
                                                         </div>
 
                                                         {/* SECTION 2: Quick Actions or Info */}
                                                         <div className={`border-l ${theme.canvas.border} pl-6 space-y-4`}>
                                                             <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest mb-2`}>Client Details</h4>
                                                             <div className="space-y-1">
-                                                                <p className={`text-sm ${theme.text.primary} font-medium`}>{project.metadata?.client_name || "Unknown"}</p>
+                                                                <p className={`text-sm ${theme.text.primary} font-medium`}>{meta.client_name || "Unknown"}</p>
                                                                 <p className={`text-xs ${theme.text.secondary}`}>Source: {project.lead_source}</p>
                                                                 <p className={`text-xs ${theme.text.secondary}`}>ID: {project._id}</p>
                                                             </div>

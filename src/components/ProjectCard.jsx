@@ -70,31 +70,31 @@ const ProjectCard = ({ project, onRefresh }) => {
         };
     };
 
-    // Helper to determine display title
+    // Helper to resolve title template from config
     const getDisplayTitle = () => {
-        const { vertical, metadata } = project;
+        const { metadata } = project;
         const meta = metadata || {};
 
-        if (vertical === 'knots') {
-            const groom = meta.groom_name ? meta.groom_name.split(' ')[0] : '';
-            const bride = meta.bride_name ? meta.bride_name.split(' ')[0] : '';
+        // Find vertical config
+        const verticalConfig = config?.verticals?.find(v => v.id === project.vertical);
+        const template = verticalConfig?.title_template;
 
-            if (groom && bride) return `${groom} & ${bride}`;
-            if (groom) return `${groom}'s Wedding`;
-            if (bride) return `${bride}'s Wedding`;
+        if (template) {
+            let resolved = template;
+            // Replace {field_name} placeholders with actual metadata values
+            resolved = resolved.replace(/\{(\w+)\}/g, (match, fieldName) => {
+                const val = meta[fieldName];
+                if (val && typeof val === 'string') return val.split(' ')[0]; // Use first word for names
+                if (val) return String(val);
+                return '';
+            });
+            resolved = resolved.trim();
+            // Clean up dangling separators (e.g. " & " when one side is empty)
+            resolved = resolved.replace(/^[&\s]+|[&\s]+$/g, '').replace(/\s*&\s*&\s*/g, ' & ');
+            if (resolved && resolved !== '&' && resolved.trim()) return resolved;
         }
 
-        if (vertical === 'pluto') {
-            const child = meta.child_name ? meta.child_name.split(' ')[0] : '';
-            const occasion = meta.occasion_type || 'Event';
-            if (child) return `${child}'s ${occasion}`;
-        }
-
-        if (vertical === 'festia') {
-            return meta.event_name || meta.company_name;
-        }
-
-        // Fallback to title (if exists) or client name
+        // Fallback to title or client name
         return project.title || meta.client_name || 'Untitled Project';
     };
 
@@ -203,47 +203,45 @@ const ProjectCard = ({ project, onRefresh }) => {
                     className={`px-4 py-3 md:px-6 md:py-4 mt-auto border-t ${theme.canvas.border} flex items-center justify-between text-xs ${theme.text.secondary} cursor-pointer group/footer hover:${theme.canvas.hover} transition-colors`}
                 >
                     <div className="flex items-center gap-2 flex-wrap">
-                        {/* Vertical-specific badges */}
-                        {project.vertical === 'knots' && project.metadata?.side && (
-                            <span className={clsx(
-                                "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
-                                project.metadata.side === 'Groom' && "bg-amber-500/20 text-amber-400 border border-amber-500/30",
-                                project.metadata.side === 'Bride' && "bg-rose-500/20 text-rose-400 border border-rose-500/30",
-                                project.metadata.side === 'Both' && "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                            )}>
-                                {project.metadata.side === 'Both' ? '👫 Both' : project.metadata.side === 'Groom' ? '👔 Groom' : '👗 Bride'}
-                            </span>
-                        )}
-                        {project.vertical === 'knots' && project.metadata?.religion && (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${theme.canvas.card} ${theme.text.secondary} border ${theme.canvas.border}`}>
-                                {project.metadata.religion}
-                            </span>
-                        )}
-                        {project.vertical === 'pluto' && project.metadata?.occasion_type && (
-                            <span className={clsx(
-                                "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
-                                project.metadata.occasion_type === 'Birthday' && "bg-pink-500/20 text-pink-400 border border-pink-500/30",
-                                project.metadata.occasion_type === 'Baptism' && "bg-sky-500/20 text-sky-400 border border-sky-500/30",
-                                project.metadata.occasion_type === 'Newborn' && "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                            )}>
-                                {project.metadata.occasion_type === 'Birthday' ? '🎂 Birthday' :
-                                    project.metadata.occasion_type === 'Baptism' ? '✝️ Baptism' :
-                                        project.metadata.occasion_type === 'Newborn' ? '👶 Newborn' : project.metadata.occasion_type}
-                            </span>
-                        )}
-                        {/* Next event info */}
-                        {nextEvent ? (
-                            <>
-                                <span className="text-red-400 font-medium flex items-center gap-1">
-                                    <Icons.Calendar className="w-3 h-3" />
-                                    {new Date(nextEvent.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                </span>
-                                <span>•</span>
-                                <span className={theme.text.secondary}>{nextEvent.type}</span>
-                            </>
-                        ) : (
-                            <span>No upcoming events</span>
-                        )}
+                        {/* Config-driven card badges */}
+                        {(() => {
+                            const verticalConfig = config?.verticals?.find(v => v.id === project.vertical);
+                            const cardFields = verticalConfig?.card_fields || [];
+                            const allFields = verticalConfig?.fields || [];
+                            const meta = project.metadata || {};
+                            const hasEvents = verticalConfig?.has_events !== false;
+
+                            return (
+                                <>
+                                    {cardFields.map(fieldName => {
+                                        const fieldConfig = allFields.find(f => f.name === fieldName);
+                                        const value = meta[fieldName];
+                                        if (!value) return null;
+                                        return (
+                                            <span
+                                                key={fieldName}
+                                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${theme.canvas.card} ${theme.text.secondary} border ${theme.canvas.border}`}
+                                            >
+                                                {value}
+                                            </span>
+                                        );
+                                    })}
+                                    {/* Next event info (only for event-based) */}
+                                    {hasEvents && nextEvent ? (
+                                        <>
+                                            <span className="text-red-400 font-medium flex items-center gap-1">
+                                                <Icons.Calendar className="w-3 h-3" />
+                                                {new Date(nextEvent.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            </span>
+                                            <span>•</span>
+                                            <span className={theme.text.secondary}>{nextEvent.type}</span>
+                                        </>
+                                    ) : hasEvents ? (
+                                        <span>No upcoming events</span>
+                                    ) : null}
+                                </>
+                            );
+                        })()}
                     </div>
                     <button className={`p-1.5 hover:${theme.canvas.hover} rounded-full ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
                         <Icons.ChevronRight className="w-4 h-4" />
