@@ -246,7 +246,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                                                 <p className={`text-xs ${theme.text.secondary}`}>ID: {project._id}</p>
                                                             </div>
 
-                                                            <button className={`w-full mt-4 ${theme.canvas.fg || 'bg-white'} ${theme.text.inverse || 'text-black'} py-2 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity`}>
+                                                            <button className={`w-full mt-4 ${theme.canvas.active} py-2 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity`}>
                                                                 Manage Project
                                                             </button>
                                                         </div>

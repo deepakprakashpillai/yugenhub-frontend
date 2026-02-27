@@ -55,7 +55,7 @@ const TemplatesSection = () => {
                     </p>
                     <button
                         onClick={() => setModal({ open: true, mode: 'create', template: null })}
-                        className={`flex items-center gap-2 px-4 py-2 ${theme.text.inverse} bg-black dark:bg-white rounded-lg text-sm font-bold hover:opacity-90 transition-colors`}
+                        className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.button.primary} rounded-lg text-sm font-bold`}
                     >
                         <Icons.Plus className="w-4 h-4" />
                         New Template

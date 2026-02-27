@@ -1234,7 +1234,7 @@ const ProjectPage = () => {
                         onClick={() => setActiveTab(tab.id)}
                         className={clsx(
                             "pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap",
-                            activeTab === tab.id ? `text-accent border-accent` : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
+                            activeTab === tab.id ? theme.canvas.tabs.active : theme.canvas.tabs.inactive
                         )}
                     >
                         {tab.label}
@@ -1281,7 +1281,7 @@ const ProjectPage = () => {
                             </h3>
                             <button
                                 onClick={() => setTaskModal({ open: true, task: null })}
-                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} border ${theme.canvas.border} rounded-lg font-bold text-sm transition-colors`}
+                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.button.secondary} border rounded-lg font-bold text-sm transition-colors`}
                             >
                                 <Icons.Plus className="w-4 h-4" /> Add Task
                             </button>
@@ -1353,7 +1353,7 @@ const ProjectPage = () => {
 
                     <button
                         onClick={() => setEventModal({ open: true, event: null, eventId: null })}
-                        className={`w-full mt-4 border-2 border-dashed ${theme.canvas.border} hover:border-zinc-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 ${theme.text.secondary} hover:${theme.text.primary} transition-all group hover:${theme.canvas.hover}`}
+                        className={`w-full mt-4 border-2 border-dashed ${theme.canvas.border} hover:opacity-80 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 ${theme.text.secondary} hover:${theme.text.primary} transition-all group ${theme.canvas.hover}`}
                     >
                         <div className={`w-12 h-12 rounded-xl ${theme.canvas.card} group-hover:${theme.canvas.hover} flex items-center justify-center transition-colors`}>
                             <Icons.Plus className="w-6 h-6" />
@@ -1376,7 +1376,7 @@ const ProjectPage = () => {
                             </h3>
                             <button
                                 onClick={() => setTaskModal({ open: true, task: null, eventId: null, isDeliverable: true })}
-                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} border ${theme.canvas.border} rounded-lg font-bold text-sm transition-colors`}
+                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.button.secondary} border rounded-lg font-bold text-sm transition-colors`}
                             >
                                 <Icons.Plus className="w-4 h-4" /> Add Deliverable
                             </button>
@@ -1412,7 +1412,7 @@ const ProjectPage = () => {
                             </h3>
                             <button
                                 onClick={() => setTeamMemberModal({ open: true, eventId: null, assignment: null })}
-                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.card} hover:${theme.canvas.hover} ${theme.text.primary} border ${theme.canvas.border} rounded-lg font-bold text-sm transition-colors`}
+                                className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.button.secondary} border rounded-lg font-bold text-sm transition-colors`}
                             >
                                 <Icons.Plus className="w-4 h-4" /> Add Member
                             </button>

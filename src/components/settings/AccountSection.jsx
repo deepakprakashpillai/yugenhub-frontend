@@ -155,7 +155,7 @@ function AccountSection() {
                     <button
                         onClick={handleSave}
                         disabled={!dirty || saving}
-                        className={`px-6 py-3 bg-accent text-white rounded-xl font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-accent/20`}
+                        className={`px-6 py-3 ${theme.canvas.button.primary} rounded-xl font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed`}
                     >
                         {saving ? (
                             <RefreshCw size={16} className="animate-spin" />

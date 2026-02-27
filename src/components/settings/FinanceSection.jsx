@@ -232,7 +232,7 @@ const FinanceSection = () => {
                                         />
                                         <button
                                             onClick={() => handleAddSubcategory(cat.id)}
-                                            className="px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                            className={`px-3 py-1.5 text-xs ${theme.canvas.button.primary} rounded-lg`}
                                         >
                                             Add
                                         </button>
@@ -311,13 +311,13 @@ const FinanceSection = () => {
                             <div className="flex gap-3 pt-2">
                                 <button
                                     onClick={handleAddCategory}
-                                    className="flex-1 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+                                    className={`flex-1 py-2 ${theme.canvas.button.primary} rounded-lg font-medium`}
                                 >
                                     Create Category
                                 </button>
                                 <button
                                     onClick={() => setIsAddingCategory(false)}
-                                    className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium"
+                                    className={`px-6 py-2 ${theme.canvas.button.secondary} rounded-lg font-medium`}
                                 >
                                     Cancel
                                 </button>

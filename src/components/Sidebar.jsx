@@ -189,10 +189,10 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
           }}
           className={`flex items-center gap-3 w-full text-left px-3.5 py-2.5 rounded-xl ${theme.canvas.inactive} ${theme.canvas.hover} group transition-all`}
         >
-          <Bell size={15} className={`${theme.text.secondary} group-hover:${theme.text.primary}`} />
+          <Bell size={15} className={`group-hover:${theme.text.primary} transition-colors`} />
           <span className={`${theme.text?.nav || ""} text-[13px]`}>{"NOTIFICATIONS"}</span>
           {notificationCount > 0 && (
-            <span className="ml-auto bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="ml-auto bg-accent text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
               {notificationCount}
             </span>
           )}
