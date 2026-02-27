@@ -79,6 +79,16 @@ export const THEME_VARIANTS = {
       hover: "hover:bg-zinc-900/50",
       active: "bg-accent text-white",
       inactive: "text-zinc-500",
+      button: {
+        primary: "bg-accent text-white hover:opacity-90 shadow-lg shadow-accent/20 transition-all",
+        secondary: "bg-zinc-900 text-zinc-300 hover:bg-zinc-800 border-zinc-800",
+        ghost: "text-zinc-400 hover:text-white hover:bg-zinc-900",
+        muted: "bg-zinc-950 text-zinc-500 border-zinc-900"
+      },
+      tabs: {
+        active: "border-accent text-accent",
+        inactive: "border-transparent text-zinc-500 hover:text-zinc-300"
+      }
     },
     text: {
       ...SHARED_TEXT,
@@ -98,6 +108,16 @@ export const THEME_VARIANTS = {
       hover: "hover:bg-[#fae8ff]", // Fuchsia-100
       active: "bg-accent text-white", // Accent
       inactive: "text-[#94a3b8]", // Slate-400
+      button: {
+        primary: "bg-accent text-white hover:opacity-90 shadow-lg shadow-accent/20 transition-all",
+        secondary: "bg-[#fae8ff] text-[#701a75] hover:bg-[#f5d0fe] border-[#f0abfc]", // Fuchsia colors
+        ghost: "text-[#64748b] hover:text-[#334155] hover:bg-[#f1f5f9]", // Slate
+        muted: "bg-[#f8fafc] text-[#94a3b8] border-[#e2e8f0]" // Slate
+      },
+      tabs: {
+        active: "border-accent text-accent",
+        inactive: "border-transparent text-[#64748b] hover:text-[#334155]"
+      }
     },
     text: {
       ...SHARED_TEXT,

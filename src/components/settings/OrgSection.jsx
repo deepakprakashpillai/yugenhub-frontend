@@ -70,7 +70,7 @@ function OrgSection({ role }) {
                 ))}
                 {editing && (
                     <div className="flex gap-3 pt-2">
-                        <button onClick={handleSave} disabled={saving} className={`flex items-center gap-2 px-5 py-2.5 ${theme.text.inverse} bg-black dark:bg-white font-bold text-sm rounded-xl hover:opacity-90 transition-colors disabled:opacity-50`}>
+                        <button onClick={handleSave} disabled={saving} className={`flex items-center gap-2 px-5 py-2.5 ${theme.canvas.button.primary} font-bold text-sm rounded-xl disabled:opacity-50`}>
                             <Check size={14} /> {saving ? 'Saving...' : 'Save'}
                         </button>
                         <button onClick={() => { setDraft(org); setEditing(false); }} className={`flex items-center gap-2 px-5 py-2.5 ${theme.canvas.bg} ${theme.text.secondary} text-sm rounded-xl hover:${theme.text.primary} transition-colors border ${theme.canvas.border}`}>

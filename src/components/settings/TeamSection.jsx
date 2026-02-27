@@ -89,7 +89,7 @@ function TeamSection({ role }) {
                 {canManagePermission && (
                     <button
                         onClick={() => setInviteModal(true)}
-                        className={`px-6 py-3 bg-accent text-white rounded-xl font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-accent/20`}
+                        className={`px-6 py-3 ${theme.canvas.button.primary} rounded-xl font-bold text-sm flex items-center gap-2`}
                     >
                         <Plus size={18} /> Invite Member
                     </button>

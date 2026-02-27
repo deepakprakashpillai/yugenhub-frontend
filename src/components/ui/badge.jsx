@@ -9,13 +9,13 @@ const Badge = ({ className, variant = "default", ...props }) => {
     let variantStyles = `border-transparent ${theme.canvas.card} ${theme.text.primary} hover:${theme.canvas.hover}`; // Default fallback
 
     if (variant === "default") {
-        variantStyles = "border-transparent bg-primary text-primary-foreground hover:bg-primary/80";
+        variantStyles = "border-transparent bg-accent text-white hover:opacity-90";
     } else if (variant === "secondary") {
-        variantStyles = "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80";
+        variantStyles = `border-transparent ${theme.canvas.button.secondary}`;
     } else if (variant === "destructive") {
-        variantStyles = "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80";
+        variantStyles = "border-transparent bg-red-500 text-white hover:bg-red-600";
     } else if (variant === "outline") {
-        variantStyles = `${theme.text.primary} ${theme.canvas.border}`;
+        variantStyles = `${theme.text.primary} ${theme.canvas.border} bg-transparent`;
     }
 
     return (

@@ -63,7 +63,7 @@ const Toolbar = ({
                 {search && (
                     <button
                         onClick={() => setSearch('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-500 hover:text-zinc-300 rounded-full p-1"
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme.text.secondary} hover:${theme.text.primary} rounded-full p-1`}
                         title="Clear search"
                         type="button"
                     >
@@ -82,7 +82,7 @@ const Toolbar = ({
                         onClick={() => toggleDropdown('filter')}
                         className={clsx(
                             "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors",
-                            activeDropdown === 'filter' ? "" : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary} ${theme.canvas.hover}`
+                            activeDropdown === 'filter' ? "" : `${theme.canvas.button.secondary}`
                         )}
                         style={activeDropdown === 'filter' ? {
                             borderColor: accent.primary,
@@ -126,8 +126,8 @@ const Toolbar = ({
                                 Upcoming Events
                             </button>
 
-                            <div className="h-px bg-zinc-800 my-1" />
-                            <div className="px-4 py-1.5 text-[10px] uppercase font-bold text-zinc-600 tracking-wider">
+                            <div className={`h-px ${theme.canvas.border} my-1`} />
+                            <div className={`px-4 py-1.5 text-[10px] uppercase font-bold ${theme.text.secondary} opacity-50 tracking-wider`}>
                                 By Status
                             </div>
 
@@ -163,7 +163,7 @@ const Toolbar = ({
                         onClick={() => toggleDropdown('sort')}
                         className={clsx(
                             "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors",
-                            activeDropdown === 'sort' ? "" : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary} ${theme.canvas.hover}`
+                            activeDropdown === 'sort' ? "" : `${theme.canvas.button.secondary}`
                         )}
                         style={activeDropdown === 'sort' ? {
                             borderColor: accent.primary,
@@ -208,7 +208,7 @@ const Toolbar = ({
                         onClick={() => setViewMode('grid')}
                         className={clsx(
                             "p-2 rounded-md transition-colors",
-                            viewMode === 'grid' ? "" : `${theme.text.secondary} ${theme.canvas.hover}`
+                            viewMode === 'grid' ? "" : `${theme.canvas.button.ghost}`
                         )}
                         style={viewMode === 'grid' ? {
                             backgroundColor: `${accent.primary}25`,
@@ -221,7 +221,7 @@ const Toolbar = ({
                         onClick={() => setViewMode('list')}
                         className={clsx(
                             "p-2 rounded-md transition-colors",
-                            viewMode === 'list' ? "" : `${theme.text.secondary} ${theme.canvas.hover}`
+                            viewMode === 'list' ? "" : `${theme.canvas.button.ghost}`
                         )}
                         style={viewMode === 'list' ? {
                             backgroundColor: `${accent.primary}25`,

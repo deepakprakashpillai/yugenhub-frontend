@@ -83,7 +83,7 @@ const FieldEditor = ({ fields, onFieldsChange, label, theme }) => {
                     <button
                         onClick={handleAdd}
                         disabled={!newField.label}
-                        className={`px-3 py-2 ${theme.text.inverse} bg-black dark:bg-white hover:opacity-90 rounded-lg disabled:opacity-30 transition-colors text-sm font-medium flex items-center gap-1.5`}
+                        className={`px-3 py-2 ${theme.canvas.button.primary} rounded-lg disabled:opacity-30 text-sm font-medium flex items-center gap-1.5`}
                     >
                         <Plus size={14} /> Add
                     </button>
@@ -179,7 +179,7 @@ const FieldPicker = ({ allFields, selectedFields, onChange, label, icon: Icon, t
                                 onClick={() => toggleField(f.name)}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all
                                     ${isSelected
-                                        ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                                        ? 'bg-accent/15 text-accent border-accent/30'
                                         : `${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border} hover:border-zinc-500`
                                     }`}
                             >
@@ -466,7 +466,7 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className={`px-8 py-2.5 rounded-xl text-sm font-bold bg-black dark:bg-white text-white dark:text-black hover:opacity-90 flex items-center gap-2 transition-all disabled:opacity-50 shadow-lg active:scale-95`}
+                    className={`px-8 py-2.5 rounded-xl text-sm font-bold ${theme.canvas.button.primary} flex items-center gap-2 disabled:opacity-50 active:scale-95`}
                 >
                     {saving ? <Settings size={16} className="animate-spin" /> : <Save size={16} />}
                     Save Changes
@@ -666,7 +666,7 @@ function VerticalsSection({ role }) {
                 {!editingId && isOwner && (
                     <button
                         onClick={() => setEditingId('new')}
-                        className={`px-6 py-3 ${theme.text.inverse} bg-black dark:bg-white rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2`}
+                        className={`px-6 py-3 ${theme.canvas.button.primary} rounded-xl font-bold text-sm flex items-center gap-2`}
                     >
                         <Plus size={18} /> Add Vertical
                     </button>
