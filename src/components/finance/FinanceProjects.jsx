@@ -95,11 +95,19 @@ const VerticalProjectList = ({ vertical, onSelectProject, selectedProjectId }) =
                             }`}
                     >
                         <h4 className={`font-medium ${theme.text.primary} truncate`}>
-                            {project.metadata?.project_type
-                                ? project.metadata.project_type
-                                : (project.vertical === 'knots' && (project.metadata?.groom_name || project.metadata?.bride_name))
-                                    ? `${project.metadata.groom_name || ''} & ${project.metadata.bride_name || ''}`
-                                    : project.code}
+                            {(() => {
+                                const verticalConfig = config?.verticals?.find(v => v.id === project.vertical);
+                                const template = verticalConfig?.title_template;
+                                const meta = project.metadata || {};
+                                if (template) {
+                                    let resolved = template.replace(/\{(\w+)\}/g, (_, fn) => {
+                                        const val = meta[fn];
+                                        return val && typeof val === 'string' ? val.split(' ')[0] : (val ? String(val) : '');
+                                    }).trim().replace(/^[&\s]+|[&\s]+$/g, '');
+                                    if (resolved && resolved !== '&') return resolved;
+                                }
+                                return meta.project_type || meta.client_name || project.code;
+                            })()}
                         </h4>
                         <div className="flex justify-between items-center mt-1">
                             <span className={`text-xs ${theme.text.secondary} truncate max-w-[90%] text-left`}>

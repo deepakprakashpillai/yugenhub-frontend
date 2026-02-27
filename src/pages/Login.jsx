@@ -32,7 +32,7 @@ const Login = () => {
         <div className={`flex flex-col items-center justify-center min-h-screen ${theme.canvas.bg} ${theme.text.primary} p-4`}>
             <div className={`w-full max-w-md p-8 space-y-8 ${theme.canvas.card} rounded-xl shadow-2xl border ${theme.canvas.border}`}>
                 <div className="text-center">
-                    <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 tracking-tighter mb-2">YUGENHUB</h1>
+                    <img src="/yugen_logo_ui.png" alt="YUGENHUB" className="w-24 h-24 mx-auto mb-4 rounded-xl shadow-lg border border-white/10" />
                     <p className={theme.text.secondary}>Internal Management System</p>
                 </div>
 

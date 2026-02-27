@@ -90,7 +90,12 @@ const SlideOver = ({
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 overflow-y-auto md:pb-0 pb-20">
+                        <div
+                            className="flex-1 overflow-y-auto"
+                            style={{
+                                paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 5rem)' : undefined
+                            }}
+                        >
                             {children}
                         </div>
                     </motion.div>

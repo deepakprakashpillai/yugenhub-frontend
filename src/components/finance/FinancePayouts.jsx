@@ -7,10 +7,12 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import TransactionSlideOver from '../modals/TransactionSlideOver';
 import TransactionItem from './TransactionItem';
-import { FINANCE_CATEGORIES, TRANSACTION_TYPES, VERTICALS } from '../../constants';
+import { FINANCE_CATEGORIES, TRANSACTION_TYPES } from '../../constants';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 const FinancePayouts = ({ refreshTrigger }) => {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const [transactions, setTransactions] = useState([]);
     const [associates, setAssociates] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -68,6 +70,7 @@ const FinancePayouts = ({ refreshTrigger }) => {
                         theme={theme}
                         associates={associates}
                         projects={projects}
+                        config={config}
                     />
                 ))}
                 {transactions.length === 0 && !loading && (
@@ -83,7 +86,7 @@ const FinancePayouts = ({ refreshTrigger }) => {
                 initialData={{
                     type: TRANSACTION_TYPES.EXPENSE,
                     category: FINANCE_CATEGORIES.ASSOCIATE_PAYOUT,
-                    vertical: VERTICALS.GENERAL
+                    vertical: 'general'
                 }}
             />
         </div>

@@ -57,8 +57,10 @@ const MobileHeader = () => {
             className={`md:hidden sticky top-0 z-40 flex items-center justify-between h-[64px] px-4 border-b backdrop-blur-xl ${theme.canvas.sidebar} ${theme.canvas.border} transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}
             style={{ WebkitBackdropFilter: 'blur(20px)', backdropFilter: 'blur(20px)' }}
         >
-            {/* Left Box (Invisible, just for flex balance) */}
-            <div className="w-10"></div>
+            {/* Left Box: Logo */}
+            <div className="w-10 flex items-center justify-center">
+                <img src="/yugen_logo_ui.png" alt="" className="w-6 h-6 rounded-md opacity-80" />
+            </div>
 
             {/* Center: Page title */}
             <span className={`text-sm font-bold uppercase tracking-widest ${theme.text.primary}`}>

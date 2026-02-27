@@ -47,8 +47,8 @@ const ProjectSlideOver = ({
     // Template Import State
     const [showTemplateModal, setShowTemplateModal] = useState(false);
 
-    // Collapsible Sections State
-    const [isWeddingDetailsOpen, setIsWeddingDetailsOpen] = useState(true);
+    // Resolve current vertical config
+    const configVertical = config?.verticals?.find(v => v.id === vertical?.toLowerCase());
 
     // Fetch clients and associates
     useEffect(() => {
@@ -311,286 +311,62 @@ const ProjectSlideOver = ({
         onSave(projectData);
     };
 
-    // System Fields Configuration — only the essential core fields
-    const SYSTEM_FIELDS = {
-        wedding: [
-            'client_side', 'side', 'religion', 'groom_name', 'groom_number', 'bride_name',
-            'bride_number', 'wedding_date'
-        ],
-        children: [
-            'child_name', 'child_age', 'occasion_type'
-        ]
-    };
+    // Generic config-driven field renderer
+    const renderConfigFields = () => {
+        const fields = configVertical?.fields || [];
+        if (fields.length === 0) return null;
 
-    // Helper to render dynamic custom fields
-    const renderCustomFields = (fields, type) => {
-        if (!fields || fields.length === 0) return null;
-
-        // Filter out system fields to avoid duplicates
-        const systemFields = SYSTEM_FIELDS[type] || [];
-        const filteredFields = fields.filter(f => !systemFields.includes(f.name));
-
-        if (filteredFields.length === 0) return null;
-
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-4">
-                {filteredFields.map(field => (
-                    <div key={field.name}>
-                        <label className={`block text-xs ${theme.text.secondary} mb-1`}>{field.label}</label>
-                        {field.type === 'select' ? (
-                            <select
-                                name={field.name}
-                                value={metadata[field.name] || ''}
-                                onChange={handleMetadataChange}
-                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            >
-                                <option value="">Select {field.label}</option>
-                                {field.options?.map(opt => (
-                                    <option key={opt} value={opt}>{opt}</option>
-                                ))}
-                            </select>
-                        ) : field.type === 'date' ? (
-                            <DatePicker
-                                value={metadata[field.name] || ''}
-                                onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
-                                placeholder={field.label}
-                                className="w-full"
-                                inputClassName={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            />
-                        ) : (
-                            <input
-                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
-                                name={field.name}
-                                value={metadata[field.name] || ''}
-                                onChange={handleMetadataChange}
-                                placeholder={field.label}
-                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            />
-                        )}
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
-    // Vertical-specific fields
-    const renderVerticalFields = () => {
-        const vId = vertical?.toLowerCase();
-        // Find config for this vertical
-        const configVertical = config?.verticals?.find(v => v.id === vId);
-
-        // Determine type with fallback for migration
-        let verticalType = configVertical?.type;
-        if (!verticalType) {
-            if (vId === 'knots') verticalType = 'wedding';
-            else if (vId === 'pluto') verticalType = 'children';
-            else verticalType = 'general';
-        }
-
-        const customFields = configVertical?.fields || [];
-
-        if (verticalType === 'wedding') {
-            return (
-                <>
-                    <button
-                        type="button"
-                        onClick={() => setIsWeddingDetailsOpen(!isWeddingDetailsOpen)}
-                        className={`w-full flex items-center justify-between text-sm uppercase tracking-widest ${theme.text.secondary} font-medium mt-6 mb-3 hover:${theme.text.primary} transition-colors`}
-                    >
-                        <span className="flex items-center gap-2">
-                            <Icons.Heart className="w-4 h-4" />
-                            Wedding Details
-                        </span>
-                        {isWeddingDetailsOpen ? <Icons.ChevronUp className="w-4 h-4" /> : <Icons.ChevronDown className="w-4 h-4" />}
-                    </button>
-
-                    {isWeddingDetailsOpen && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Side</label>
-                                    <select
-                                        name="side"
-                                        value={metadata.side || 'both'}
-                                        onChange={handleMetadataChange}
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    >
-                                        <option value="groom">Groom</option>
-                                        <option value="bride">Bride</option>
-                                        <option value="both">Both</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Religion</label>
-                                    <select
-                                        name="religion"
-                                        value={metadata.religion || 'Hindu'}
-                                        onChange={handleMetadataChange}
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    >
-                                        <option value="Hindu">Hindu</option>
-                                        <option value="Christian">Christian</option>
-                                        <option value="Muslim">Muslim</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Name</label>
-                                    <input
-                                        type="text"
-                                        name="groom_name"
-                                        value={metadata.groom_name || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="Groom's name"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Groom Number</label>
-                                    <input
-                                        type="tel"
-                                        name="groom_number"
-                                        value={metadata.groom_number || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="Phone number"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Bride Name</label>
-                                    <input
-                                        type="text"
-                                        name="bride_name"
-                                        value={metadata.bride_name || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="Bride's name"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                                <div>
-                                    <label className={`block text-xs ${theme.text.secondary} mb-1`}>Bride Number</label>
-                                    <input
-                                        type="tel"
-                                        name="bride_number"
-                                        value={metadata.bride_number || ''}
-                                        onChange={handleMetadataChange}
-                                        placeholder="Phone number"
-                                        className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mb-3">
-                                <label className={`block text-xs ${theme.text.secondary} mb-1`}>Wedding Date</label>
-                                <DatePicker
-                                    value={metadata.wedding_date || ''}
-                                    onChange={(val) => setMetadata(prev => ({ ...prev, wedding_date: val }))}
-                                    placeholder="Select wedding date"
-                                    className="w-full"
-                                />
-                            </div>
-                        </div >
-                    )}
-
-                    {/* Render Custom Fields defined in Config */}
-                    {renderCustomFields(customFields, verticalType)}
-                </>
-            );
-        }
-
-        if (verticalType === 'children') {
-            return (
-                <>
-                    <h4 className={`text-sm uppercase tracking-widest ${theme.text.secondary} font-medium mt-6 mb-3 flex items-center gap-2`}>
-                        <Icons.Star className="w-4 h-4" />
-                        Event Details
-                    </h4>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Child's Name</label>
-                            <input
-                                type="text"
-                                name="child_name"
-                                value={metadata.child_name || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Child's name"
-                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            />
-                        </div>
-                        <div>
-                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>Age</label>
-                            <input
-                                type="number"
-                                name="child_age"
-                                value={metadata.child_age || ''}
-                                onChange={handleMetadataChange}
-                                placeholder="Age"
-                                className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="mb-3">
-                        <label className={`block text-xs ${theme.text.secondary} mb-1`}>Occasion</label>
-                        <select
-                            name="occasion_type"
-                            value={metadata.occasion_type || 'birthday'}
-                            onChange={handleMetadataChange}
-                            className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                        >
-                            <option value="birthday">Birthday</option>
-                            <option value="baptism">Baptism</option>
-                            <option value="newborn">Newborn</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    {/* Render Custom Fields defined in Config */}
-                    {renderCustomFields(customFields, verticalType)}
-                </>
-            );
-        }
-
-        // General / Other
         return (
             <>
                 <h4 className={`text-sm uppercase tracking-widest ${theme.text.secondary} font-medium mt-6 mb-3 flex items-center gap-2`}>
                     <Icons.Briefcase className="w-4 h-4" />
-                    Project Details
+                    {configVertical?.label || 'Project'} Details
                 </h4>
-
-                {/* Render Custom Fields defined in Config */}
-                {renderCustomFields(customFields, verticalType)}
-
-                {(!customFields || customFields.length === 0) && (
-                    <div>
-                        <label className={`block text-xs ${theme.text.secondary} mb-1`}>Project Type</label>
-                        <input
-                            type="text"
-                            name="project_type"
-                            value={metadata.project_type || ''}
-                            onChange={handleMetadataChange}
-                            placeholder="e.g., Corporate Video, Product Shoot"
-                            className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                        />
-                    </div>
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {fields.map(field => (
+                        <div key={field.name}>
+                            <label className={`block text-xs ${theme.text.secondary} mb-1`}>{field.label}</label>
+                            {field.type === 'select' ? (
+                                <select
+                                    name={field.name}
+                                    value={metadata[field.name] || ''}
+                                    onChange={handleMetadataChange}
+                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-base md:text-sm focus:outline-none focus:border-purple-500`}
+                                >
+                                    <option value="">Select {field.label}</option>
+                                    {field.options?.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                </select>
+                            ) : field.type === 'date' ? (
+                                <DatePicker
+                                    value={metadata[field.name] || ''}
+                                    onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
+                                    placeholder={field.label}
+                                    className="w-full"
+                                    inputClassName={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
+                                />
+                            ) : (
+                                <input
+                                    type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
+                                    name={field.name}
+                                    value={metadata[field.name] || ''}
+                                    onChange={handleMetadataChange}
+                                    placeholder={field.label}
+                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-base md:text-sm focus:outline-none focus:border-purple-500`}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
             </>
         );
     };
 
     const renderEventsSection = () => {
-        // Fetch vertical config to get custom event fields
-        const vId = vertical?.toLowerCase();
-        const configVertical = config?.verticals?.find(v => v.id === vId);
+        // Only render events section if vertical supports events
+        if (configVertical?.has_events === false) return null;
+
         const customEventFields = configVertical?.event_fields || [];
 
         return (
@@ -647,7 +423,7 @@ const ProjectSlideOver = ({
                                             value={event.type}
                                             onChange={(e) => handleEventChange(index, 'type', e.target.value)}
                                             placeholder="e.g. Wedding Reception"
-                                            className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} focus:border-purple-500 text-base font-medium ${theme.text.primary} p-0 pb-1 focus:ring-0 placeholder-zinc-500 transition-colors`}
+                                            className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} focus:border-purple-500 text-base md:text-sm font-medium ${theme.text.primary} p-0 pb-1 focus:ring-0 placeholder-zinc-500 transition-colors`}
                                         />
                                     </div>
                                     <button
@@ -718,7 +494,7 @@ const ProjectSlideOver = ({
                                                     value={event.venue_name}
                                                     onChange={(e) => handleEventChange(index, 'venue_name', e.target.value)}
                                                     placeholder="Venue Name"
-                                                    className={`w-full ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-2 text-sm ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors ${!event.venue_name ? theme.text.secondary : theme.text.primary}`}
+                                                    className={`w-full ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-2 text-base md:text-sm ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors ${!event.venue_name ? theme.text.secondary : theme.text.primary}`}
                                                 />
                                             </div>
                                             <div>
@@ -728,7 +504,7 @@ const ProjectSlideOver = ({
                                                     value={event.venue_location}
                                                     onChange={(e) => handleEventChange(index, 'venue_location', e.target.value)}
                                                     placeholder="Address/City"
-                                                    className={`w-full ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-2 text-sm ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors ${!event.venue_location ? theme.text.secondary : theme.text.primary}`}
+                                                    className={`w-full ${theme.canvas.card} border ${theme.canvas.border} rounded-lg px-3 py-2 text-base md:text-sm ${theme.text.primary} placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors ${!event.venue_location ? theme.text.secondary : theme.text.primary}`}
                                                 />
                                             </div>
                                         </div>
@@ -750,7 +526,7 @@ const ProjectSlideOver = ({
                                                                 name={field.name}
                                                                 value={event[field.name] || ''}
                                                                 onChange={(e) => handleEventChange(index, field.name, e.target.value)}
-                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                                                             >
                                                                 <option value="">Select {field.label}</option>
                                                                 {field.options?.map(opt => (
@@ -763,7 +539,7 @@ const ProjectSlideOver = ({
                                                                 onChange={(val) => handleEventChange(index, field.name, val)}
                                                                 placeholder={field.label}
                                                                 className="w-full"
-                                                                inputClassName={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                                inputClassName={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                                                             />
                                                         ) : (
                                                             <input
@@ -776,7 +552,7 @@ const ProjectSlideOver = ({
                                                                     handleEventChange(index, field.name, val);
                                                                 }}
                                                                 placeholder={field.label}
-                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                                                             />
                                                         )}
                                                     </div>
@@ -810,7 +586,7 @@ const ProjectSlideOver = ({
                                                 <select
                                                     value={del.type}
                                                     onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                                    className={`w-full sm:flex-1 bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer pr-8 sm:pr-0`}
+                                                    className={`w-full sm:flex-1 bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer pr-8 sm:pr-0`}
                                                 >
                                                     <option value="" disabled>Select Type</option>
                                                     {(config?.deliverableTypes || []).map(dt => (
@@ -824,7 +600,7 @@ const ProjectSlideOver = ({
                                                         type="number"
                                                         value={del.quantity}
                                                         onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
-                                                        className={`flex-1 sm:w-12 bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 sm:text-center font-medium`}
+                                                        className={`flex-1 sm:w-12 bg-transparent border-0 text-base md:text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 sm:text-center font-medium`}
                                                         min="1"
                                                     />
                                                 </div>
@@ -873,7 +649,7 @@ const ProjectSlideOver = ({
                                                     <select
                                                         value={assign.associate_id}
                                                         onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
-                                                        className={`w-full bg-transparent border-0 text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                        className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
                                                     >
                                                         <option value="" disabled>Select Member</option>
                                                         {associates.map(assoc => (
@@ -887,7 +663,7 @@ const ProjectSlideOver = ({
                                                         value={assign.role}
                                                         onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
                                                         placeholder="Role (e.g. Lead)"
-                                                        className={`w-full bg-transparent border-0 text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 placeholder-zinc-500`}
+                                                        className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 placeholder-zinc-500`}
                                                     />
                                                 </div>
                                                 <button
@@ -1039,10 +815,10 @@ const ProjectSlideOver = ({
                     />
                 </div>
 
-                {/* Vertical-specific fields */}
-                {renderVerticalFields()}
+                {/* Config-driven vertical fields */}
+                {renderConfigFields()}
 
-                {/* Events Section */}
+                {/* Events Section (only if has_events) */}
                 {renderEventsSection()}
 
                 {/* Actions */}

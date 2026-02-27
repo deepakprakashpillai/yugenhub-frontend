@@ -68,7 +68,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
     { id: 'calendar', label: 'Calendar', icon: Calendar },
   ];
 
-  if (user?.role === ROLES.ADMIN || user?.role === ROLES.OWNER) {
+  if (user?.role === ROLES.ADMIN || user?.role === ROLES.OWNER || user?.finance_access) {
     opsItems.push({ id: 'finance', label: 'Finance', icon: IndianRupee });
   }
 
@@ -122,8 +122,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
   const sidebarContent = (
     <aside className={`${isMobile ? 'w-[80vw] max-w-[320px]' : 'w-64'} border-r ${theme.canvas?.border || "border-zinc-800"} flex flex-col h-screen ${isMobile ? '' : 'sticky top-0'} ${theme.canvas?.sidebar || "bg-black"}`}>
 
-      <div className="p-4 pb-3 flex items-center justify-between">
-        <h1 className={(theme.text?.heading || "") + ` ${theme.text.primary}`}>
+      <div className="p-4 pb-3 flex items-center gap-3">
+        <img src="/yugen_logo_ui.png" alt="" className="w-8 h-8 rounded-lg border border-white/10 shadow-sm" />
+        <h1 className={(theme.text?.heading || "") + ` ${theme.text.primary} text-lg tracking-tighter`}>
           {currentConfig.brand?.name || AGENCY_CONFIG?.brand?.name}
           <span style={{ color: theme.accents?.default?.primary }}>
             {currentConfig.brand?.suffix || AGENCY_CONFIG?.brand?.suffix}
@@ -163,7 +164,17 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
           </NavLink>
         </div>
 
-        {renderNavGroup("Verticals", currentConfig.verticals || AGENCY_CONFIG?.verticals || [], true)}
+        {renderNavGroup(
+          "Verticals",
+          (() => {
+            const allVerts = currentConfig.verticals || AGENCY_CONFIG?.verticals || [];
+            if (user?.role === ROLES.OWNER) return allVerts;
+            const allowed = user?.allowed_verticals || [];
+            if (allowed.length === 0) return allVerts;
+            return allVerts.filter(v => allowed.includes(v.id));
+          })(),
+          true
+        )}
         {renderNavGroup("Operations", opsItems)}
         {renderNavGroup("Directory", managementItems)}
       </nav>

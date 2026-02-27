@@ -26,6 +26,8 @@ import ReloadPrompt from './components/PWA/ReloadPrompt';
 
 import BottomNav from './components/BottomNav';
 
+import { ROLES } from './constants';
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const { theme } = useTheme();
@@ -108,6 +110,7 @@ const ProtectedRoute = ({ children }) => {
 
 function AppRoutes() {
   const { config } = useAgencyConfig();
+  const { user } = useAuth();
 
   return (
     <Suspense fallback={
@@ -128,20 +131,29 @@ function AppRoutes() {
         } />
 
         {/* Verticals - Dynamic Routing */}
-        {config?.verticals?.map(vertical => (
-          <Route
-            key={vertical.id}
-            path={`/${vertical.id}`}
-            element={
-              <ProtectedRoute>
-                <VerticalPage
-                  vertical={vertical.id}
-                  title={vertical.label}
-                />
-              </ProtectedRoute>
-            }
-          />
-        ))}
+        {config?.verticals?.map(vertical => {
+          // RBAC Check for routes
+          const isOwner = user?.role === ROLES.OWNER;
+          const allowed = user?.allowed_verticals || [];
+          const hasAccess = isOwner || allowed.length === 0 || allowed.includes(vertical.id);
+
+          if (!hasAccess) return null;
+
+          return (
+            <Route
+              key={vertical.id}
+              path={`/${vertical.id}`}
+              element={
+                <ProtectedRoute>
+                  <VerticalPage
+                    vertical={vertical.id}
+                    title={vertical.label}
+                  />
+                </ProtectedRoute>
+              }
+            />
+          );
+        })}
 
         {/* Operations */}
         <Route path="/tasks" element={

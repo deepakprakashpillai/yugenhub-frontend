@@ -6,11 +6,7 @@ export const ROLES = {
 };
 
 export const VERTICALS = {
-    KNOTS: 'knots',
-    PLUTO: 'pluto',
-    ROBO: 'robo',
-    RAYDIUM: 'raydium',
-    GENERAL: 'general'
+    GENERAL: 'general' // Sentinel value for "no vertical selected" in transaction filters
 };
 
 export const TRANSACTION_TYPES = {

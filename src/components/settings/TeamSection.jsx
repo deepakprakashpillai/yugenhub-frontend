@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Crown, ShieldCheck, UserCircle, Mail, Phone, Edit2, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Crown, ShieldCheck, UserCircle, Mail, Phone, Edit2, RefreshCw, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 import { InviteUserModal, EditUserModal } from '../modals';
 import RemoveUserModal from '../modals/RemoveUserModal';
+import ManageAccessModal from '../modals/ManageAccessModal';
 import { useTheme } from '../../context/ThemeContext';
 import { ROLES } from '../../constants';
 
@@ -16,14 +18,18 @@ const ROLE_BADGE = {
 };
 
 function TeamSection({ role }) {
+    const { user: currentUser } = useAuth();
     const { theme } = useTheme();
     const [team, setTeam] = useState([]);
     const [loading, setLoading] = useState(true);
     const [inviteModal, setInviteModal] = useState(false);
     const [removeUser, setRemoveUser] = useState(null);
     const [editUser, setEditUser] = useState(null);
+    const [accessUser, setAccessUser] = useState(null);
 
-    const canManage = role === ROLES.OWNER || role === ROLES.ADMIN;
+    const isOwner = role === ROLES.OWNER;
+    const canManagePermission = isOwner || (role === ROLES.ADMIN && currentUser?.can_manage_team);
+    const canManage = isOwner || role === ROLES.ADMIN; // Keeping legacy canManage for some basic checks if needed, but using canManagePermission for actions
 
     const fetchTeam = async () => {
         setLoading(true);
@@ -46,6 +52,8 @@ function TeamSection({ role }) {
             toast.error(err.response?.data?.detail || 'Failed to update role');
         }
     };
+
+
 
     const StatusBadge = ({ status }) => {
         const isPending = status === 'pending';
@@ -78,10 +86,10 @@ function TeamSection({ role }) {
                         Manage your workspace members, assign roles, and control access permissions.
                     </p>
                 </div>
-                {canManage && (
+                {canManagePermission && (
                     <button
                         onClick={() => setInviteModal(true)}
-                        className={`px-6 py-3 bg-black dark:bg-white ${theme.text.inverse} rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2`}
+                        className={`px-6 py-3 bg-accent text-white rounded-xl font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-accent/20`}
                     >
                         <Plus size={18} /> Invite Member
                     </button>
@@ -95,8 +103,8 @@ function TeamSection({ role }) {
                     const BadgeIcon = badge.icon;
                     // Check if current user can edit this member
                     // Owner can edit anyone (except self-demotion, handled by API-side check mostly)
-                    // Admin can edit Members.
-                    const canEditThisUser = canManage && (role === ROLES.OWNER || (member.role === ROLES.MEMBER));
+                    // Admin can edit Members if they have permission.
+                    const canEditThisUser = canManagePermission && (role === ROLES.OWNER || (member.role === ROLES.MEMBER));
 
                     return (
                         <motion.div
@@ -131,7 +139,7 @@ function TeamSection({ role }) {
                                         <Edit2 size={14} />
                                     </button>
                                 )}
-                                {canManage && member.role !== ROLES.OWNER && (
+                                {canManagePermission && member.role !== ROLES.OWNER && (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setRemoveUser(member); }}
                                         className={`p-1.5 rounded-md ${theme.text.secondary} hover:text-red-400 hover:bg-red-500/10 transition-colors`}
@@ -160,7 +168,7 @@ function TeamSection({ role }) {
                                         <BadgeIcon size={12} /> {badge.label}
                                     </div>
 
-                                    {canManage && member.role !== ROLES.OWNER && (
+                                    {canManagePermission && member.role !== ROLES.OWNER && (isOwner || member.role !== ROLES.ADMIN) && (
                                         <select
                                             value={member.role}
                                             onChange={e => handleRoleChange(member.id, e.target.value)}
@@ -172,6 +180,18 @@ function TeamSection({ role }) {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Owner-only: Manage Access Button */}
+                            {isOwner && member.role !== ROLES.OWNER && (
+                                <div className={`mt-3 pt-3 border-t ${theme.canvas.border}`}>
+                                    <button
+                                        onClick={() => setAccessUser(member)}
+                                        className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border ${theme.canvas.border} ${theme.text.secondary} hover:text-purple-400 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all`}
+                                    >
+                                        <Shield size={13} /> Access and Permissions
+                                    </button>
+                                </div>
+                            )}
                         </motion.div>
                     );
                 })}
@@ -195,6 +215,13 @@ function TeamSection({ role }) {
                 onClose={() => setRemoveUser(null)}
                 user={removeUser}
                 onRemoved={fetchTeam}
+            />
+
+            <ManageAccessModal
+                isOpen={!!accessUser}
+                onClose={() => setAccessUser(null)}
+                user={accessUser}
+                onUpdated={fetchTeam}
             />
         </div>
     );

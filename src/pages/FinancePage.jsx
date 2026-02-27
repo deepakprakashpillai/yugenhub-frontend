@@ -24,7 +24,7 @@ const FinancePage = () => {
     const [activeTab, setActiveTab] = useState('overview');
 
     useEffect(() => {
-        if (user && user.role !== ROLES.ADMIN && user.role !== ROLES.OWNER) {
+        if (user && user.role !== ROLES.ADMIN && user.role !== ROLES.OWNER && !user.finance_access) {
             navigate('/');
             // Optional: Show toast "Access Denied"
         }

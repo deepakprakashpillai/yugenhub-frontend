@@ -8,9 +8,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { RefreshCw, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import TransactionItem from './TransactionItem';
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 const FinanceTransactions = ({ refreshTrigger }) => {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const [transactions, setTransactions] = useState([]);
     const [associates, setAssociates] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -71,6 +73,7 @@ const FinanceTransactions = ({ refreshTrigger }) => {
                         theme={theme}
                         associates={associates}
                         projects={projects}
+                        config={config}
                     />
                 ))}
                 {transactions.length === 0 && !loading && (

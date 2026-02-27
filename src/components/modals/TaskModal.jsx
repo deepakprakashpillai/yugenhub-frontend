@@ -399,7 +399,12 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 )}
 
                 {/* Actions (Sticky Footer? Or just bottom) */}
-                <div className={`flex justify-end gap-3 pt-4 border-t ${theme.canvas.border}`}>
+                <div
+                    className={`flex justify-end gap-3 pt-4 border-t ${theme.canvas.border}`}
+                    style={{
+                        paddingBottom: 'calc(env(safe-area-inset-bottom) + 5rem)'
+                    }}
+                >
                     <button
                         type="button"
                         onClick={onClose}

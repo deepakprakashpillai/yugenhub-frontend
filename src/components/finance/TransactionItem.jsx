@@ -1,8 +1,8 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
-import { FINANCE_CATEGORIES, TRANSACTION_TYPES, VERTICALS } from '../../constants';
+import { FINANCE_CATEGORIES, TRANSACTION_TYPES } from '../../constants';
 
-const TransactionItem = ({ transaction, theme, associates, projects }) => {
+const TransactionItem = ({ transaction, theme, associates, projects, config }) => {
     const isIncome = transaction.type === TRANSACTION_TYPES.INCOME;
     const isTransfer = transaction.type === TRANSACTION_TYPES.TRANSFER;
 
@@ -29,18 +29,20 @@ const TransactionItem = ({ transaction, theme, associates, projects }) => {
     let vertical = null;
     let associateName = null;
 
-    // 1. Resolve Project & Vertical
+    // 1. Resolve Project & Vertical (config-driven)
     if (project) {
-        vertical = project.vertical; // 'knots', 'pluto', 'robos', etc.
+        vertical = project.vertical;
+        const verticalConfig = config?.verticals?.find(v => v.id === vertical);
+        const template = verticalConfig?.title_template;
+        const meta = project.metadata || {};
 
-        // Project Name Logic
-        projectName = project.metadata?.project_type || 'Project';
-        if (vertical === VERTICALS.KNOTS) {
-            const groom = project.metadata?.groom_name || '';
-            const bride = project.metadata?.bride_name || '';
-            projectName = (groom || bride) ? `${groom} & ${bride}` : 'Wedding';
-        } else if (vertical === VERTICALS.PLUTO && project.metadata?.child_name) {
-            projectName = project.metadata.child_name;
+        projectName = meta.project_type || 'Project';
+        if (template) {
+            let resolved = template.replace(/\{(\w+)\}/g, (_, fn) => {
+                const val = meta[fn];
+                return val && typeof val === 'string' ? val.split(' ')[0] : (val ? String(val) : '');
+            }).trim().replace(/^[&\s]+|[&\s]+$/g, '');
+            if (resolved && resolved !== '&') projectName = resolved;
         }
     }
 
@@ -49,38 +51,45 @@ const TransactionItem = ({ transaction, theme, associates, projects }) => {
         const associate = associates?.find(a => a.id === transaction.associate_id || a._id === transaction.associate_id);
         if (associate) {
             let role = '';
+            // Check event assignments
             if (project?.events) {
                 for (const evt of project.events) {
                     if (evt.assignments) {
                         const assign = evt.assignments.find(a => a.associate_id === transaction.associate_id);
-                        if (assign) {
-                            role = assign.role;
-                            break;
-                        }
+                        if (assign) { role = assign.role; break; }
                     }
                 }
             }
+            // Also check project-level assignments
+            if (!role && project?.assignments) {
+                const assign = project.assignments.find(a => a.associate_id === transaction.associate_id);
+                if (assign) role = assign.role;
+            }
             associateName = `${associate.name} ${role ? `(${role})` : ''}`;
-            displayTitle = associateName; // Override category title with Name
+            displayTitle = associateName;
         }
     }
 
-    // Helper for Vertical Badge
-    // Helper for Vertical Badge
+    // Helper for Vertical Badge (config-driven colors)
     const getVerticalBadge = (v) => {
         if (!v) return null;
-        const styles = {
-            [VERTICALS.KNOTS]: 'bg-rose-100 text-rose-700 border-rose-200',
-            [VERTICALS.PLUTO]: 'bg-sky-100 text-sky-700 border-sky-200',
-            [VERTICALS.ROBO]: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-            [VERTICALS.RAYDIUM]: 'bg-purple-100 text-purple-700 border-purple-200',
-            // default
-            [VERTICALS.GENERAL]: 'bg-gray-100 text-gray-700 border-gray-200'
-        };
-        const style = styles[v] || styles[VERTICALS.GENERAL];
+        const verticalConfig = config?.verticals?.find(vc => vc.id === v);
+        const label = verticalConfig?.label || v;
+        // Generate a consistent color from vertical index
+        const colorPalette = [
+            'bg-rose-100 text-rose-700 border-rose-200',
+            'bg-sky-100 text-sky-700 border-sky-200',
+            'bg-indigo-100 text-indigo-700 border-indigo-200',
+            'bg-purple-100 text-purple-700 border-purple-200',
+            'bg-amber-100 text-amber-700 border-amber-200',
+            'bg-emerald-100 text-emerald-700 border-emerald-200',
+            'bg-cyan-100 text-cyan-700 border-cyan-200',
+        ];
+        const idx = config?.verticals?.findIndex(vc => vc.id === v) ?? 0;
+        const style = colorPalette[idx % colorPalette.length] || 'bg-gray-100 text-gray-700 border-gray-200';
         return (
             <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${style} ml-2`}>
-                {v}
+                {label}
             </span>
         );
     };
@@ -139,3 +148,4 @@ const TransactionItem = ({ transaction, theme, associates, projects }) => {
 };
 
 export default TransactionItem;
+
