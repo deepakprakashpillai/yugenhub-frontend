@@ -8,6 +8,7 @@ import DatePicker from '../ui/DatePicker';
 import { useAuth } from '../../context/AuthContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
+import { toast } from 'sonner';
 
 /**
  * TaskModal - For general project tasks (non-deliverable).
@@ -159,11 +160,11 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!formData.title.trim()) return alert('Title is required');
+        if (!formData.title.trim()) return toast.error('Title is required');
 
         // Blocked rule
         if (formData.status === 'blocked' && (!formData.comment || !formData.comment.trim())) {
-            return alert('A comment is required when blocking a task.');
+            return toast.error('A comment is required when blocking a task.');
         }
 
         const payload = {

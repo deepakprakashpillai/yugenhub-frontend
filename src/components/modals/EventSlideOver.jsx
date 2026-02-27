@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import DatePicker from '../ui/DatePicker';
 import TimePicker from '../ui/TimePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import { toast } from 'sonner';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -272,7 +273,7 @@ const EventSlideOver = ({
 
     const handleSubmit = () => {
         if (!formData.type.trim()) {
-            alert('Event type is required');
+            toast.error('Event type is required');
             return;
         }
 

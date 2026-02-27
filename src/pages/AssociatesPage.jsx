@@ -12,8 +12,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { AssociateModal } from '../components/modals';
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
-const AssociateCard = ({ associate, theme, onDelete }) => (
+const AssociateCard = ({ associate, theme, onEdit, onDelete }) => (
     <motion.div
         layout
         initial={{ opacity: 0, scale: 0.95 }}
@@ -69,6 +70,9 @@ const AssociateCard = ({ associate, theme, onDelete }) => (
             </div>
             <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${associate.is_active ? 'bg-emerald-500' : 'bg-red-500'} mr-1`} title={associate.is_active ? "Active" : "Inactive"} />
+                <button onClick={(e) => { e.stopPropagation(); onEdit(associate); }} className={`p-1.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-purple-500/10 hover:text-purple-500 transition-colors`} title="Edit Associate">
+                    <Icons.Edit className="w-3.5 h-3.5" />
+                </button>
                 <button onClick={(e) => { e.stopPropagation(); onDelete(associate); }} className={`p-1.5 rounded-lg ${theme.canvas.bg} ${theme.text.secondary} hover:bg-red-500/10 hover:text-red-500 transition-colors`} title="Delete Associate">
                     <Icons.Trash className="w-3.5 h-3.5" />
                 </button>
@@ -77,7 +81,7 @@ const AssociateCard = ({ associate, theme, onDelete }) => (
     </motion.div>
 );
 
-const AssociateTable = ({ associates, theme, onDelete }) => (
+const AssociateTable = ({ associates, theme, onEdit, onDelete }) => (
     <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border}`}>
         <table className={`w-full text-left text-sm ${theme.text.secondary} ${theme.canvas.bg} bg-opacity-50`}>
             <thead className={`text-xs uppercase ${theme.canvas.bg} bg-opacity-80 ${theme.text.secondary} font-medium`}>
@@ -126,6 +130,9 @@ const AssociateTable = ({ associates, theme, onDelete }) => (
                             <div className="flex justify-end gap-2">
                                 <a href={`tel:${assoc.phone_number}`} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.text.primary}`} title="Call"><Icons.Phone className="w-3 h-3" /></a>
                                 <a href={`https://wa.me/${assoc.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:text-green-500`} title="WhatsApp"><Icons.WhatsApp className="w-3 h-3" /></a>
+                                <button onClick={(e) => { e.stopPropagation(); onEdit(assoc); }} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:bg-purple-500/10 hover:text-purple-500 transition-colors`} title="Edit Associate">
+                                    <Icons.Edit className="w-3 h-3" />
+                                </button>
                                 <button onClick={(e) => { e.stopPropagation(); onDelete(assoc); }} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:bg-red-500/10 hover:text-red-500 transition-colors`} title="Delete Associate">
                                     <Icons.Trash className="w-3 h-3" />
                                 </button>
@@ -230,7 +237,7 @@ const AssociatesPage = () => {
             setAssociateModal({ open: false, associate: null });
         } catch (err) {
             console.error(err);
-            alert('Failed to save associate');
+            toast.error('Failed to save associate');
         } finally {
             setActionLoading(false);
         }
@@ -242,10 +249,10 @@ const AssociatesPage = () => {
         try {
             await api.delete(`/associates/${associate._id}`);
             await fetchAssociates();
-            alert('Associate deleted successfully');
+            toast.success('Associate deleted successfully');
         } catch (err) {
             console.error(err);
-            alert('Failed to delete associate');
+            toast.error('Failed to delete associate');
         }
     };
 
@@ -412,7 +419,7 @@ const AssociatesPage = () => {
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                         >
                             {associates.map(assoc => (
-                                <AssociateCard key={assoc._id} associate={assoc} theme={theme} onDelete={handleDeleteAssociate} />
+                                <AssociateCard key={assoc._id} associate={assoc} theme={theme} onEdit={(a) => setAssociateModal({ open: true, associate: a })} onDelete={handleDeleteAssociate} />
                             ))}
                         </motion.div>
                     ) : (
@@ -420,7 +427,7 @@ const AssociatesPage = () => {
                             key="list"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         >
-                            <AssociateTable associates={associates} theme={theme} onDelete={handleDeleteAssociate} />
+                            <AssociateTable associates={associates} theme={theme} onEdit={(a) => setAssociateModal({ open: true, associate: a })} onDelete={handleDeleteAssociate} />
                         </motion.div>
                     )}
                 </AnimatePresence>
