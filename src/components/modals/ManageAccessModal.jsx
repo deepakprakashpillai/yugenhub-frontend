@@ -12,12 +12,14 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
 
     const [allowedVerticals, setAllowedVerticals] = useState([]);
     const [financeAccess, setFinanceAccess] = useState(false);
+    const [canManageTeam, setCanManageTeam] = useState(false);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (user) {
             setAllowedVerticals(user.allowed_verticals || []);
             setFinanceAccess(user.finance_access || false);
+            setCanManageTeam(user.can_manage_team || false);
         }
     }, [user]);
 
@@ -48,6 +50,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
             await api.patch(`/settings/team/${user.id}/access`, {
                 allowed_verticals: allowedVerticals,
                 finance_access: financeAccess,
+                can_manage_team: canManageTeam,
             });
             toast.success('Access updated');
             onUpdated?.();
@@ -75,7 +78,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
                             <Shield size={20} />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white">Manage Access</h2>
+                            <h2 className="text-lg font-bold text-white">Access and Permissions</h2>
                             <p className="text-xs text-zinc-500 mt-0.5">{user.name}</p>
                         </div>
                     </div>
@@ -153,6 +156,34 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
                             </div>
                         </button>
                     </div>
+
+                    {/* Permissions (Admin Only) */}
+                    {user.role === 'admin' && (
+                        <div className="pt-4 border-t border-zinc-800">
+                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
+                                <Shield size={14} /> Administrative Permissions
+                            </div>
+                            <button
+                                onClick={() => setCanManageTeam(!canManageTeam)}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${canManageTeam
+                                    ? 'bg-purple-500/10 border-purple-500/25'
+                                    : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
+                                    }`}
+                            >
+                                <div className="text-left">
+                                    <p className={`text-sm font-medium ${canManageTeam ? 'text-purple-400' : 'text-zinc-400'}`}>
+                                        Team Management {canManageTeam ? 'Enabled' : 'Disabled'}
+                                    </p>
+                                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                                        Allow inviting, removing, and changing roles of members
+                                    </p>
+                                </div>
+                                <div className={`relative w-10 h-5 rounded-full transition-colors ${canManageTeam ? 'bg-purple-500' : 'bg-zinc-700'}`}>
+                                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${canManageTeam ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </div>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
