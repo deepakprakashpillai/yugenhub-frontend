@@ -127,8 +127,53 @@ const VerticalPage = ({ vertical, title }) => {
                 return;
             }
 
+            // 1.5 Clean payload for backend validation
+            const cleanedEvents = (projectData.events || []).map(event => {
+                const cleanedEvent = { ...event };
+
+                // Combine date and time
+                if (cleanedEvent.start_date) {
+                    cleanedEvent.start_date = cleanedEvent.start_time
+                        ? `${cleanedEvent.start_date}T${cleanedEvent.start_time}:00`
+                        : `${cleanedEvent.start_date}T00:00:00`;
+                }
+
+                if (cleanedEvent.end_date) {
+                    cleanedEvent.end_date = cleanedEvent.end_time
+                        ? `${cleanedEvent.end_date}T${cleanedEvent.end_time}:00`
+                        : `${cleanedEvent.end_date}T00:00:00`;
+                } else {
+                    cleanedEvent.end_date = null; // Fix "" -> null
+                }
+
+                // Remove frontend-only helper fields
+                delete cleanedEvent.start_time;
+                delete cleanedEvent.end_time;
+
+                // Clean deliverables
+                if (cleanedEvent.deliverables) {
+                    cleanedEvent.deliverables = cleanedEvent.deliverables.map(del => {
+                        const cleanedDel = { ...del };
+                        if (!cleanedDel.due_date) {
+                            cleanedDel.due_date = null;
+                        } else if (cleanedDel.due_date.length === 10) {
+                            // If it's just a date 'YYYY-MM-DD', append time
+                            cleanedDel.due_date = `${cleanedDel.due_date}T00:00:00`;
+                        }
+                        return cleanedDel;
+                    });
+                }
+
+                return cleanedEvent;
+            });
+
+            const payload = {
+                ...projectData,
+                events: cleanedEvents
+            };
+
             // 2. Send unified payload to backend (including events, deliverables, assignments)
-            const response = await api.post('/projects', projectData);
+            const response = await api.post('/projects', payload);
 
             // The backend returns the created project including its generated ID and sequential code
             const savedProject = response.data;
