@@ -32,7 +32,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
         priority: 'medium',
         assigned_to: '',
         due_date: '',
-        comment: ''
+        comment: '',
+        quantity: 1
     });
 
     // Project Selection State
@@ -70,7 +71,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 priority: task.priority || 'medium',
                 assigned_to: task.assigned_to || '',
                 due_date: task.due_date ? task.due_date.split('T')[0] : '',
-                comment: ''
+                comment: '',
+                quantity: task.quantity || 1
             });
 
             // Try to deduce vertical/project from task if available
@@ -99,7 +101,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 priority: 'medium',
                 assigned_to: '',
                 due_date: '',
-                comment: ''
+                comment: '',
+                quantity: 1
             });
             setHistory([]);
             setSelectedVertical('general');
@@ -171,6 +174,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
             ...formData,
             due_date: formData.due_date || null,
             assigned_to: formData.assigned_to || null,
+            // Only include quantity if it's a deliverable
+            quantity: isDeliverable ? parseInt(formData.quantity) || 1 : undefined,
             // PRESERVE category if it was a deliverable
             category: isDeliverable ? 'deliverable' : 'general',
             // PRESERVE type logic
@@ -225,20 +230,33 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 <div className="space-y-4">
                     <div className="flex flex-col gap-2">
                         {/* Status (Top Right or inline for mobile) */}
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-4">
                             {isDeliverable ? (
-                                <select
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleChange}
-                                    className={`text-2xl font-black bg-transparent border-none p-0 ${theme.text.primary} focus:ring-0 w-full`}
-                                    autoFocus={isNewTask}
-                                >
-                                    <option value="">Select Deliverable Type</option>
-                                    {(config?.deliverableTypes || []).map(dt => (
-                                        <option key={dt} value={dt}>{dt}</option>
-                                    ))}
-                                </select>
+                                <div className="flex-1 flex gap-3 items-center">
+                                    <select
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        className={`text-2xl font-black bg-transparent border-none p-0 ${theme.text.primary} focus:ring-0 w-full`}
+                                        autoFocus={isNewTask}
+                                    >
+                                        <option value="">Select Deliverable Type</option>
+                                        {(config?.deliverableTypes || []).map(dt => (
+                                            <option key={dt} value={dt}>{dt}</option>
+                                        ))}
+                                    </select>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        <label className={`text-xs ${theme.text.secondary} uppercase font-bold tracking-wider`}>Qty:</label>
+                                        <input
+                                            type="number"
+                                            name="quantity"
+                                            value={formData.quantity}
+                                            onChange={handleChange}
+                                            min="1"
+                                            className={`w-16 bg-transparent border-b ${theme.canvas.border} p-0 py-1 text-center ${theme.text.primary} focus:ring-0 focus:border-purple-500`}
+                                        />
+                                    </div>
+                                </div>
                             ) : (
                                 <input
                                     type="text"

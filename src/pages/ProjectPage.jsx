@@ -387,16 +387,6 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
 // Assignment Item Component with Edit/Delete
 const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
     const { theme } = useTheme();
-    const [showMenu, setShowMenu] = useState(false);
-    const menuRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) setShowMenu(false);
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     const name = assignment.associate_name || assignment.name || 'Unknown';
 
@@ -415,37 +405,22 @@ const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
                 <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.card} ${theme.text.secondary}`}>
                     {assignment.role}
                 </span>
-                <div className="relative" ref={menuRef}>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                        className={`p-1.5 rounded-lg sm:hover:${theme.canvas.card} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${showMenu ? 'opacity-100' : ''}`}
-                    >
-                        <Icons.More className="w-4 h-4" />
-                    </button>
 
-                    <AnimatePresence>
-                        {showMenu && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
-                            >
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowMenu(false); onEdit(); }}
-                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
-                                >
-                                    <Icons.Edit className="w-4 h-4" /> Edit Member
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowMenu(false); onDelete(); }}
-                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
-                                >
-                                    <Icons.Trash className="w-4 h-4" /> Remove Member
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                        className={`p-1 rounded sm:hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
+                        title="Edit Member"
+                    >
+                        <Icons.Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                        className={`p-1 rounded hover:bg-red-500/10 text-red-500 hover:text-red-400 transition-colors`}
+                        title="Remove Member"
+                    >
+                        <Icons.Trash className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
         </div>
@@ -512,7 +487,7 @@ const EventSection = ({
     const endTime = formatTime(event.end_date);
 
     // Calculate Event Progress
-    const eventCompleted = eventTasks.filter(t => ['done', 'completed'].includes(t.status)).length;
+    const eventCompleted = eventTasks.filter(t => ['done', 'completed', 'delivered'].includes(t.status?.toLowerCase())).length;
     const eventTotal = eventTasks.length;
 
     return (
@@ -961,7 +936,7 @@ const ProjectPage = () => {
             setTeamMemberModal({ open: false, eventId: null, assignment: null });
         } catch (err) {
             console.error(err);
-            toast.error('Failed to save team member');
+            toast.error(err.response?.data?.detail || 'Failed to save team member');
         } finally {
             setActionLoading(false);
         }
@@ -991,7 +966,7 @@ const ProjectPage = () => {
         setStatusDropdown(false);
         // Validation: Cannot complete project with incomplete tasks
         if (newStatus === 'completed') {
-            const incompleteTasks = tasks.filter(t => !['done', 'completed'].includes(t.status));
+            const incompleteTasks = tasks.filter(t => !['done', 'completed', 'delivered'].includes(t.status?.toLowerCase()));
             if (incompleteTasks.length > 0) {
                 toast.error(`Cannot mark as Completed. ${incompleteTasks.length} task(s) are still pending.`);
                 return;
@@ -1068,7 +1043,7 @@ const ProjectPage = () => {
     }
 
     // Calculate Project Progress
-    const projectCompleted = tasks.filter(t => ['done', 'completed'].includes(t.status)).length;
+    const projectCompleted = tasks.filter(t => ['done', 'completed', 'delivered'].includes(t.status?.toLowerCase())).length;
     const projectTotal = tasks.length;
 
     // Split Tasks
