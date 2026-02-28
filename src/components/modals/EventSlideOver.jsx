@@ -312,6 +312,17 @@ const EventSlideOver = ({
     // Team member handlers
     const addMember = () => {
         if (!newMember.name.trim()) return;
+
+        // Prevent duplicate names
+        const isDuplicate = assignments.some(a =>
+            (a.associate_name || '').toLowerCase() === newMember.name.trim().toLowerCase() ||
+            (a.name || '').toLowerCase() === newMember.name.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            toast.error('This team member is already added');
+            return;
+        }
+
         setAssignments([...assignments, { id: uuidv4(), associate_name: newMember.name, ...newMember }]);
         setNewMember({ name: '', role: '' });
         setShowAddMember(false);
