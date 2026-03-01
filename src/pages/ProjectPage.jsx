@@ -864,15 +864,22 @@ const ProjectPage = () => {
     const handleSaveEvent = async (eventData) => {
         setActionLoading(true);
         try {
+            let res;
             if (eventModal.eventId) {
                 // Update existing event
-                await api.patch(`/projects/${id}/events/${eventModal.eventId}`, eventData);
+                res = await api.patch(`/projects/${id}/events/${eventModal.eventId}`, eventData);
             } else {
                 // Add new event
-                await api.post(`/projects/${id}/events`, { id: uuidv4(), ...eventData });
+                res = await api.post(`/projects/${id}/events`, { id: uuidv4(), ...eventData });
             }
             await fetchProject();
             setEventModal({ open: false, event: null, eventId: null });
+
+            if (res?.data?.calendar_synced) {
+                toast.success('Event saved & added to calendar');
+            } else {
+                toast.success('Event saved successfully');
+            }
         } catch (err) {
             console.error(err);
             toast.error('Failed to save event');
@@ -884,9 +891,15 @@ const ProjectPage = () => {
     const handleDeleteEvent = async () => {
         setActionLoading(true);
         try {
-            await api.delete(`/projects/${id}/events/${deleteEventModal.event.id}`);
+            const res = await api.delete(`/projects/${id}/events/${deleteEventModal.event.id}`);
             await fetchProject();
             setDeleteEventModal({ open: false, event: null });
+
+            if (res?.data?.calendar_synced) {
+                toast.success('Event and calendar entry deleted');
+            } else {
+                toast.success('Event deleted successfully');
+            }
         } catch (err) {
             console.error(err);
             toast.error('Failed to delete event');
