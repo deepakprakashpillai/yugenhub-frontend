@@ -26,8 +26,8 @@ const VerticalPage = ({ vertical, title }) => {
 
     // --- Toolbar State ---
     const [search, setSearch] = useState('');
-    const [view, setView] = useState('all'); // Default to 'all' so we can apply specific status filters
-    const [filter, setFilter] = useState('ongoing'); // Default to 'ongoing' status
+    const [view, setView] = useState('active'); // Default to 'active' (Booked & Ongoing)
+    const [filter, setFilter] = useState('all'); // Default to 'all' status for the active view
     const [sort, setSort] = useState('newest'); // 'newest', 'oldest', 'upcoming'
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
@@ -112,9 +112,9 @@ const VerticalPage = ({ vertical, title }) => {
     // --- HANDLERS ---
     const handleClearFilters = () => {
         setSearch('');
-        setFilter('ongoing');
+        setFilter('all');
         setSort('newest');
-        setView('all');
+        setView('active');
     };
 
     const handleAddProject = async (projectData) => {
