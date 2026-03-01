@@ -21,6 +21,8 @@ const Toolbar = ({
     // Helper to get current label
     const getCurrentFilterLabel = () => {
         if (view === 'upcoming') return 'Upcoming Events';
+        if (view === 'active') return 'Active Projects';
+        if (view === 'production') return 'Production';
         if (filter === 'all' && view === 'all') return 'All Projects';
         // Check if it's a known status
         const status = config?.statusOptions?.find(s => s.id === filter);
@@ -97,6 +99,34 @@ const Toolbar = ({
                     {activeDropdown === 'filter' && (
                         <div className={`absolute top-full right-0 mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {/* Special Views */}
+                            <button
+                                onClick={() => { setView('active'); setFilter('all'); setActiveDropdown(null); }}
+                                className={clsx(
+                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    view === 'active' ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
+                                )}
+                                style={view === 'active' ? {
+                                    color: accent.primary,
+                                    backgroundColor: `${accent.primary}1A`
+                                } : {}}
+                            >
+                                <Icons.Activity className="w-4 h-4" />
+                                Active Projects
+                            </button>
+                            <button
+                                onClick={() => { setView('production'); setFilter('all'); setActiveDropdown(null); }}
+                                className={clsx(
+                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    view === 'production' ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
+                                )}
+                                style={view === 'production' ? {
+                                    color: accent.primary,
+                                    backgroundColor: `${accent.primary}1A`
+                                } : {}}
+                            >
+                                <Icons.Video className="w-4 h-4" />
+                                Production
+                            </button>
                             <button
                                 onClick={() => { setView('all'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
