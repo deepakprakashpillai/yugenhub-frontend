@@ -350,6 +350,24 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
                                         <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${draft.include_in_finance_summary !== false ? 'translate-x-5' : 'translate-x-0'}`} />
                                     </button>
                                 </div>
+
+                                {/* Calendar Sync Toggle */}
+                                <div className="flex items-center justify-between col-span-1 md:col-span-2 mt-2 pt-4 border-t border-zinc-500/10 dark:border-zinc-800/50">
+                                    <div>
+                                        <label className={`text-sm font-medium ${theme.text.primary} flex items-center gap-2`}>
+                                            <Calendar size={14} className="text-blue-400" /> Calendar Sync
+                                        </label>
+                                        <p className={`text-[10px] ${theme.text.secondary} mt-0.5 ml-5`}>
+                                            Sync events to an external calendar <span className="text-emerald-500 font-semibold text-[9px]">(Requires Global Calendar Sync)</span>
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setDraft({ ...draft, calendar_sync: draft.calendar_sync !== false ? false : true })}
+                                        className={`relative w-10 h-5 rounded-full transition-colors ${draft.calendar_sync !== false ? 'bg-blue-500' : 'bg-zinc-700'}`}
+                                    >
+                                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${draft.calendar_sync !== false ? 'translate-x-5' : 'translate-x-0'}`} />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Delete */}

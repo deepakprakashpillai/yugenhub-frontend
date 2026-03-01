@@ -23,6 +23,7 @@ import TemplatesSection from '../components/settings/TemplatesSection';
 import AppearanceSection from '../components/settings/AppearanceSection';
 import FinanceSection from '../components/settings/FinanceSection';
 import AccountSection from '../components/settings/AccountSection';
+import AutomationsSection from '../components/settings/AutomationsSection';
 
 const SECTIONS = [
     { id: 'account', label: 'My Account', icon: UserCircle, roles: ['owner', 'admin', 'member'] },
@@ -33,6 +34,7 @@ const SECTIONS = [
     { id: 'verticals', label: 'Verticals', icon: Layers, roles: ['owner', 'admin'] },
     { id: 'templates', label: 'Templates', icon: Icons.LayoutTemplate, roles: ['owner', 'admin'] },
     { id: 'finance', label: 'Finance', icon: IndianRupee, roles: ['owner', 'admin'] },
+    { id: 'automations', label: 'Automations', icon: Workflow, roles: ['owner', 'admin'] },
     { id: 'notifications', label: 'Notifications', icon: Bell, roles: ['owner', 'admin', 'member'] },
     { id: 'export', label: 'Data Export', icon: Download, roles: ['owner', 'admin'] },
     { id: 'danger', label: 'Danger Zone', icon: AlertTriangle, roles: ['owner'] },
@@ -95,6 +97,7 @@ function SettingsPage() {
             case 'verticals': return <VerticalsSection role={role} />;
             case 'templates': return <TemplatesSection />;
             case 'finance': return <FinanceSection role={role} />;
+            case 'automations': return <AutomationsSection role={role} />;
             case 'notifications': return <NotificationsSection />;
             case 'export': return <ExportSection />;
             case 'danger': return <DangerZone />;

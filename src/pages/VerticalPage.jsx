@@ -179,7 +179,15 @@ const VerticalPage = ({ vertical, title }) => {
             const savedProject = response.data;
 
             setProjects(prev => [savedProject, ...prev]);
-            toast.success(`Project ${savedProject.code} created successfully!`);
+
+            // Determine if any events were calendar synced
+            const wasCalendarSynced = savedProject?.events?.some(e => e.calendar_event_id);
+            if (wasCalendarSynced) {
+                toast.success(`Project ${savedProject.code} created & added to calendar!`);
+            } else {
+                toast.success(`Project ${savedProject.code} created successfully!`);
+            }
+
             setProjectSlideOver(false);
             setRefreshTrigger(p => p + 1);
 
