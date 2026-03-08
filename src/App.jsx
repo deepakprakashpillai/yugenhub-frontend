@@ -202,6 +202,9 @@ function AppRoutes() {
             <SettingsPage />
           </ProtectedRoute>
         } />
+
+        {/* Catch-all: redirect unknown routes to dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   );

@@ -306,7 +306,7 @@ const ProjectSlideOver = ({
             events // Pass events up
         };
 
-        console.log('Submitting Project Data:', projectData);
+
 
         onSave(projectData);
     };

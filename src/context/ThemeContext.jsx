@@ -41,7 +41,6 @@ export const ThemeProvider = ({ children }) => {
     // Apply mode class and CSS variables to HTML element
     useEffect(() => {
         const root = window.document.documentElement;
-        console.log('ThemeContext: Setting theme mode to', themeMode); // DEBUG
         root.classList.remove('light', 'dark');
         root.classList.add(themeMode);
 

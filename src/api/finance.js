@@ -42,7 +42,7 @@ export const updateInvoice = async (invoiceId, invoiceData) => {
 };
 
 export const updateInvoiceStatus = async (invoiceId, status) => {
-    const response = await api.post(`/finance/invoices/${invoiceId}/status?status=${status}`);
+    const response = await api.post(`/finance/invoices/${invoiceId}/status`, { status });
     return response.data;
 };
 
