@@ -291,6 +291,12 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            drag="x"
+            dragConstraints={{ left: -320, right: 0 }}
+            dragElastic={0.1}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -100 || info.velocity.x < -400) onClose();
+            }}
             className="fixed left-0 top-0 h-full z-[100]"
           >
             {sidebarContent}

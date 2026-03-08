@@ -16,6 +16,8 @@ import { Icons } from "./Icons";
 import { useAgencyConfig } from "../context/AgencyConfigContext";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { motion } from "framer-motion";
+import { useIsMobile } from "../hooks/useMediaQuery";
 
 
 
@@ -64,6 +66,7 @@ export function CommandPalette() {
     const { config } = useAgencyConfig();
     const { user } = useAuth();
     const { theme, themeMode } = useTheme(); // Get themeMode explicitly
+    const isMobile = useIsMobile();
 
     // Toggle with Cmd+K
     useEffect(() => {
@@ -93,41 +96,62 @@ export function CommandPalette() {
             open={open}
             onOpenChange={setOpen}
             label="Global Command Menu"
-            className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-5xl z-[9999] flex flex-col gap-4 p-4"
-            contentClassName="bg-transparent shadow-none border-none p-0"
+            className="fixed bottom-0 md:bottom-auto md:top-[20%] left-0 md:left-1/2 md:-translate-x-1/2 w-full md:max-w-5xl z-[9999] flex flex-col md:gap-4 p-0 md:p-4 h-[90dvh] md:h-auto"
+            contentClassName="bg-transparent shadow-none border-none p-0 h-full md:h-auto"
         >
-            {/* 1. Detached Search Bar */}
-            <div className={`
-                flex items-center px-6 py-5 rounded-2xl shadow-xl border
-                backdrop-blur-xl
-                ${isDark ? 'bg-zinc-950/95 border-zinc-800' : 'bg-white/95 border-zinc-200/50'}
-            `}>
-                <Search className={`w-6 h-6 ${isDark ? 'text-zinc-500' : 'text-zinc-400'} mr-4`} />
-                <Command.Input
-                    value={search}
-                    onValueChange={setSearch}
-                    placeholder="Search for anything..."
-                    className={`w-full bg-transparent border-none text-2xl font-light tracking-tight focus:outline-none 
-                        ${isDark ? 'text-white placeholder:text-zinc-600' : 'text-zinc-900 placeholder:text-zinc-400'}
-                    `}
-                    autoFocus
-                />
-                <div className="hidden md:flex gap-2 items-center ml-4">
-                    <span className={`px-2 py-1 text-xs font-bold rounded border 
-                        ${isDark ? 'text-zinc-500 bg-zinc-900 border-zinc-800' : 'text-zinc-400 bg-zinc-100 border-zinc-200'}
-                    `}>ESC</span>
+            <motion.div
+                drag={isMobile ? "y" : false}
+                dragConstraints={{ top: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(_, info) => {
+                    if (info.offset.y > 100) setOpen(false);
+                }}
+                className={`flex flex-col h-full md:h-auto w-full bg-transparent`}
+            >
+                {/* Mobile Handle & Cancel */}
+                <div className={`md:hidden flex items-center justify-between px-4 pt-3 pb-2 rounded-t-2xl shadow-lg border-t ${isDark ? 'bg-zinc-950/95 border-zinc-800' : 'bg-white/95 border-zinc-200'}`}>
+                    <div className="w-12 opacity-0" /> {/* Spacer */}
+                    <div className={`w-12 h-1.5 rounded-full ${isDark ? 'bg-zinc-700' : 'bg-zinc-300'}`} />
+                    <button onClick={() => setOpen(false)} className="text-sm font-medium text-blue-500 w-12 text-right">Cancel</button>
                 </div>
-            </div>
 
-            {/* 2. Detached Results Grid */}
-            <div className={`
-                rounded-2xl shadow-2xl border overflow-hidden
-                backdrop-blur-xl
-                transition-all duration-300 ease-out origin-top
-                ${isDark ? 'bg-zinc-950/95 border-zinc-800' : 'bg-white/95 border-zinc-200/50'}
-                ${open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4'}
-            `}>
-                <Command.List className="p-8 overflow-y-auto max-h-[60vh]">
+                {/* 1. Detached Search Bar */}
+                <div className={`
+                    flex items-center px-4 py-3 md:px-6 md:py-5 md:rounded-2xl md:shadow-xl border-b md:border
+                    backdrop-blur-xl shrink-0
+                    ${isDark ? 'bg-zinc-950/95 border-zinc-800' : 'bg-white/95 border-zinc-200'}
+                `}>
+                    <Search className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-zinc-500' : 'text-zinc-400'} mr-3 md:mr-4`} />
+                    <Command.Input
+                        value={search}
+                        onValueChange={setSearch}
+                        placeholder="Search for anything..."
+                        inputMode="search"
+                        enterKeyHint="search"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        className={`w-full bg-transparent border-none text-base md:text-2xl font-light tracking-tight focus:outline-none 
+                            ${isDark ? 'text-white placeholder:text-zinc-600' : 'text-zinc-900 placeholder:text-zinc-400'}
+                        `}
+                        autoFocus
+                    />
+                    <div className="hidden md:flex gap-2 items-center ml-4">
+                        <span className={`px-2 py-1 text-xs font-bold rounded border 
+                            ${isDark ? 'text-zinc-500 bg-zinc-900 border-zinc-800' : 'text-zinc-400 bg-zinc-100 border-zinc-200'}
+                        `}>ESC</span>
+                    </div>
+                </div>
+
+                {/* 2. Detached Results Grid */}
+                <div className={`
+                    flex-1 overflow-hidden
+                    md:rounded-2xl md:shadow-2xl md:border 
+                    backdrop-blur-xl flex flex-col
+                    transition-all duration-300 ease-out origin-top
+                    ${isDark ? 'bg-zinc-950/95 md:border-zinc-800' : 'bg-white/95 md:border-zinc-200'}
+                    ${open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 md:-translate-y-4'}
+                `}>
+                    <Command.List className="p-4 md:p-8 flex-1 overflow-y-auto mix-blend-normal z-10 overscroll-contain pb-safe">
                     <Command.Empty className={`py-12 text-center ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                         No results found.
                     </Command.Empty>
@@ -237,6 +261,7 @@ export function CommandPalette() {
 
                 </Command.List>
             </div>
+            </motion.div>
         </Command.Dialog>
     );
 }
