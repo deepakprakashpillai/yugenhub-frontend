@@ -17,9 +17,6 @@ const useMediaQuery = (query) => {
         const mediaQuery = window.matchMedia(query);
         const handler = (e) => setMatches(e.matches);
 
-        // Set initial value
-        setTimeout(() => setMatches(mediaQuery.matches), 0);
-
         // Listen for changes
         mediaQuery.addEventListener('change', handler);
         return () => mediaQuery.removeEventListener('change', handler);

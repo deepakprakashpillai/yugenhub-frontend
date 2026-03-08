@@ -26,9 +26,13 @@ const FinancePage = () => {
     useEffect(() => {
         if (user && user.role !== ROLES.ADMIN && user.role !== ROLES.OWNER && !user.finance_access) {
             navigate('/');
-            // Optional: Show toast "Access Denied"
         }
     }, [user, navigate]);
+
+    // Guard: prevent flash of finance content for unauthorized users
+    if (user && user.role !== ROLES.ADMIN && user.role !== ROLES.OWNER && !user.finance_access) {
+        return null;
+    }
 
     const tabs = [
         { id: 'overview', label: 'Overview', icon: PieChart },

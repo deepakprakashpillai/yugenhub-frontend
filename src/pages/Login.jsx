@@ -25,7 +25,7 @@ const Login = () => {
     };
 
     const handleError = () => {
-        console.log('Login Failed');
+
         toast.error("Google Login failed to initialize.");
     };
 

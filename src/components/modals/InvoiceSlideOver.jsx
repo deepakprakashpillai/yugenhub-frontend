@@ -33,7 +33,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
     const fetchNextNumber = async (type, projectId, projectCode) => {
         if (!projectId) return;
 
-        console.log("Fetching next number for:", { type, projectId, projectCode });
+
         setFormData(prev => ({ ...prev, invoice_no: 'Generating...' }));
 
         try {
@@ -41,9 +41,9 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
             const pCode = projectCode || 'GEN';
 
             // Fetch existing invoices for this project to determine sequence
-            console.log("Calling getInvoices with projectId:", projectId);
+
             const existingDocs = await getInvoices({ project_id: projectId });
-            console.log("Existing Docs Fetched:", existingDocs);
+
 
             // Filter by type (Quote vs Invoice)
             // Note: This relies on the invoice_no convention or a separate type field if added.
@@ -52,7 +52,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 if (type === 'quote') return d.invoice_no.includes('-QT-');
                 return d.invoice_no.includes('-INV-');
             });
-            console.log("Filtered Docs for Type:", typeDocs);
+
 
             // Find max sequence
             let maxSeq = 0;
@@ -61,11 +61,11 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 const seq = parseInt(parts[parts.length - 1]);
                 if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
             });
-            console.log("Max Sequence Found:", maxSeq);
+
 
             const nextSeq = String(maxSeq + 1).padStart(3, '0');
             const newNumber = `${pCode}-${prefix}-${nextSeq}`;
-            console.log("Generated New Number:", newNumber);
+
 
             setFormData(prev => ({ ...prev, invoice_no: newNumber }));
         } catch (error) {
@@ -225,7 +225,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 total_amount: calculateTotal()
             };
 
-            console.log("Submitting Invoice Payload:", JSON.stringify(payload, null, 2));
+
 
             if (initialData && initialData.id) {
                 await updateInvoice(initialData.id, payload);
@@ -263,7 +263,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
     const handleProjectChange = (projectId) => {
         const project = projects.find(p => p.id === projectId || p._id === projectId);
-        console.log("Selected Project:", project);
+
 
         if (!project?.client_id) {
             console.warn("Project has no client_id:", project);
