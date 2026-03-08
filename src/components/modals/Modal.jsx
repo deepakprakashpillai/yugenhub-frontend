@@ -50,6 +50,12 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
                         animate={animation.animate}
                         exit={animation.exit}
                         transition={{ duration: 0.2, type: isMobile ? 'spring' : 'tween', damping: isMobile ? 30 : undefined, stiffness: isMobile ? 300 : undefined }}
+                        drag={isMobile ? "y" : false}
+                        dragConstraints={{ top: 0 }}
+                        dragElastic={0.2}
+                        onDragEnd={(_, info) => {
+                            if (info.offset.y > 100) onClose();
+                        }}
                         className={`relative w-full ${isMobile ? '' : sizeClasses[size]} ${theme.canvas.card} border ${theme.canvas.border} ${isMobile ? 'rounded-t-2xl' : 'rounded-2xl'} shadow-2xl overflow-hidden`}
                     >
                         {/* Mobile drag handle */}

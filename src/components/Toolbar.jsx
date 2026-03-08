@@ -52,6 +52,10 @@ const Toolbar = ({
                 <Icons.Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500 w-4 h-4" />
                 <input
                     type="text"
+                    inputMode="search"
+                    enterKeyHint="search"
+                    autoComplete="off"
+                    autoCorrect="off"
                     placeholder="Search projects..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -83,7 +87,7 @@ const Toolbar = ({
                     <button
                         onClick={() => toggleDropdown('filter')}
                         className={clsx(
-                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors",
+                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors min-h-[40px] md:min-h-0",
                             activeDropdown === 'filter' ? "" : `${theme.canvas.button.secondary}`
                         )}
                         style={activeDropdown === 'filter' ? {
@@ -192,7 +196,7 @@ const Toolbar = ({
                     <button
                         onClick={() => toggleDropdown('sort')}
                         className={clsx(
-                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors",
+                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors min-h-[40px] md:min-h-0",
                             activeDropdown === 'sort' ? "" : `${theme.canvas.button.secondary}`
                         )}
                         style={activeDropdown === 'sort' ? {

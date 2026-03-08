@@ -48,6 +48,10 @@ const TaskFilters = ({ filters, onChange }) => {
                 <Icons.Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${theme.text.secondary}`} />
                 <input
                     type="text"
+                    inputMode="search"
+                    enterKeyHint="search"
+                    autoComplete="off"
+                    autoCorrect="off"
                     placeholder="Search tasks..."
                     value={filters.search || ''}
                     onChange={(e) => handleChange('search', e.target.value)}

@@ -110,3 +110,23 @@ input[type="number"]:hover::-webkit-outer-spin-button {
   background-color: rgba(161, 161, 170, 0.7);
   /* zinc-400 */
 }
+
+/* Prevent double-tap zoom delay on touch devices */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Hide scrollbar entirely on mobile devices for native feel */
+@media (max-width: 767px) {
+  * {
+    scrollbar-width: none !important;
+  }
+  *::-webkit-scrollbar {
+    display: none !important;
+  }
+}
