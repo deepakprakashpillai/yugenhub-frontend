@@ -9,6 +9,7 @@ import { Skeleton } from '../ui/Skeleton';
 
 const VerticalProjectList = ({ vertical, onSelectProject, selectedProjectId }) => {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
