@@ -1,28 +1,11 @@
 import { useState, useEffect } from 'react';
 import SlideOver from './SlideOver';
 import { Icons } from '../Icons';
-import clsx from 'clsx';
 import { v4 as uuidv4 } from 'uuid';
 import DatePicker from '../ui/DatePicker';
 import TimePicker from '../ui/TimePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
-
-// Status Badge Component
-const StatusBadge = ({ status }) => {
-    const statusConfig = {
-        'Pending': { bg: 'bg-zinc-700', text: 'text-zinc-300' },
-        'In Progress': { bg: 'bg-amber-500/20', text: 'text-amber-400' },
-        'Completed': { bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
-        'Delivered': { bg: 'bg-blue-500/20', text: 'text-blue-400' },
-    };
-    const config = statusConfig[status] || statusConfig['Pending'];
-    return (
-        <span className={clsx("px-2 py-0.5 rounded-full text-xs font-medium", config.bg, config.text)}>
-            {status}
-        </span>
-    );
-};
 
 // Inline Editable Deliverable Row
 const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
@@ -57,16 +40,6 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                    <select
-                        value={data.status}
-                        onChange={(e) => setData({ ...data, status: e.target.value })}
-                        className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                    >
-                        <option value="Pending">Pending</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Delivered">Delivered</option>
-                    </select>
                     <DatePicker
                         value={data.due_date?.slice(0, 10) || ''}
                         onChange={(val) => setData({ ...data, due_date: val })}
@@ -105,7 +78,6 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                <StatusBadge status={deliverable.status} />
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => setEditing(true)} className="p-1 rounded hover:bg-zinc-700 text-zinc-400">
                         <Icons.Edit className="w-3.5 h-3.5" />
@@ -213,7 +185,7 @@ const EventSlideOver = ({
     const [assignments, setAssignments] = useState([]);
     const [showAddDeliverable, setShowAddDeliverable] = useState(false);
     const [showAddMember, setShowAddMember] = useState(false);
-    const [newDeliverable, setNewDeliverable] = useState({ type: '', quantity: 1, status: 'Pending', due_date: '', notes: '' });
+    const [newDeliverable, setNewDeliverable] = useState({ type: '', quantity: 1, due_date: '', notes: '' });
     const [newMember, setNewMember] = useState({ name: '', role: '' });
 
     // Helper to parse datetime string into date and time parts
@@ -297,7 +269,7 @@ const EventSlideOver = ({
     const addDeliverable = () => {
         if (!newDeliverable.type.trim()) return;
         setDeliverables([...deliverables, { id: uuidv4(), ...newDeliverable }]);
-        setNewDeliverable({ type: '', quantity: 1, status: 'Pending', due_date: '', notes: '' });
+        setNewDeliverable({ type: '', quantity: 1, due_date: '', notes: '' });
         setShowAddDeliverable(false);
     };
 

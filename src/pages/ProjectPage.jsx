@@ -22,6 +22,7 @@ import EmptyState from '../components/EmptyState';
 // Vertical-specific templates
 import { WeddingTemplate, KidsTemplate, EventsTemplate, GenericTemplate } from '../components/templates';
 import ProjectFinance from '../components/finance/ProjectFinance';
+import DeliverableManager from '../components/portal/DeliverableManager';
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -732,6 +733,7 @@ const ProjectPage = () => {
     const allTabs = [
         { id: 'overview', label: 'Overview', icon: Icons.LayoutDashboard },
         { id: 'tasks', label: 'Tasks', icon: Icons.ListTodo },
+        { id: 'portal', label: 'Portal', icon: Icons.Package },
         { id: 'finance', label: 'Finance', icon: Icons.CircleDollarSign },
     ];
 
@@ -1292,6 +1294,13 @@ const ProjectPage = () => {
                 </div>
             )}
 
+            {/* Portal / Deliverables Tab */}
+            {activeTab === 'portal' && (
+                <div className="mb-8">
+                    <DeliverableManager projectId={id} events={project?.events || []} project={project || {}} />
+                </div>
+            )}
+
             {/* Finance Tab */}
             {activeTab === 'finance' && (
                 <div className="mb-8">
@@ -1303,8 +1312,8 @@ const ProjectPage = () => {
                 </div>
             )}
 
-            {/* Events Section (only for event-based verticals) */}
-            {hasEvents && (
+            {/* Events Section (only for event-based verticals, overview tab only) */}
+            {hasEvents && activeTab === 'overview' && (
                 <div className="mb-8">
                     <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2 mb-4`}>
                         <Icons.Calendar className={`w-5 h-5 ${theme.text.secondary}`} />
@@ -1318,7 +1327,7 @@ const ProjectPage = () => {
                                     key={event.id || index}
                                     event={event}
                                     index={index}
-                                    isExpanded={expandedEvents[index]}
+                                    isExpanded={expandedEvents[index] !== false}
                                     onToggle={() => toggleEvent(index)}
                                     onEditEvent={() => setEventModal({ open: true, event, eventId: event.id })}
                                     onDeleteEvent={() => setDeleteEventModal({ open: true, event })}
@@ -1352,8 +1361,8 @@ const ProjectPage = () => {
                 </div>
             )}
 
-            {/* Project-Level Deliverables & Team (for non-event verticals) */}
-            {!hasEvents && (
+            {/* Project-Level Deliverables & Team (for non-event verticals, overview tab only) */}
+            {!hasEvents && activeTab === 'overview' && (
                 <div className="mb-8 space-y-8">
                     {/* Project Deliverables */}
                     <div>

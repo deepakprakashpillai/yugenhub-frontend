@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
-import clsx from 'clsx';
 import DatePicker from '../ui/DatePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
@@ -34,7 +33,6 @@ const DeliverableModal = ({
         title: '',
         quantity: 1,
         description: '',
-        status: 'Pending',
         assigned_to: '',
         due_date: '',
     });
@@ -45,7 +43,6 @@ const DeliverableModal = ({
                 title: deliverable.title || '',
                 quantity: deliverable.quantity || 1,
                 description: deliverable.description || '',
-                status: deliverable.status || 'Pending',
                 assigned_to: deliverable.assigned_to || '',
                 due_date: deliverable.due_date ? deliverable.due_date.split('T')[0] : '',
             }), 0);
@@ -55,7 +52,6 @@ const DeliverableModal = ({
                 title: '',
                 quantity: 1,
                 description: '',
-                status: 'Pending',
                 assigned_to: '',
                 due_date: '',
             }), 0);
@@ -85,20 +81,10 @@ const DeliverableModal = ({
         onSave(payload);
     };
 
-    const statusOptions = [
-        { value: 'Pending', label: 'Pending', icon: Icons.Clock, color: 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20' },
-        { value: 'In Progress', label: 'In Progress', icon: Icons.Loader, color: 'text-blue-400 bg-blue-400/10 border-blue-400/20' },
-        { value: 'Completed', label: 'Completed', icon: Icons.CheckCircle, color: 'text-green-400 bg-green-400/10 border-green-400/20' },
-        { value: 'Delivered', label: 'Delivered', icon: Icons.Package, color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
-    ];
-
     const assignedUser = users.find(u => u.id === formData.assigned_to);
 
     // --- VIEW MODE RENDER ---
     const renderViewMode = () => {
-        const statusConfig = statusOptions.find(o => o.value === formData.status) || statusOptions[0];
-        const StatusIcon = statusConfig.icon;
-
         return (
             <div className="space-y-8">
                 {/* Header */}
@@ -110,10 +96,6 @@ const DeliverableModal = ({
                                 <span className="text-[9px] uppercase font-bold text-zinc-600 leading-none">QTY</span>
                             </div>
                             <h2 className="text-2xl font-black text-white leading-tight">{formData.title}</h2>
-                        </div>
-                        <div className={clsx("px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border flex items-center gap-2", statusConfig.color)}>
-                            <StatusIcon className="w-4 h-4" />
-                            {formData.status}
                         </div>
                     </div>
 
@@ -211,33 +193,6 @@ const DeliverableModal = ({
                     placeholder="Any special instructions..."
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors resize-none"
                 />
-            </div>
-
-            {/* Status (Visual Toggle) */}
-            <div>
-                <label className="block text-xs uppercase text-zinc-500 font-bold mb-2">Status</label>
-                <div className="grid grid-cols-4 gap-2">
-                    {statusOptions.map(opt => {
-                        const Icon = opt.icon;
-                        const isActive = formData.status === opt.value;
-                        return (
-                            <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => setFormData(p => ({ ...p, status: opt.value }))}
-                                className={clsx(
-                                    "flex flex-col items-center gap-1 p-2 rounded-lg border text-xs font-medium transition-all",
-                                    isActive
-                                        ? "border-amber-500 bg-amber-500/10 text-amber-400"
-                                        : "border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
-                                )}
-                            >
-                                <Icon className="w-4 h-4" />
-                                {opt.label}
-                            </button>
-                        );
-                    })}
-                </div>
             </div>
 
             {/* Due Date & Assignee */}

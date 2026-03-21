@@ -20,6 +20,7 @@ const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const FinancePage = lazy(() => import('./pages/FinancePage'));
+const PortalPage = lazy(() => import('./pages/PortalPage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
 import ReloadPrompt from './components/PWA/ReloadPrompt';
@@ -120,6 +121,7 @@ function AppRoutes() {
     }>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/portal/:token" element={<PortalPage />} />
         {import.meta.env.DEV && (
           <Route path="/dev-login" element={<DevLoginPage />} />
         )}
