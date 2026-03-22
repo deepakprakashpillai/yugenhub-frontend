@@ -61,7 +61,7 @@ export default function DatePicker({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
-    // Close on click outside
+    // Close on click/touch outside
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -70,7 +70,11 @@ export default function DatePicker({
         };
         if (open) {
             document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+                document.removeEventListener('touchstart', handleClickOutside);
+            };
         }
     }, [open]);
 

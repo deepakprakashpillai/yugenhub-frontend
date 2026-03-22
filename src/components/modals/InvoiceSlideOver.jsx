@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import SlideOver from './SlideOver';
 import { createInvoice, updateInvoice, getInvoices } from '../../api/finance';
 import { getClients } from '../../api/clients';
@@ -23,7 +24,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         invoice_no: '',
         client_id: '',
         project_id: '',
-        line_items: [{ title: '', quantity: 1, price: 0, total: 0 }],
+        line_items: [{ id: uuidv4(), title: '', quantity: 1, price: 0, total: 0 }],
         date: new Date().toISOString().split('T')[0]
     });
 
@@ -100,6 +101,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                         client_id: initialData.client_id || '',
                         project_id: initialData.project_id || '',
                         line_items: initialData.line_items?.map(item => ({
+                            id: item.id || uuidv4(),
                             title: item.title,
                             quantity: item.quantity || 1,
                             price: item.price || 0,
@@ -131,7 +133,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                         invoice_no: 'Select Project...',
                         client_id: '',
                         project_id: '',
-                        line_items: [{ title: '', quantity: 1, price: 0, total: 0 }],
+                        line_items: [{ id: uuidv4(), title: '', quantity: 1, price: 0, total: 0 }],
                         date: new Date().toISOString().split('T')[0]
                     });
                 }
@@ -190,7 +192,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
     const addLineItem = () => {
         setFormData({
             ...formData,
-            line_items: [...formData.line_items, { title: '', quantity: 1, price: 0, total: 0 }]
+            line_items: [...formData.line_items, { id: uuidv4(), title: '', quantity: 1, price: 0, total: 0 }]
         });
     };
 
@@ -415,7 +417,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
                     <div className="space-y-3">
                         {formData.line_items.map((item, index) => (
-                            <div key={index} className={`p-3 rounded-lg border ${theme.canvas.border} bg-gray-50/50`}>
+                            <div key={item.id} className={`p-3 rounded-lg border ${theme.canvas.border} bg-gray-50/50`}>
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center">
                                     {/* Description */}
                                     <div className="flex-1 w-full">
@@ -439,7 +441,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                                                 <input
                                                     type="number"
                                                     value={item.quantity}
-                                                    onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value))}
+                                                    onChange={(e) => handleLineItemChange(index, 'quantity', parseFloat(e.target.value) || 1)}
                                                     className={`w-full px-2 py-1.5 text-sm rounded-md border ${theme.canvas.bg} ${theme.canvas.border}`}
                                                     required
                                                 />
@@ -452,7 +454,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                                             <input
                                                 type="number"
                                                 value={item.price}
-                                                onChange={(e) => handleLineItemChange(index, 'price', parseFloat(e.target.value))}
+                                                onChange={(e) => handleLineItemChange(index, 'price', parseFloat(e.target.value) || 0)}
                                                 className={`w-full px-2 py-1.5 text-sm rounded-md border ${theme.canvas.bg} ${theme.canvas.border}`}
                                                 required
                                             />

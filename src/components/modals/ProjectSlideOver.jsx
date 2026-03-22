@@ -64,6 +64,7 @@ const ProjectSlideOver = ({
                 setAssociates(associatesRes.data.data || associatesRes.data || []);
             } catch (err) {
                 console.error('Failed to fetch resources:', err);
+                toast.error('Failed to load clients and associates');
             } finally {
                 setLoadingClients(false);
             }
@@ -200,14 +201,20 @@ const ProjectSlideOver = ({
     const handleAddDeliverable = (eventIndex) => {
         setEvents(prev => {
             const newEvents = [...prev];
-            newEvents[eventIndex].deliverables.push({
-                id: uuidv4(),
-                type: '', // User selects from config
-                quantity: 1,
-                status: 'Pending',
-                due_date: '',
-                notes: ''
-            });
+            newEvents[eventIndex] = {
+                ...newEvents[eventIndex],
+                deliverables: [
+                    ...newEvents[eventIndex].deliverables,
+                    {
+                        id: uuidv4(),
+                        type: '',
+                        quantity: 1,
+                        status: 'Pending',
+                        due_date: '',
+                        notes: ''
+                    }
+                ]
+            };
             return newEvents;
         });
     };
@@ -235,12 +242,18 @@ const ProjectSlideOver = ({
     const handleAddAssignment = (eventIndex) => {
         setEvents(prev => {
             const newEvents = [...prev];
-            newEvents[eventIndex].assignments.push({
-                id: uuidv4(),
-                associate_id: '',
-                role: '',
-                name: '' // For display
-            });
+            newEvents[eventIndex] = {
+                ...newEvents[eventIndex],
+                assignments: [
+                    ...newEvents[eventIndex].assignments,
+                    {
+                        id: uuidv4(),
+                        associate_id: '',
+                        role: '',
+                        name: ''
+                    }
+                ]
+            };
             return newEvents;
         });
     };
@@ -293,20 +306,52 @@ const ProjectSlideOver = ({
         setMetadata(prev => ({ ...prev, [name]: value }));
     };
 
+    const combineDateTime = (date, time) => {
+        if (!date) return null;
+        return time ? `${date}T${time}:00` : `${date}T00:00:00`;
+    };
+
     const handleSubmit = () => {
         if (!formData.client_id) {
             toast.warning('Please select a client');
             return;
         }
 
+        // Validate events and combine date+time fields
+        for (let i = 0; i < events.length; i++) {
+            const ev = events[i];
+            if (!ev.type.trim()) {
+                toast.error(`Event ${i + 1}: type is required`);
+                return;
+            }
+            if (!ev.start_date) {
+                toast.error(`Event ${i + 1}: start date is required`);
+                return;
+            }
+            if (ev.end_date) {
+                if (ev.end_date < ev.start_date) {
+                    toast.error(`Event ${i + 1}: end date cannot be before start date`);
+                    return;
+                }
+                if (ev.end_date === ev.start_date && ev.end_time && ev.start_time && ev.end_time <= ev.start_time) {
+                    toast.error(`Event ${i + 1}: end time must be after start time`);
+                    return;
+                }
+            }
+        }
+
+        const processedEvents = events.map(({ start_time, end_time, ...rest }) => ({
+            ...rest,
+            start_date: combineDateTime(rest.start_date, start_time),
+            end_date: combineDateTime(rest.end_date, end_time),
+        }));
+
         const projectData = {
             ...formData,
             vertical,
             metadata,
-            events // Pass events up
+            events: processedEvents
         };
-
-
 
         onSave(projectData);
     };
