@@ -15,12 +15,12 @@ import { toast } from 'sonner';
  * Simplified form without Quantity or Category toggles.
  * JIRA-style inline editing.
  */
-const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId = null, eventId = null, loading = false }) => {
+const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId = null, eventId = null, isDeliverable: isDeliverableProp = false, loading = false }) => {
     // Current User Context (for fallback assignee info)
     const { user: currentUser } = useAuth();
     const { config } = useAgencyConfig();
     const { theme } = useTheme();
-    const isDeliverable = !!eventId || task?.category === 'deliverable' || !!task?.event_id;
+    const isDeliverable = isDeliverableProp || !!eventId || task?.category === 'deliverable' || !!task?.event_id;
 
     // Determine initial "isNew" state for title display logic
     const isNewTask = !task;

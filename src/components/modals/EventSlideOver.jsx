@@ -213,28 +213,24 @@ const EventSlideOver = ({
 
     useEffect(() => {
         if (isOpen && event) {
-            setTimeout(() => {
-                const start = parseDateTime(event.start_date);
-                const end = parseDateTime(event.end_date);
-                setFormData({
-                    type: event.type || '',
-                    venue_name: event.venue_name || '',
-                    venue_location: event.venue_location || '',
-                    start_date: start.date,
-                    start_time: start.time,
-                    end_date: end.date,
-                    end_time: end.time,
-                    notes: event.notes || ''
-                });
-                setDeliverables(event.deliverables || []);
-                setAssignments(event.assignments || []);
-            }, 0);
+            const start = parseDateTime(event.start_date);
+            const end = parseDateTime(event.end_date);
+            setFormData({
+                type: event.type || '',
+                venue_name: event.venue_name || '',
+                venue_location: event.venue_location || '',
+                start_date: start.date,
+                start_time: start.time,
+                end_date: end.date,
+                end_time: end.time,
+                notes: event.notes || ''
+            });
+            setDeliverables(event.deliverables || []);
+            setAssignments(event.assignments || []);
         } else if (isOpen) {
-            setTimeout(() => {
-                setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
-                setDeliverables([]);
-                setAssignments([]);
-            }, 0);
+            setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
+            setDeliverables([]);
+            setAssignments([]);
         }
     }, [isOpen, event]);
 
@@ -249,9 +245,28 @@ const EventSlideOver = ({
             return;
         }
 
+        if (!formData.start_date) {
+            toast.error('Start date is required');
+            return;
+        }
+
         // Combine date and time for API
         const start_date = combineDateTime(formData.start_date, formData.start_time);
         const end_date = combineDateTime(formData.end_date, formData.end_time);
+
+        if (formData.end_date) {
+            if (formData.end_date < formData.start_date) {
+                toast.error('End date cannot be before start date');
+                return;
+            }
+            // Same day: only compare times if both are set
+            if (formData.end_date === formData.start_date && formData.end_time && formData.start_time) {
+                if (formData.end_time <= formData.start_time) {
+                    toast.error('End time must be after start time');
+                    return;
+                }
+            }
+        }
 
         onSave({
             type: formData.type,

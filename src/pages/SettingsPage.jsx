@@ -9,6 +9,8 @@ import { Icons } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import api from '../api/axios';
+import { toast } from 'sonner';
 import { Palette } from 'lucide-react';
 
 // Import extracted sections
@@ -67,25 +69,72 @@ function SettingsPage() {
     }, [activeSection, isMobile, activeIndex]);
 
     // Simple danger zone component since it's small
-    const DangerZone = () => (
-        <div className="space-y-6">
-            <div>
-                <h2 className="text-2xl font-bold text-red-500">Danger Zone</h2>
-                <p className={`text-sm ${theme.text.secondary} mt-1`}>Irreversible actions for your agency</p>
-            </div>
-            <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className={`text-sm font-bold ${theme.text.primary}`}>Delete Agency</p>
-                        <p className={`text-xs ${theme.text.secondary} mt-1`}>Permanently delete your agency and all data</p>
+    const DangerZone = () => {
+        const [syncing, setSyncing] = useState(false);
+        const [syncResult, setSyncResult] = useState(null);
+
+        const handleBackfillPortalDeliverables = async () => {
+            setSyncing(true);
+            setSyncResult(null);
+            try {
+                const res = await api.post('/projects/admin/backfill-portal-deliverables');
+                setSyncResult(res.data);
+                toast.success(`Sync complete — ${res.data.total_created} portal deliverables created`);
+            } catch (err) {
+                console.error(err);
+                toast.error('Sync failed');
+            } finally {
+                setSyncing(false);
+            }
+        };
+
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-red-500">Danger Zone</h2>
+                    <p className={`text-sm ${theme.text.secondary} mt-1`}>Irreversible actions for your agency</p>
+                </div>
+
+                {/* Maintenance */}
+                <div className={`border ${theme.canvas.border} rounded-2xl p-6`}>
+                    <h3 className={`text-sm font-semibold ${theme.text.primary} mb-4`}>Maintenance</h3>
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <p className={`text-sm font-bold ${theme.text.primary}`}>Sync Portal Deliverables</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                                Backfills portal deliverables for any existing projects that are missing them. Safe to run multiple times.
+                            </p>
+                            {syncResult && (
+                                <p className="text-xs text-green-400 mt-2">
+                                    {syncResult.projects_scanned} projects scanned · {syncResult.total_created} created · {syncResult.total_removed} removed
+                                </p>
+                            )}
+                        </div>
+                        <button
+                            onClick={handleBackfillPortalDeliverables}
+                            disabled={syncing}
+                            className="shrink-0 px-4 py-2 bg-purple-500/10 text-purple-400 text-xs font-bold rounded-lg hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+                        >
+                            {syncing ? 'Syncing…' : 'Run Sync'}
+                        </button>
                     </div>
-                    <button className="px-4 py-2 bg-red-500/10 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white transition-colors">
-                        Delete
-                    </button>
+                </div>
+
+                {/* Danger */}
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className={`text-sm font-bold ${theme.text.primary}`}>Delete Agency</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-1`}>Permanently delete your agency and all data</p>
+                        </div>
+                        <button className="px-4 py-2 bg-red-500/10 text-red-500 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white transition-colors">
+                            Delete
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderSection = () => {
         switch (activeSection) {

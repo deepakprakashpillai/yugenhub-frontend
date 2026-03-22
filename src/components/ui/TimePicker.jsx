@@ -41,11 +41,13 @@ export default function TimePicker({
 
     const [{ h, m, ampm }, setTimeState] = useState(parseTime(value));
 
-    // Sync state when value changes externally
+    // Sync state when value changes externally (including clear)
     useEffect(() => {
         if (value) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setTimeState(parseTime(value));
+        } else {
+            setTimeState({ h: '', m: '00', ampm: 'AM' });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
@@ -59,7 +61,11 @@ export default function TimePicker({
         };
         if (open) {
             document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+                document.removeEventListener('touchstart', handleClickOutside);
+            };
         }
     }, [open]);
 

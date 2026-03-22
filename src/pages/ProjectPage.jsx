@@ -688,6 +688,7 @@ const EventSection = ({
 const ProjectPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const goBack = () => window.history.length > 1 ? navigate(-1) : navigate('/');
     const { config } = useAgencyConfig();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -759,9 +760,14 @@ const ProjectPage = () => {
             setProject(res.data);
             setTasks(tasksRes.data.data || []);
             setUsers(usersRes.data);
-            const expanded = {};
-            res.data.events?.forEach((_, i) => { expanded[i] = true; });
-            setExpandedEvents(expanded);
+            setExpandedEvents(prev => {
+                const updated = {};
+                res.data.events?.forEach((_, i) => {
+                    // Preserve user's expand/collapse preference; default new events to expanded
+                    updated[i] = prev[i] !== undefined ? prev[i] : true;
+                });
+                return updated;
+            });
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.detail || 'Failed to load project');
@@ -783,7 +789,7 @@ const ProjectPage = () => {
         setActionLoading(true);
         try {
             await api.delete(`/projects/${id}`);
-            navigate(-1);
+            goBack();
         } catch (err) {
             console.error(err);
             toast.error('Failed to delete project');
@@ -1045,7 +1051,7 @@ const ProjectPage = () => {
     if (error) {
         return (
             <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
-                <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} mb-8 transition-colors`}>
+                <button onClick={goBack} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} mb-8 transition-colors`}>
                     <Icons.ArrowLeft className="w-5 h-5" /> Back
                 </button>
                 <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
@@ -1071,7 +1077,7 @@ const ProjectPage = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
                 <div className="flex items-center justify-between w-full sm:w-auto">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => navigate(-1)} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
+                        <button onClick={goBack} className={`flex items-center gap-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}>
                             <Icons.ArrowLeft className="w-5 h-5" />
                             <span className="hidden sm:inline">Back</span>
                         </button>
@@ -1520,6 +1526,7 @@ const ProjectPage = () => {
                 task={taskModal.task}
                 projectId={id}
                 eventId={taskModal.eventId}
+                isDeliverable={taskModal.isDeliverable}
                 users={users}
                 loading={actionLoading}
             />
