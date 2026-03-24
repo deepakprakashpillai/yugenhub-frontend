@@ -73,16 +73,17 @@ function SettingsPage() {
         const [syncing, setSyncing] = useState(false);
         const [syncResult, setSyncResult] = useState(null);
 
-        const handleBackfillPortalDeliverables = async () => {
+        const handleRevalidateAll = async () => {
             setSyncing(true);
             setSyncResult(null);
             try {
-                const res = await api.post('/projects/admin/backfill-portal-deliverables');
+                const res = await api.post('/projects/admin/revalidate-all');
                 setSyncResult(res.data);
-                toast.success(`Sync complete — ${res.data.total_created} portal deliverables created`);
+                const fixed = res.data.event_dates_fixed + res.data.tasks_created + res.data.portal_deliverables_created + res.data.portal_deliverables_removed;
+                toast.success(fixed > 0 ? `Revalidation complete — ${fixed} issues fixed` : 'Revalidation complete — everything looks good');
             } catch (err) {
                 console.error(err);
-                toast.error('Sync failed');
+                toast.error('Revalidation failed');
             } finally {
                 setSyncing(false);
             }
@@ -99,23 +100,38 @@ function SettingsPage() {
                 <div className={`border ${theme.canvas.border} rounded-2xl p-6`}>
                     <h3 className={`text-sm font-semibold ${theme.text.primary} mb-4`}>Maintenance</h3>
                     <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <p className={`text-sm font-bold ${theme.text.primary}`}>Sync Portal Deliverables</p>
+                        <div className="flex-1">
+                            <p className={`text-sm font-bold ${theme.text.primary}`}>Revalidate All Projects</p>
                             <p className={`text-xs ${theme.text.secondary} mt-1`}>
-                                Backfills portal deliverables for any existing projects that are missing them. Safe to run multiple times.
+                                Scans every project and fixes common data issues: corrupted event dates, missing deliverable tasks, and out-of-sync portal deliverables. Safe to run multiple times.
                             </p>
                             {syncResult && (
-                                <p className="text-xs text-green-400 mt-2">
-                                    {syncResult.projects_scanned} projects scanned · {syncResult.total_created} created · {syncResult.total_removed} removed
-                                </p>
+                                <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1">
+                                    <p className="text-xs text-zinc-400">{syncResult.projects_scanned} projects scanned</p>
+                                    <p className={`text-xs ${syncResult.event_dates_fixed > 0 ? 'text-amber-400' : 'text-zinc-500'}`}>
+                                        {syncResult.event_dates_fixed} date fields fixed
+                                    </p>
+                                    <p className={`text-xs ${syncResult.tasks_created > 0 ? 'text-blue-400' : 'text-zinc-500'}`}>
+                                        {syncResult.tasks_created} missing tasks created
+                                    </p>
+                                    <p className={`text-xs ${syncResult.portal_deliverables_created > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
+                                        {syncResult.portal_deliverables_created} portal deliverables created
+                                    </p>
+                                    <p className={`text-xs ${syncResult.portal_deliverables_removed > 0 ? 'text-red-400' : 'text-zinc-500'}`}>
+                                        {syncResult.portal_deliverables_removed} excess portal deliverables removed
+                                    </p>
+                                    {syncResult.errors > 0 && (
+                                        <p className="text-xs text-red-400">{syncResult.errors} projects had errors</p>
+                                    )}
+                                </div>
                             )}
                         </div>
                         <button
-                            onClick={handleBackfillPortalDeliverables}
+                            onClick={handleRevalidateAll}
                             disabled={syncing}
                             className="shrink-0 px-4 py-2 bg-purple-500/10 text-purple-400 text-xs font-bold rounded-lg hover:bg-purple-500/20 transition-colors disabled:opacity-50"
                         >
-                            {syncing ? 'Syncing…' : 'Run Sync'}
+                            {syncing ? 'Running…' : 'Run Revalidation'}
                         </button>
                     </div>
                 </div>

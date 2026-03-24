@@ -1525,6 +1525,7 @@ const ProjectPage = () => {
                 onSave={handleSaveTask}
                 task={taskModal.task}
                 projectId={id}
+                projectVertical={project?.vertical}
                 eventId={taskModal.eventId}
                 isDeliverable={taskModal.isDeliverable}
                 users={users}

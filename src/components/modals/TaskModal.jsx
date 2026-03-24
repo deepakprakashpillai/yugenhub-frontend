@@ -15,7 +15,7 @@ import { toast } from 'sonner';
  * Simplified form without Quantity or Category toggles.
  * JIRA-style inline editing.
  */
-const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId = null, eventId = null, isDeliverable: isDeliverableProp = false, loading = false }) => {
+const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId = null, projectVertical = null, eventId = null, isDeliverable: isDeliverableProp = false, loading = false }) => {
     // Current User Context (for fallback assignee info)
     const { user: currentUser } = useAuth();
     const { config } = useAgencyConfig();
@@ -37,7 +37,7 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
     });
 
     // Project Selection State
-    const [selectedVertical, setSelectedVertical] = useState('general');
+    const [selectedVertical, setSelectedVertical] = useState(projectVertical || 'general');
     const [projects, setProjects] = useState([]);
     const [projectsLoading, setProjectsLoading] = useState(false);
     const [selectedProjectId, setSelectedProjectId] = useState(projectId || ''); // Prop or local state
@@ -81,15 +81,12 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 // If the task has a project_vertical (added by backend lookup or provided in task object)
                 if (task.project_vertical) {
                     setSelectedVertical(task.project_vertical);
-                } else if (task.category === 'deliverable') {
-                    // Safety: deliverables always have a project, but we might not have the vertical string yet
-                    // We'll let the user change it if needed, but we don't reset to 'general'
-                } else if (task.type === 'project') {
-                    // For project-linked general tasks, we should try to stay in that project context
+                } else if (projectVertical) {
+                    setSelectedVertical(projectVertical);
                 }
             } else {
                 setSelectedProjectId('');
-                setSelectedVertical('general');
+                setSelectedVertical(projectVertical || 'general');
             }
 
             fetchHistory();

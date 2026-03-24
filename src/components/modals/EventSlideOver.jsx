@@ -275,7 +275,7 @@ const EventSlideOver = ({
             start_date,
             end_date,
             notes: formData.notes,
-            deliverables,
+            deliverables: deliverables.map(d => ({ ...d, due_date: d.due_date || null })),
             assignments
         });
     };
