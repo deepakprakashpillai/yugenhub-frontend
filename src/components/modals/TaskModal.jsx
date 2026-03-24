@@ -292,41 +292,44 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                             className="w-full md:w-40"
                         />
 
-                        {/* Vertical Selection */}
-                        <Select
-                            value={selectedVertical}
-                            onChange={(val) => {
-                                setSelectedVertical(val);
-                                setSelectedProjectId(''); // Reset project on vertical change
-                            }}
-                            options={[
-                                { value: 'general', label: 'General Task', icon: Icons.Layers, color: theme.text.secondary },
-                                ...(config?.verticals?.map(v => ({
-                                    value: v.id,
-                                    label: v.label,
-                                    icon: Icons.Briefcase, // Or dynamic icon if available
-                                    color: v.color ? `text-[${v.color}]` : theme.text.secondary // Note: dynamic classes might need style prop or safelist
-                                })) || [])
-                            ]}
-                            placeholder="Type"
-                            className="w-full md:w-40"
-                        />
+                        {/* Vertical & Project Selection (only for non-deliverable tasks) */}
+                        {!isDeliverable && (
+                            <>
+                                <Select
+                                    value={selectedVertical}
+                                    onChange={(val) => {
+                                        setSelectedVertical(val);
+                                        setSelectedProjectId(''); // Reset project on vertical change
+                                    }}
+                                    options={[
+                                        { value: 'general', label: 'General Task', icon: Icons.Layers, color: theme.text.secondary },
+                                        ...(config?.verticals?.map(v => ({
+                                            value: v.id,
+                                            label: v.label,
+                                            icon: Icons.Briefcase,
+                                            color: v.color ? `text-[${v.color}]` : theme.text.secondary
+                                        })) || [])
+                                    ]}
+                                    placeholder="Type"
+                                    className="w-full md:w-40"
+                                />
 
-                        {/* Project Selection (Conditional) */}
-                        {selectedVertical !== 'general' && (
-                            <Select
-                                value={selectedProjectId}
-                                onChange={setSelectedProjectId}
-                                options={projects.map(p => ({
-                                    value: p._id,
-                                    label: p.title || p.code,
-                                    icon: Icons.Briefcase,
-                                    color: theme.text.primary
-                                }))}
-                                placeholder={projectsLoading ? "Loading..." : "Select Project"}
-                                className="w-full md:w-48"
-                                disabled={projectsLoading}
-                            />
+                                {selectedVertical !== 'general' && (
+                                    <Select
+                                        value={selectedProjectId}
+                                        onChange={setSelectedProjectId}
+                                        options={projects.map(p => ({
+                                            value: p._id,
+                                            label: p.title || p.code,
+                                            icon: Icons.Briefcase,
+                                            color: theme.text.primary
+                                        }))}
+                                        placeholder={projectsLoading ? "Loading..." : "Select Project"}
+                                        className="w-full md:w-48"
+                                        disabled={projectsLoading}
+                                    />
+                                )}
+                            </>
                         )}
 
                         {/* Due Date (Calendar Picker) */}
@@ -414,13 +417,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                     </div>
                 )}
 
-                {/* Actions (Sticky Footer? Or just bottom) */}
-                <div
-                    className={`flex justify-end gap-3 pt-4 border-t ${theme.canvas.border}`}
-                    style={{
-                        paddingBottom: 'calc(env(safe-area-inset-bottom) + 5rem)'
-                    }}
-                >
+                {/* Actions */}
+                <div className={`sticky bottom-0 flex justify-end gap-3 pt-4 pb-2 border-t ${theme.canvas.border} ${theme.canvas.card}`}>
                     <button
                         type="button"
                         onClick={onClose}

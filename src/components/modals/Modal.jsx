@@ -34,7 +34,10 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className={`fixed inset-0 z-50 flex ${isMobile ? 'items-end' : 'items-center justify-center p-4'}`}>
+                <div
+                    className={`fixed inset-0 z-50 flex ${isMobile ? 'items-end' : 'items-center justify-center p-4'}`}
+                    style={isMobile ? { paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' } : undefined}
+                >
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}

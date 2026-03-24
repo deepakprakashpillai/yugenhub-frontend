@@ -207,6 +207,7 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                                 <span className="capitalize">{task.priority}</span>
                             </button>
 
+
                             <AnimatePresence>
                                 {showPriorityMenu && (
                                     <motion.div
@@ -338,47 +339,47 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                             </AnimatePresence>
                         </div>
 
+                    </div>
+                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5`}>
                         {task.quantity && (
                             <span className={`px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary}`}>
                                 Qty: {task.quantity}
                             </span>
                         )}
-                    </div>
-                </div>
-            </div>
-            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-                <StatusBadge status={task.status} />
-                <div className="relative" ref={actionRef}>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setShowActionMenu(!showActionMenu); }}
-                        className={`p-1.5 rounded-lg sm:hover:${theme.canvas.card} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${showActionMenu ? 'opacity-100' : ''}`}
-                    >
-                        <Icons.More className="w-4 h-4" />
-                    </button>
-
-                    <AnimatePresence>
-                        {showActionMenu && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                        <StatusBadge status={task.status} />
+                        <div className="relative" ref={actionRef}>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setShowActionMenu(!showActionMenu); }}
+                                className={`p-1.5 rounded-lg sm:hover:${theme.canvas.card} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${showActionMenu ? 'opacity-100' : ''}`}
                             >
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onEdit(); }}
-                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
-                                >
-                                    <Icons.Edit className="w-4 h-4" /> Edit Task
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onDelete(); }}
-                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
-                                >
-                                    <Icons.Trash className="w-4 h-4" /> Delete Task
-                                </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                <Icons.More className="w-4 h-4" />
+                            </button>
+
+                            <AnimatePresence>
+                                {showActionMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                                    >
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onEdit(); }}
+                                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                        >
+                                            <Icons.Edit className="w-4 h-4" /> Edit Task
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onDelete(); }}
+                                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                        >
+                                            <Icons.Trash className="w-4 h-4" /> Delete Task
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
