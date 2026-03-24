@@ -11,6 +11,7 @@ import FloatingActionButton from '../components/FloatingActionButton';
 import { ClientModal } from '../components/modals';
 import { v4 as uuidv4 } from 'uuid';
 import { useTheme } from '../context/ThemeContext';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { toast } from 'sonner';
 
 const ClientCard = ({ client, theme, onEdit, onDelete }) => (
@@ -141,6 +142,7 @@ const ClientTable = ({ clients, theme, onEdit, onDelete }) => (
 
 const ClientsPage = () => {
     const { theme } = useTheme();
+    const isMobile = useIsMobile();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -261,8 +263,10 @@ const ClientsPage = () => {
                 <div className="relative w-full md:w-1/3">
                     <Icons.Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${theme.text.secondary}`} />
                     <input
-                        type="text"
-                        placeholder="Search clients clients by name, phone or location..."
+                        type="search"
+                        inputMode="search"
+                        enterKeyHint="search"
+                        placeholder="Search by name, phone or location..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className={`w-full ${theme.canvas.bg} ${theme.text.primary} pl-12 pr-4 py-2 md:py-3 rounded-xl border ${theme.canvas.border} focus:border-white/20 focus:outline-none placeholder:${theme.text.secondary} text-sm md:text-base`}
@@ -274,10 +278,10 @@ const ClientsPage = () => {
                     />
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
+                <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto md:flex-wrap md:gap-3 pb-0.5 md:pb-0 scrollbar-none">
 
                     {/* Sort Dropdown */}
-                    <div className="relative filter-dropdown">
+                    <div className="relative filter-dropdown shrink-0">
                         <button
                             onClick={() => toggleDropdown('sort')}
                             className={clsx(
@@ -294,16 +298,16 @@ const ClientsPage = () => {
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'sort' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'sort' && (
-                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setSort('newest'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Newest First</button>
-                                <button onClick={() => { setSort('projects_desc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Most Projects</button>
-                                <button onClick={() => { setSort('projects_asc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Least Projects</button>
+                            <div className={`absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setSort('newest'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Newest First</button>
+                                <button onClick={() => { setSort('projects_desc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Most Projects</button>
+                                <button onClick={() => { setSort('projects_asc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Least Projects</button>
                             </div>
                         )}
                     </div>
 
                     {/* Type Filter */}
-                    <div className="relative filter-dropdown">
+                    <div className="relative filter-dropdown shrink-0">
                         <button
                             onClick={() => toggleDropdown('type')}
                             className={clsx(
@@ -321,10 +325,10 @@ const ClientsPage = () => {
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'type' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'type' && (
-                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Clients</button>
+                            <div className={`absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Clients</button>
                                 {['Active Client', 'Lead', 'Legacy'].map(type => (
-                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
+                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
                                 ))}
                             </div>
                         )}
@@ -363,7 +367,7 @@ const ClientsPage = () => {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
             ) : clients.length === 0 ? (
@@ -378,11 +382,11 @@ const ClientsPage = () => {
                 />
             ) : (
                 <AnimatePresence mode='wait'>
-                    {viewMode === 'grid' ? (
+                    {(isMobile || viewMode === 'grid') ? (
                         <motion.div
                             key="grid"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6"
                         >
                             {clients.map(client => (
                                 <ClientCard key={client._id} client={client} theme={theme} onEdit={(c) => setClientModal({ open: true, client: c })} onDelete={handleDeleteClient} />

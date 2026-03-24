@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import api from '../api/axios';
 import StatsHeader from '../components/StatsHeader';
@@ -147,6 +148,7 @@ const AssociateTable = ({ associates, theme, onEdit, onDelete }) => (
 
 const AssociatesPage = () => {
     const { theme } = useTheme();
+    const isMobile = useIsMobile();
     const { config } = useAgencyConfig();
     const [associates, setAssociates] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -275,8 +277,10 @@ const AssociatesPage = () => {
                 <div className="relative w-full xl:w-1/3">
                     <Icons.Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${theme.text.secondary}`} />
                     <input
-                        type="text"
-                        placeholder="Search team by name, city or phone..."
+                        type="search"
+                        inputMode="search"
+                        enterKeyHint="search"
+                        placeholder="Search by name, city or phone..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className={`w-full ${theme.canvas.input || theme.canvas.card} ${theme.text.primary} pl-12 pr-4 py-2 md:py-3 rounded-xl border ${theme.canvas.border} focus:border-white/20 focus:outline-none placeholder:${theme.text.secondary} text-sm md:text-base`}
@@ -288,9 +292,9 @@ const AssociatesPage = () => {
                     />
                 </div>
 
-                <div className="flex items-center gap-3 w-full xl:w-auto flex-wrap">
+                <div className="flex items-center gap-2 w-full xl:w-auto overflow-x-auto xl:flex-wrap xl:gap-3 pb-0.5 xl:pb-0 scrollbar-none">
                     {/* Role Filter */}
-                    <div className="relative">
+                    <div className="relative shrink-0">
                         <button
                             onClick={() => toggleDropdown('role')}
                             className={clsx(
@@ -308,17 +312,17 @@ const AssociatesPage = () => {
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'role' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'role' && (
-                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setRoleFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Roles</button>
+                            <div className={`absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setRoleFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Roles</button>
                                 {(config?.associateRoles || []).map(role => (
-                                    <button key={role} onClick={() => { setRoleFilter(role); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{role}</button>
+                                    <button key={role} onClick={() => { setRoleFilter(role); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{role}</button>
                                 ))}
                             </div>
                         )}
                     </div>
 
                     {/* Type Filter */}
-                    <div className="relative">
+                    <div className="relative shrink-0">
                         <button
                             onClick={() => toggleDropdown('type')}
                             className={clsx(
@@ -336,17 +340,17 @@ const AssociatesPage = () => {
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'type' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'type' && (
-                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Types</button>
+                            <div className={`absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Types</button>
                                 {['Freelance', 'In-house'].map(type => (
-                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
+                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
                                 ))}
                             </div>
                         )}
                     </div>
 
                     {/* Status Filter */}
-                    <div className="relative">
+                    <div className="relative shrink-0">
                         <button
                             onClick={() => toggleDropdown('status')}
                             className={clsx(
@@ -364,10 +368,10 @@ const AssociatesPage = () => {
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'status' && "-rotate-90")} />
                         </button>
                         {activeDropdown === 'status' && (
-                            <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setStatusFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Status</button>
-                                <button onClick={() => { setStatusFilter('active'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Active</button>
-                                <button onClick={() => { setStatusFilter('inactive'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Inactive</button>
+                            <div className={`absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
+                                <button onClick={() => { setStatusFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Status</button>
+                                <button onClick={() => { setStatusFilter('active'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Active</button>
+                                <button onClick={() => { setStatusFilter('inactive'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Inactive</button>
                             </div>
                         )}
                     </div>
@@ -405,18 +409,18 @@ const AssociatesPage = () => {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
             ) : associates.length === 0 ? (
                 <EmptyState onClear={() => { setSearch(''); setRoleFilter(''); setTypeFilter(''); setStatusFilter(''); }} title="No team members found" message="Try adjusted your search or filters to find the associate you're looking for." />
             ) : (
                 <AnimatePresence mode='wait'>
-                    {viewMode === 'grid' ? (
+                    {(isMobile || viewMode === 'grid') ? (
                         <motion.div
                             key="grid"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6"
                         >
                             {associates.map(assoc => (
                                 <AssociateCard key={assoc._id} associate={assoc} theme={theme} onEdit={(a) => setAssociateModal({ open: true, associate: a })} onDelete={handleDeleteAssociate} />

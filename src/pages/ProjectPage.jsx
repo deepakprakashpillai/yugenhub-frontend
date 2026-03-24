@@ -187,7 +187,7 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
     };
 
     return (
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group relative`}>
+        <div className={`flex items-start justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group relative`}>
             <div className="flex items-start gap-4 flex-1 min-w-0">
                 <div className={`w-8 h-8 rounded-lg ${theme.canvas.card} flex items-center justify-center flex-shrink-0`}>
                     <Icons.Package className={`w-4 h-4 ${theme.text.secondary}`} />
@@ -340,46 +340,48 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                         </div>
 
                     </div>
-                    <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5`}>
-                        {task.quantity && (
+                    {task.quantity && (
+                        <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5`}>
                             <span className={`px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary}`}>
                                 Qty: {task.quantity}
                             </span>
-                        )}
-                        <StatusBadge status={task.status} />
-                        <div className="relative" ref={actionRef}>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setShowActionMenu(!showActionMenu); }}
-                                className={`p-1.5 rounded-lg sm:hover:${theme.canvas.card} ${theme.text.secondary} sm:hover:${theme.text.primary} transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 ${showActionMenu ? 'opacity-100' : ''}`}
-                            >
-                                <Icons.More className="w-4 h-4" />
-                            </button>
-
-                            <AnimatePresence>
-                                {showActionMenu && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
-                                    >
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onEdit(); }}
-                                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
-                                        >
-                                            <Icons.Edit className="w-4 h-4" /> Edit Task
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onDelete(); }}
-                                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
-                                        >
-                                            <Icons.Trash className="w-4 h-4" /> Delete Task
-                                        </button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
                         </div>
-                    </div>
+                    )}
+                </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+                <StatusBadge status={task.status} />
+                <div className="relative" ref={actionRef}>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowActionMenu(!showActionMenu); }}
+                        className={`p-1.5 rounded-lg hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
+                    >
+                        <Icons.More className="w-4 h-4" />
+                    </button>
+
+                    <AnimatePresence>
+                        {showActionMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className={`absolute right-0 top-full mt-2 w-36 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                            >
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onEdit(); }}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
+                                >
+                                    <Icons.Edit className="w-4 h-4" /> Edit Task
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowActionMenu(false); onDelete(); }}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 transition-colors border-t ${theme.canvas.border}`}
+                                >
+                                    <Icons.Trash className="w-4 h-4" /> Delete Task
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>
