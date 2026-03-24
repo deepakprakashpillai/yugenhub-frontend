@@ -32,7 +32,7 @@ const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
                 "border border-white/10 dark:border-white/5",
                 "shadow-[10px_10px_0px_0px_rgba(0,0,0,0.2)] dark:shadow-[10px_10px_0px_0px_rgba(255,255,255,0.07)]",
                 "hover:shadow-[14px_14px_0px_0px_rgba(0,0,0,0.2)] dark:hover:shadow-[14px_14px_0px_0px_rgba(255,255,255,0.07)]",
-                isHovered ? "w-auto md:px-6" : "w-14",
+                "w-auto px-5 md:px-6",
                 className
             )}
             style={{
@@ -42,22 +42,9 @@ const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
             }}
             title={label}
         >
-            <motion.div layout className="flex items-center justify-center gap-2 px-4 md:px-0 h-full">
+            <motion.div layout className="flex items-center justify-center gap-2 h-full">
                 <Icons.Plus className="w-5 h-5 shrink-0" />
-                <AnimatePresence mode="wait">
-                    {isHovered && (
-                        <motion.span
-                            layout
-                            initial={{ width: 0, opacity: 0, x: -10 }}
-                            animate={{ width: 'auto', opacity: 1, x: 0 }}
-                            exit={{ width: 0, opacity: 0, x: -10 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="overflow-hidden whitespace-nowrap hidden md:inline-block text-xs"
-                        >
-                            {label}
-                        </motion.span>
-                    )}
-                </AnimatePresence>
+                <span className="text-xs whitespace-nowrap">{label}</span>
             </motion.div>
         </motion.button>
     );
