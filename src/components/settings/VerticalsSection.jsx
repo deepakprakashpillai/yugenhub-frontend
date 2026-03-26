@@ -3,7 +3,8 @@ import {
     Plus, Edit3, Trash2, X,
     LayoutGrid, List, Settings, ChevronRight,
     Save, IndianRupee, Calendar, Camera,
-    Eye, Table2, Type, CornerDownRight, Check
+    Eye, Table2, Type, CornerDownRight, Check,
+    Tag, Users
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +12,7 @@ import { toast } from 'sonner';
 import api from '../../api/axios';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
+import EditableTagList from '../ui/EditableTagList';
 
 
 // ─── FIELD EDITOR COMPONENT ────────────────────────────────────────────────
@@ -196,7 +198,7 @@ const FieldPicker = ({ allFields, selectedFields, onChange, label, icon: Icon, t
 
 
 // ─── VERTICAL EDITOR PANEL ──────────────────────────────────────────────────
-const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, theme }) => {
+const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, theme, associateRoles }) => {
     const [draft, setDraft] = useState(vertical);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('identity');
@@ -233,7 +235,26 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
         { id: 'display', label: 'Display', icon: Eye },
         { id: 'fields', label: 'Project Fields', icon: List },
         ...(draft.has_events !== false ? [{ id: 'events', label: 'Event Fields', icon: Calendar }] : []),
+        ...(draft.has_events !== false ? [{ id: 'team_config', label: 'Team Config', icon: Users }] : []),
     ];
+
+    const addTeamRequirement = () => {
+        const existing = draft.team_requirements || [];
+        const firstUnused = (associateRoles || []).find(r => !existing.some(e => e.role === r));
+        if (!firstUnused) return;
+        setDraft({ ...draft, team_requirements: [...existing, { role: firstUnused, count: 1 }] });
+    };
+
+    const updateTeamRequirement = (index, field, value) => {
+        const updated = (draft.team_requirements || []).map((req, i) =>
+            i === index ? { ...req, [field]: value } : req
+        );
+        setDraft({ ...draft, team_requirements: updated });
+    };
+
+    const removeTeamRequirement = (index) => {
+        setDraft({ ...draft, team_requirements: (draft.team_requirements || []).filter((_, i) => i !== index) });
+    };
 
     return (
         <motion.div
@@ -473,6 +494,92 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
                             />
                         </motion.div>
                     )}
+
+                    {/* ─── TEAM CONFIG TAB ─── */}
+                    {activeTab === 'team_config' && draft.has_events !== false && (
+                        <motion.div key="team_config" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
+                            {/* Assignment Tags */}
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Tag size={14} className="text-indigo-400" />
+                                    <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest`}>Assignment Tags</h4>
+                                </div>
+                                <p className={`text-[11px] ${theme.text.secondary}`}>
+                                    Vertical-specific tags to label what an associate will focus on during an event (e.g., "Candid", "Bride Side", "Stage").
+                                </p>
+                                <EditableTagList
+                                    title=""
+                                    items={draft.assignment_tags || []}
+                                    editing={true}
+                                    onUpdate={assignment_tags => setDraft({ ...draft, assignment_tags })}
+                                />
+                                {(draft.assignment_tags || []).length === 0 && (
+                                    <p className={`text-[10px] ${theme.text.secondary} italic`}>No tags yet — add some above.</p>
+                                )}
+                            </div>
+
+                            {/* Team Requirements */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Users size={14} className="text-emerald-400" />
+                                        <h4 className={`text-xs font-bold ${theme.text.secondary} uppercase tracking-widest`}>Default Team Requirements</h4>
+                                    </div>
+                                </div>
+                                <p className={`text-[11px] ${theme.text.secondary}`}>
+                                    Define default crew size per role for events in this vertical. Shown as a reference when building an event team.
+                                </p>
+
+                                {(draft.team_requirements || []).length === 0 ? (
+                                    <div className={`text-center py-6 border border-dashed ${theme.canvas.border} rounded-xl`}>
+                                        <Users size={20} className={`mx-auto mb-2 ${theme.text.secondary}`} />
+                                        <p className={`text-xs ${theme.text.secondary}`}>No requirements set</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {(draft.team_requirements || []).map((req, i) => (
+                                            <div key={i} className={`flex items-center gap-3 p-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg`}>
+                                                <select
+                                                    value={req.role}
+                                                    onChange={e => updateTeamRequirement(i, 'role', e.target.value)}
+                                                    className={`flex-1 bg-transparent border-none text-sm ${theme.text.primary} focus:outline-none cursor-pointer`}
+                                                >
+                                                    {(associateRoles || []).map(r => (
+                                                        <option key={r} value={r}>{r}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`text-[10px] ${theme.text.secondary}`}>Count</span>
+                                                    <input
+                                                        type="number"
+                                                        min={1}
+                                                        max={20}
+                                                        value={req.count}
+                                                        onChange={e => updateTeamRequirement(i, 'count', Math.max(1, parseInt(e.target.value) || 1))}
+                                                        className={`w-14 text-center ${theme.canvas.hover} border ${theme.canvas.border} rounded-lg px-2 py-1 text-sm ${theme.text.primary} focus:outline-none`}
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => removeTeamRequirement(i)}
+                                                    className={`w-7 h-7 flex items-center justify-center ${theme.text.secondary} hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all`}
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={addTeamRequirement}
+                                    disabled={(draft.team_requirements || []).length >= (associateRoles || []).length}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-dashed ${theme.canvas.border} rounded-lg ${theme.text.secondary} hover:${theme.text.primary} hover:border-zinc-500 transition-colors disabled:opacity-30`}
+                                >
+                                    <Plus size={12} /> Add Role
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
                 </AnimatePresence>
             </div>
 
@@ -604,7 +711,7 @@ const VerticalViewCard = ({ vertical, onEdit, canEdit, theme }) => {
 // ─── MAIN SECTION ───────────────────────────────────────────────────────────
 function VerticalsSection({ role }) {
     const { theme } = useTheme();
-    const { refreshConfig } = useAgencyConfig();
+    const { config, refreshConfig } = useAgencyConfig();
     const [verticals, setVerticals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState(null);
@@ -700,7 +807,7 @@ function VerticalsSection({ role }) {
                             <VerticalEditor
                                 vertical={
                                     isCreating
-                                        ? { label: '', description: '', has_events: true, include_in_finance_summary: true, fields: [], event_fields: [], title_template: '', card_fields: [], table_fields: [] }
+                                        ? { label: '', description: '', has_events: true, include_in_finance_summary: true, fields: [], event_fields: [], title_template: '', card_fields: [], table_fields: [], assignment_tags: [], team_requirements: [] }
                                         : verticals.find(v => v.id === editingId) || {}
                                 }
                                 isCreating={isCreating}
@@ -708,6 +815,7 @@ function VerticalsSection({ role }) {
                                 onCancel={() => setEditingId(null)}
                                 onDelete={() => handleDeleteVertical(editingId)}
                                 theme={theme}
+                                associateRoles={config?.associateRoles || []}
                             />
                         </motion.div>
                     )}
