@@ -41,7 +41,7 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
         if (isOpen && associate) {
             setTimeout(() => setFormData({
                 name: associate.name || '',
-                role: associate.role || '',
+                role: associate.primary_role || associate.role || '',
                 email: associate.email_id || associate.email || '',
                 phone: associate.phone_number || associate.phone || '',
                 location: associate.base_city || associate.location || '',
