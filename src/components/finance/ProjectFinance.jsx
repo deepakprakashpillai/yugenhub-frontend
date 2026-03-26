@@ -20,7 +20,7 @@ const FinanceStatCard = ({ title, value, subtitle, icon: Icon, type, theme, onEd
                 </h3>
                 {subtitle && <p className={`text-[10px] sm:text-xs mt-0.5 sm:mt-1 ${theme.text.secondary}`}>{subtitle}</p>}
             </div>
-            <div className={`p-1.5 sm:p-2 rounded-lg ${type === 'positive' ? 'bg-green-50 text-green-600' : type === 'negative' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+            <div className={`p-1.5 sm:p-2 rounded-lg ${type === 'positive' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : type === 'negative' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}`}>
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
         </div>
@@ -240,7 +240,7 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                             }}
                             className={`p-3 sm:p-4 rounded-xl border-2 border-dashed ${theme.canvas.border} hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all flex flex-col items-center justify-center text-center group`}
                         >
-                            <div className="p-1.5 sm:p-2 rounded-full bg-indigo-100 text-indigo-600 mb-1 sm:mb-2 group-hover:scale-110 transition-transform">
+                            <div className="p-1.5 sm:p-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-1 sm:mb-2 group-hover:scale-110 transition-transform">
                                 <Wallet className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
                             <span className={`text-sm font-bold ${theme.text.primary}`}>Set Project Quote</span>
@@ -326,6 +326,7 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                 <div className="space-y-3">
                     {transactions.map(tx => {
                         const isIncome = tx.type === TRANSACTION_TYPES.INCOME;
+                        const isTransfer = tx.type === TRANSACTION_TYPES.TRANSFER;
                         const isPayout = tx.category === FINANCE_CATEGORIES.ASSOCIATE_PAYOUT;
                         const displayTitle = isPayout
                             ? (tx.associate_id ? getAssociateName(tx.associate_id) : tx.category)
@@ -337,7 +338,7 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                         return (
                             <div key={tx.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 p-3 sm:p-4 rounded-xl border ${theme.canvas.border} ${theme.canvas.hover || "bg-zinc-800/50"}`}>
                                 <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0">
-                                    <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${isIncome ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                    <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${isIncome ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : isTransfer ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'}`}>
                                         {isIncome ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                                     </div>
                                     <div className="min-w-0 flex-1">
@@ -350,8 +351,8 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                                     </div>
                                 </div>
                                 <div className="text-left sm:text-right pl-9 sm:pl-0 shrink-0 mt-[-2px] sm:mt-0">
-                                    <p className={`font-bold text-sm sm:text-base ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
-                                        {isIncome ? '+' : '-'} ₹ {tx.amount.toLocaleString('en-IN')}
+                                    <p className={`font-bold text-sm sm:text-base ${isIncome ? 'text-green-600' : isTransfer ? 'text-blue-600' : 'text-red-600'}`}>
+                                        {isIncome ? '+' : isTransfer ? '↔' : '-'} ₹ {tx.amount.toLocaleString('en-IN')}
                                     </p>
                                 </div>
                             </div>

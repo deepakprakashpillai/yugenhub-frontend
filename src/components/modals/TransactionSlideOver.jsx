@@ -27,6 +27,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         amount: '',
         date: new Date().toISOString().split('T')[0],
         account_id: '',
+        destination_account_id: '',
         category: '',
         subcategory: '',
         client_id: '',
@@ -34,6 +35,8 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         associate_id: '',
         notes: ''
     });
+
+    const isTransfer = formData.type === TRANSACTION_TYPES.TRANSFER;
 
     const [filteredCategories, setFilteredCategories] = useState([]);
     const [availableSubcategories, setAvailableSubcategories] = useState([]);
@@ -76,6 +79,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 amount: initialData?.amount || '',
                 date: initialData?.date || new Date().toISOString().split('T')[0],
                 account_id: initialData?.account_id || '',
+                destination_account_id: initialData?.destination_account_id || '',
                 category: initialData?.category || '',
                 subcategory: initialData?.subcategory || '',
                 client_id: initialData?.client_id || '',
@@ -89,6 +93,12 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
     // Update available categories when type changes
     useEffect(() => {
+        // Transfers don't need categories
+        if (formData.type === TRANSACTION_TYPES.TRANSFER) {
+            setFilteredCategories([]);
+            return;
+        }
+
         let relevantCats = [];
 
         if (config?.finance_categories) {
@@ -106,8 +116,8 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         setFilteredCategories(relevantCats);
 
         // Clear selections if type changes (and current cat is invalid)
-        // Only clear if we actually have categories to check against, otherwise we might clear prematurely
-        if (relevantCats.length > 0 && formData.category && !relevantCats.find(c => c.name === formData.category)) {
+        // Guard: only clear if config has actually loaded, to avoid wiping pre-filled values
+        if (config?.finance_categories && relevantCats.length > 0 && formData.category && !relevantCats.find(c => c.name === formData.category)) {
             setFormData(prev => ({ ...prev, category: '', subcategory: '', associate_id: '' }));
         }
     }, [formData.type, config, formData.category]);
@@ -158,10 +168,23 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         }
 
         try {
-            await createTransaction({
-                ...formData,
-                amount: parseFloat(formData.amount)
+            // Build clean payload — strip empty string values to avoid polluting DB
+            const payload = { amount: parseFloat(formData.amount) };
+            Object.entries(formData).forEach(([key, val]) => {
+                if (key === 'amount') return; // already handled
+                if (val !== '' && val !== null && val !== undefined) {
+                    payload[key] = val;
+                }
             });
+
+            // Transfers: auto-set category, remove irrelevant fields
+            if (isTransfer) {
+                payload.category = 'Transfer';
+                delete payload.subcategory;
+                delete payload.associate_id;
+            }
+
+            await createTransaction(payload);
             toast.success("Transaction recorded successfully");
             onSuccess && onSuccess();
             onClose();
@@ -264,15 +287,15 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         >
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 {/* 1. Type Selection (Top) */}
-                <div className="flex p-1 bg-gray-100 rounded-lg">
+                <div className="flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-lg">
                     {[TRANSACTION_TYPES.INCOME, TRANSACTION_TYPES.EXPENSE, TRANSACTION_TYPES.TRANSFER].map(type => (
                         <button
                             key={type}
                             type="button"
                             onClick={() => setFormData({ ...formData, type })}
                             className={`flex-1 py-2 text-sm font-medium rounded-md capitalize transition-all ${formData.type === type
-                                ? 'bg-white text-indigo-600 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                                 }`}
                         >
                             {type}
@@ -338,7 +361,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 </div>
 
                 <div>
-                    <label className="block text-xs font-medium mb-1 text-gray-500">Account</label>
+                    <label className="block text-xs font-medium mb-1 text-gray-500">{isTransfer ? 'From Account' : 'Account'}</label>
                     <select
                         required
                         value={formData.account_id}
@@ -352,49 +375,70 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                     </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-medium mb-1 text-gray-500">Category</label>
+                {/* Destination Account (Transfer only) */}
+                {isTransfer && (
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                        <label className="block text-xs font-medium mb-1 text-gray-500">To Account</label>
                         <select
-                            value={formData.category}
-                            onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '', associate_id: '' })}
+                            required
+                            value={formData.destination_account_id}
+                            onChange={(e) => setFormData({ ...formData, destination_account_id: e.target.value })}
                             className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
                         >
-                            <option value="">Select...</option>
-                            {filteredCategories.map(c => (
-                                <option key={c.id || c.name} value={c.name}>{c.name}</option>
+                            <option value="" disabled>Select Destination</option>
+                            {accounts.filter(acc => acc.id !== formData.account_id).map(acc => (
+                                <option key={acc.id} value={acc.id}>{acc.name} (₹{acc.current_balance})</option>
                             ))}
                         </select>
                     </div>
+                )}
 
-                    {/* Subcategory OR Associate Payout */}
-                    {formData.category === FINANCE_CATEGORIES.ASSOCIATE_PAYOUT ? (
+                {/* Category / Subcategory (hidden for transfers) */}
+                {!isTransfer && (
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-medium mb-1 text-gray-500">Pay To</label>
-                            <SearchableSelect
-                                options={associateOptions}
-                                value={formData.associate_id}
-                                onChange={(val) => setFormData({ ...formData, associate_id: val })}
-                                placeholder="Select Associate..."
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            <label className="block text-xs font-medium mb-1 text-gray-500">Subcategory</label>
+                            <label className="block text-xs font-medium mb-1 text-gray-500">Category</label>
                             <select
-                                value={formData.subcategory}
-                                onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+                                value={formData.category}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '', associate_id: '' })}
                                 className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
-                                disabled={availableSubcategories.length === 0}
                             >
-                                <option value="">{availableSubcategories.length > 0 ? 'Select...' : 'None'}</option>
-                                {availableSubcategories.map(s => (
-                                    <option key={s.id || s.name} value={s.name}>{s.name}</option>
+                                <option value="">Select...</option>
+                                {filteredCategories.map(c => (
+                                    <option key={c.id || c.name} value={c.name}>{c.name}</option>
                                 ))}
                             </select>
                         </div>
-                    )}
-                </div>
+
+                        {/* Subcategory OR Associate Payout */}
+                        {formData.category === FINANCE_CATEGORIES.ASSOCIATE_PAYOUT ? (
+                            <div>
+                                <label className="block text-xs font-medium mb-1 text-gray-500">Pay To</label>
+                                <SearchableSelect
+                                    options={associateOptions}
+                                    value={formData.associate_id}
+                                    onChange={(val) => setFormData({ ...formData, associate_id: val })}
+                                    placeholder="Select Associate..."
+                                />
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-xs font-medium mb-1 text-gray-500">Subcategory</label>
+                                <select
+                                    value={formData.subcategory}
+                                    onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+                                    className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
+                                    disabled={availableSubcategories.length === 0}
+                                >
+                                    <option value="">{availableSubcategories.length > 0 ? 'Select...' : 'None'}</option>
+                                    {availableSubcategories.map(s => (
+                                        <option key={s.id || s.name} value={s.name}>{s.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Client Dropdown Removed users request */}
 

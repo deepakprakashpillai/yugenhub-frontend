@@ -18,7 +18,7 @@ const StatCard = ({ title, value, icon: Icon, trend, type, theme }) => (
                     {value?.toLocaleString('en-IN') || '0'}
                 </h3>
             </div>
-            <div className={`p-1.5 sm:p-2 rounded-lg ${type === 'positive' ? 'bg-green-100 text-green-600' : type === 'negative' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+            <div className={`p-1.5 sm:p-2 rounded-lg ${type === 'positive' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : type === 'negative' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}`}>
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
         </div>
@@ -42,7 +42,7 @@ const FinanceOverview = ({ refreshTrigger }) => {
                     getFinanceOverview(),
                     getTransactions({ limit: 5 }),
                     getAssociates(),
-                    getProjects()
+                    getProjects({}, true)
                 ]);
                 setData(overviewRes);
                 setRecentTransactions(recentRes);
@@ -51,8 +51,8 @@ const FinanceOverview = ({ refreshTrigger }) => {
                 if (ascRes.data) setAssociates(ascRes.data);
                 else if (Array.isArray(ascRes)) setAssociates(ascRes);
 
-                if (projRes.data) setProjects(projRes.data);
-                else if (Array.isArray(projRes)) setProjects(projRes);
+                const projData = projRes.data || projRes;
+                setProjects(Array.isArray(projData) ? projData : []);
 
             } catch (error) {
                 console.error("Failed to load finance overview", error);
@@ -72,28 +72,34 @@ const FinanceOverview = ({ refreshTrigger }) => {
         </div>;
     }
 
+    // Guard against null data values
+    const income = data?.income || 0;
+    const expenses = data?.expenses || 0;
+    const netProfit = data?.net_profit ?? (income - expenses);
+    const expenseRatio = income > 0 ? Math.round((expenses / income) * 100) : 0;
+
     return (
         <div className="space-y-4 sm:space-y-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 <StatCard
                     title="Total Income"
-                    value={data?.income}
+                    value={income}
                     icon={ArrowUpRight}
                     type="positive"
                     theme={theme}
                 />
                 <StatCard
                     title="Total Expenses"
-                    value={data?.expenses}
+                    value={expenses}
                     icon={ArrowDownRight}
                     type="negative"
                     theme={theme}
                 />
                 <StatCard
                     title="Net Profit"
-                    value={data?.net_profit}
+                    value={netProfit}
                     icon={Wallet}
-                    type={data?.net_profit >= 0 ? "positive" : "negative"}
+                    type={netProfit >= 0 ? "positive" : "negative"}
                     theme={theme}
                 />
                 <StatCard
@@ -133,17 +139,17 @@ const FinanceOverview = ({ refreshTrigger }) => {
                     </div>
                     <h4 className={`font-medium text-sm sm:text-base ${theme.text.primary}`}>Financial Health</h4>
                     <p className={`text-[11px] sm:text-sm ${theme.text.secondary} mt-1 sm:mt-2`}>
-                        {data?.income > data?.expenses ? "You're profitable! Keep it up." : "Expenses exceed income. Review spending."}
+                        {income > expenses ? "You're profitable! Keep it up." : "Expenses exceed income. Review spending."}
                     </p>
                     <div className="mt-6 w-full">
                         <div className="flex justify-between text-xs mb-1">
                             <span>Income vs Expense</span>
-                            <span>{Math.round((data?.expenses / (data?.income || 1)) * 100)}%</span>
+                            <span>{expenseRatio}%</span>
                         </div>
                         <div className="h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-zinc-700">
                             <div
                                 className="h-full bg-blue-500 rounded-full"
-                                style={{ width: `${Math.min(((data?.expenses || 0) / (data?.income || 1)) * 100, 100)}%` }}
+                                style={{ width: `${Math.min(expenseRatio, 100)}%` }}
                             />
                         </div>
                     </div>
