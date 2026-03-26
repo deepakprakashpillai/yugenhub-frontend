@@ -170,7 +170,10 @@ const TeamMemberRow = ({ member, onUpdate, onDelete, assignmentTags }) => {
     }
 
     return (
-        <div className="p-3 bg-zinc-800/30 rounded-lg group hover:bg-zinc-800/50 transition-colors">
+        <div
+            className="p-3 bg-zinc-800/30 rounded-lg group hover:bg-zinc-800/50 transition-colors cursor-pointer"
+            onClick={() => setEditing(true)}
+        >
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
@@ -183,14 +186,12 @@ const TeamMemberRow = ({ member, onUpdate, onDelete, assignmentTags }) => {
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-300">{member.role}</span>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => setEditing(true)} className="p-1 rounded hover:bg-zinc-700 text-zinc-400">
-                            <Icons.Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={onDelete} className="p-1 rounded hover:bg-red-500/20 text-zinc-400 hover:text-red-400">
-                            <Icons.Trash className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
+                    <button
+                        onClick={e => { e.stopPropagation(); onDelete(); }}
+                        className="p-1 rounded hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-colors"
+                    >
+                        <Icons.Trash className="w-3.5 h-3.5" />
+                    </button>
                 </div>
             </div>
             {memberTags.length > 0 && (
@@ -665,9 +666,14 @@ const EventSlideOver = ({
                         ))}
 
                         {assignments.length === 0 && !showAddMember && (
-                            <p className="text-zinc-600 text-sm italic p-3 bg-zinc-800/30 rounded-lg text-center">
-                                No team members yet
-                            </p>
+                            <div className="p-3 bg-zinc-800/30 rounded-lg text-center">
+                                <p className="text-zinc-600 text-sm italic">No team members yet</p>
+                                {teamRequirements.length > 0 && (
+                                    <p className="text-amber-500/70 text-xs mt-1">
+                                        {teamRequirements.reduce((s, r) => s + r.count, 0)} people needed across {teamRequirements.length} role{teamRequirements.length > 1 ? 's' : ''} — none assigned
+                                    </p>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
