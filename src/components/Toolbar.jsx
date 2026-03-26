@@ -78,16 +78,16 @@ const Toolbar = ({
                 )}
             </div>
 
-            <div className="flex items-center justify-end md:justify-start gap-3 w-full md:w-auto flex-wrap mt-2 md:mt-0">
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto md:flex-wrap md:gap-3 pb-0.5 md:pb-0 scrollbar-none mt-1 md:mt-0">
 
 
 
                 {/* 2. Combined Filter Dropdown */}
-                <div className="relative">
+                <div className="relative shrink-0">
                     <button
                         onClick={() => toggleDropdown('filter')}
                         className={clsx(
-                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors min-h-[40px] md:min-h-0",
+                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors whitespace-nowrap",
                             activeDropdown === 'filter' ? "" : `${theme.canvas.button.secondary}`
                         )}
                         style={activeDropdown === 'filter' ? {
@@ -101,12 +101,12 @@ const Toolbar = ({
                     </button>
 
                     {activeDropdown === 'filter' && (
-                        <div className={`absolute top-full right-0 mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                        <div className={`absolute top-full left-0 md:left-auto md:right-0 mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {/* Special Views */}
                             <button
                                 onClick={() => { setView('active'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
-                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    "w-full text-left px-4 py-2.5 md:py-2 text-sm flex items-center gap-3 transition-colors",
                                     view === 'active' ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={view === 'active' ? {
@@ -120,7 +120,7 @@ const Toolbar = ({
                             <button
                                 onClick={() => { setView('production'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
-                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    "w-full text-left px-4 py-2.5 md:py-2 text-sm flex items-center gap-3 transition-colors",
                                     view === 'production' ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={view === 'production' ? {
@@ -134,7 +134,7 @@ const Toolbar = ({
                             <button
                                 onClick={() => { setView('all'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
-                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    "w-full text-left px-4 py-2.5 md:py-2 text-sm flex items-center gap-3 transition-colors",
                                     (view === 'all' && filter === 'all') ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={(view === 'all' && filter === 'all') ? {
@@ -148,7 +148,7 @@ const Toolbar = ({
                             <button
                                 onClick={() => { setView('upcoming'); setFilter('all'); setActiveDropdown(null); }}
                                 className={clsx(
-                                    "w-full text-left px-4 py-2 text-sm flex items-center gap-3 transition-colors",
+                                    "w-full text-left px-4 py-2.5 md:py-2 text-sm flex items-center gap-3 transition-colors",
                                     view === 'upcoming' ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={view === 'upcoming' ? {
@@ -161,7 +161,7 @@ const Toolbar = ({
                             </button>
 
                             <div className={`h-px ${theme.canvas.border} my-1`} />
-                            <div className={`px-4 py-1.5 text-[10px] uppercase font-bold ${theme.text.secondary} opacity-50 tracking-wider`}>
+                            <div className={`px-4 py-1.5 text-xs uppercase font-bold ${theme.text.secondary} opacity-50 tracking-wider`}>
                                 By Status
                             </div>
 
@@ -175,7 +175,7 @@ const Toolbar = ({
                                         setActiveDropdown(null);
                                     }}
                                     className={clsx(
-                                        "w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors",
+                                        "w-full text-left px-4 py-2.5 md:py-2 text-sm flex items-center gap-2 transition-colors",
                                         filter === status.id ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                     )}
                                     style={filter === status.id ? {
@@ -192,11 +192,11 @@ const Toolbar = ({
                 </div>
 
                 {/* 4. Sort Dropdown */}
-                <div className="relative">
+                <div className="relative shrink-0">
                     <button
                         onClick={() => toggleDropdown('sort')}
                         className={clsx(
-                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors min-h-[40px] md:min-h-0",
+                            "flex items-center gap-2 border px-3 py-2 rounded-lg text-sm transition-colors whitespace-nowrap",
                             activeDropdown === 'sort' ? "" : `${theme.canvas.button.secondary}`
                         )}
                         style={activeDropdown === 'sort' ? {
@@ -209,7 +209,7 @@ const Toolbar = ({
                     </button>
 
                     {activeDropdown === 'sort' && (
-                        <div className={`absolute top-full right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
+                        <div className={`absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
                             {[
                                 { id: 'newest', label: 'Newest First' },
                                 { id: 'oldest', label: 'Oldest First' },
@@ -222,7 +222,7 @@ const Toolbar = ({
                                         setActiveDropdown(null);
                                     }}
                                     className={clsx(
-                                        "block w-full text-left px-4 py-2 text-sm transition-colors",
+                                        "block w-full text-left px-4 py-2.5 md:py-2 text-sm transition-colors",
                                         sort === opt.id ? "font-medium" : `${theme.text.secondary} ${theme.canvas.hover}`
                                     )}
                                     style={sort === opt.id ? {

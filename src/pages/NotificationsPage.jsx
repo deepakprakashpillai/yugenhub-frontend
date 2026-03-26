@@ -86,22 +86,22 @@ const NotificationsPage = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <div className="p-3 md:p-8 pb-24 md:pb-8 max-w-[800px] mx-auto min-h-screen">
+        <div className="p-4 md:p-8 pb-24 md:pb-8 max-w-[800px] mx-auto min-h-screen">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-8">
-                <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-3 mb-6 md:mb-8">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate(-1)}
-                        className={`p-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-colors hidden md:block`}
+                        className={`p-2.5 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-colors shrink-0`}
                     >
-                        <ArrowLeft size={16} className={theme.text.secondary} />
+                        <ArrowLeft size={18} className={theme.text.secondary} />
                     </button>
                     <div>
-                        <h1 className={`text-2xl md:text-3xl font-black ${theme.text.primary} uppercase tracking-tighter flex items-center gap-3`}>
-                            <Bell size={20} />
+                        <h1 className={`text-xl md:text-3xl font-black ${theme.text.primary} uppercase tracking-tighter flex items-center gap-2`}>
+                            <Bell size={18} className="shrink-0" />
                             Notifications
                         </h1>
-                        <p className={`${theme.text.secondary} text-sm mt-1`}>
+                        <p className={`${theme.text.secondary} text-xs mt-0.5`}>
                             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
                         </p>
                     </div>
@@ -109,10 +109,11 @@ const NotificationsPage = () => {
                 {unreadCount > 0 && (
                     <button
                         onClick={handleMarkAllRead}
-                        className={`px-4 py-2 rounded-lg ${theme.canvas.card} border ${theme.canvas.border} text-xs font-bold ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors flex items-center gap-2 self-start sm:self-auto`}
+                        className={`px-3 py-2 rounded-xl ${theme.canvas.card} border ${theme.canvas.border} text-xs font-bold ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors flex items-center gap-1.5 shrink-0`}
                     >
                         <CheckCircle size={14} />
-                        Mark all as read
+                        <span className="hidden sm:inline">Mark all as read</span>
+                        <span className="sm:hidden">Mark all</span>
                     </button>
                 )}
             </div>
@@ -134,7 +135,7 @@ const NotificationsPage = () => {
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={clsx(
-                                "w-full text-left p-3 md:p-4 rounded-xl border transition-all flex items-start gap-3 md:gap-4",
+                                "w-full text-left p-4 rounded-xl border transition-all flex items-start gap-3",
                                 notification.read
                                     ? `${theme.canvas.bg} border-transparent hover:${theme.canvas.hover} opacity-70`
                                     : `${theme.canvas.card} ${theme.canvas.border} hover:border-${theme.accent?.primary || 'purple-500'}`
@@ -142,7 +143,7 @@ const NotificationsPage = () => {
                         >
                             {/* Indicator */}
                             <div className={clsx(
-                                "w-2 h-2 rounded-full mt-2 shrink-0",
+                                "w-2.5 h-2.5 rounded-full mt-1.5 shrink-0",
                                 notification.read ? theme.text.secondary : "bg-emerald-500"
                             )} style={{ backgroundColor: notification.read ? undefined : '#10b981' }} />
 
@@ -154,13 +155,10 @@ const NotificationsPage = () => {
                                 )}>
                                     {notification.title}
                                 </p>
-                                <p className={clsx(
-                                    "text-xs mt-1",
-                                    notification.read ? theme.text.secondary : theme.text.secondary
-                                )}>
+                                <p className={`text-xs mt-1 ${theme.text.secondary}`}>
                                     {renderMessage(notification.message)}
                                 </p>
-                                <p className={`text-[10px] ${theme.text.secondary} mt-2`}>
+                                <p className={`text-xs ${theme.text.secondary} mt-2 opacity-60`}>
                                     {new Date(notification.created_at).toLocaleString()}
                                 </p>
                             </div>

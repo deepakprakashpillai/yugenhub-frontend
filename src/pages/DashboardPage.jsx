@@ -31,8 +31,8 @@ const DashboardPage = () => {
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                             System Operational
                         </div>
-                        <h1 className={`text-3xl md:text-5xl font-black ${theme.text.primary} mb-2 tracking-tight`}>
-                            {getGreeting()}, <br className="hidden md:block" />
+                        <h1 className={`text-2xl md:text-5xl font-black ${theme.text.primary} mb-2 tracking-tight`}>
+                            {getGreeting()},{' '}
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 animate-gradient-x bg-[length:200%_auto]">
                                 {user?.name?.split(' ')[0]}
                             </span>
