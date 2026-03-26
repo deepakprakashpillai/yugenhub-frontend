@@ -588,6 +588,82 @@ const EventSlideOver = ({
                     </div>
                 </div>
 
+                {/* Team Requirements Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm uppercase tracking-widest text-zinc-500 font-medium flex items-center gap-2">
+                            <Icons.CheckSquare className="w-4 h-4" />
+                            Team Requirements
+                        </h3>
+                        <div className="flex items-center gap-2">
+                            {verticalTeamRequirements.length > 0 && (
+                                <button
+                                    onClick={loadVerticalDefaults}
+                                    className="text-xs text-zinc-500 hover:text-zinc-300 font-medium"
+                                >
+                                    Load defaults
+                                </button>
+                            )}
+                            <button
+                                onClick={addTeamRequirement}
+                                disabled={(teamRequirements.length >= (config?.associateRoles || []).length)}
+                                className="text-xs text-purple-400 hover:text-purple-300 font-medium disabled:opacity-30"
+                            >
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        {teamRequirements.length === 0 ? (
+                            <p className="text-zinc-600 text-sm italic p-3 bg-zinc-800/30 rounded-lg text-center">
+                                No requirements set{verticalTeamRequirements.length > 0 ? ' — load defaults or add manually' : ''}
+                            </p>
+                        ) : (
+                            teamRequirements.map((req, i) => {
+                                const assigned = assignedCountByRole[req.role] || 0;
+                                const isFulfilled = assigned >= req.count;
+                                return (
+                                    <div key={i} className="flex items-center gap-3 px-3 py-2 bg-zinc-800/30 rounded-lg group">
+                                        <select
+                                            value={req.role}
+                                            onChange={e => updateTeamRequirement(i, 'role', e.target.value)}
+                                            className="flex-1 bg-transparent border-none text-sm text-white focus:outline-none cursor-pointer"
+                                        >
+                                            {(config?.associateRoles || []).map(r => (
+                                                <option key={r} value={r}>{r}</option>
+                                            ))}
+                                        </select>
+                                        <div className="flex items-center gap-1.5 text-xs">
+                                            <span className={isFulfilled ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
+                                                {assigned}
+                                            </span>
+                                            <span className="text-zinc-600">/</span>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={20}
+                                                value={req.count}
+                                                onChange={e => updateTeamRequirement(i, 'count', Math.max(1, parseInt(e.target.value) || 1))}
+                                                className="w-10 text-center bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-white text-xs focus:outline-none"
+                                            />
+                                            <span className={`text-base leading-none ${isFulfilled ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                                {isFulfilled ? '✓' : '!'}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => removeTeamRequirement(i)}
+                                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-all"
+                                        >
+                                            <Icons.X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+
                 {/* Team Section */}
                 <div>
                     <div className="flex items-center justify-between mb-3">
@@ -674,82 +750,6 @@ const EventSlideOver = ({
                                     </p>
                                 )}
                             </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Team Requirements Section */}
-                <div>
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm uppercase tracking-widest text-zinc-500 font-medium flex items-center gap-2">
-                            <Icons.CheckSquare className="w-4 h-4" />
-                            Team Requirements
-                        </h3>
-                        <div className="flex items-center gap-2">
-                            {verticalTeamRequirements.length > 0 && (
-                                <button
-                                    onClick={loadVerticalDefaults}
-                                    className="text-xs text-zinc-500 hover:text-zinc-300 font-medium"
-                                >
-                                    Load defaults
-                                </button>
-                            )}
-                            <button
-                                onClick={addTeamRequirement}
-                                disabled={(teamRequirements.length >= (config?.associateRoles || []).length)}
-                                className="text-xs text-purple-400 hover:text-purple-300 font-medium disabled:opacity-30"
-                            >
-                                + Add
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        {teamRequirements.length === 0 ? (
-                            <p className="text-zinc-600 text-sm italic p-3 bg-zinc-800/30 rounded-lg text-center">
-                                No requirements set{verticalTeamRequirements.length > 0 ? ' — load defaults or add manually' : ''}
-                            </p>
-                        ) : (
-                            teamRequirements.map((req, i) => {
-                                const assigned = assignedCountByRole[req.role] || 0;
-                                const isFulfilled = assigned >= req.count;
-                                return (
-                                    <div key={i} className="flex items-center gap-3 px-3 py-2 bg-zinc-800/30 rounded-lg group">
-                                        <select
-                                            value={req.role}
-                                            onChange={e => updateTeamRequirement(i, 'role', e.target.value)}
-                                            className="flex-1 bg-transparent border-none text-sm text-white focus:outline-none cursor-pointer"
-                                        >
-                                            {(config?.associateRoles || []).map(r => (
-                                                <option key={r} value={r}>{r}</option>
-                                            ))}
-                                        </select>
-                                        <div className="flex items-center gap-1.5 text-xs">
-                                            <span className={isFulfilled ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
-                                                {assigned}
-                                            </span>
-                                            <span className="text-zinc-600">/</span>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                max={20}
-                                                value={req.count}
-                                                onChange={e => updateTeamRequirement(i, 'count', Math.max(1, parseInt(e.target.value) || 1))}
-                                                className="w-10 text-center bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-white text-xs focus:outline-none"
-                                            />
-                                            <span className={`text-base leading-none ${isFulfilled ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                                {isFulfilled ? '✓' : '!'}
-                                            </span>
-                                        </div>
-                                        <button
-                                            onClick={() => removeTeamRequirement(i)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-all"
-                                        >
-                                            <Icons.X className="w-3 h-3" />
-                                        </button>
-                                    </div>
-                                );
-                            })
                         )}
                     </div>
                 </div>

@@ -392,33 +392,45 @@ const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
     const { theme } = useTheme();
 
     const name = assignment.associate_name || assignment.name || 'Unknown';
+    const tags = assignment.tags || [];
 
     return (
         <div
-            className={`flex items-center justify-between gap-3 p-3 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} cursor-pointer`}
+            className={`p-3 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} cursor-pointer`}
             onClick={onEdit}
         >
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
-                    {name.charAt(0)}
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                        {name.charAt(0)}
+                    </div>
+                    <div>
+                        <p className={`${theme.text.primary} text-sm font-medium`}>{name}</p>
+                        <p className={`${theme.text.secondary} text-xs`}>{assignment.role}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className={`${theme.text.primary} text-sm font-medium`}>{name}</p>
-                    <p className={`${theme.text.secondary} text-xs`}>{assignment.role}</p>
+                <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.card} ${theme.text.secondary}`}>
+                        {assignment.role}
+                    </span>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                        className={`p-1 rounded hover:bg-red-500/10 text-red-500/60 hover:text-red-400 transition-colors`}
+                        title="Remove Member"
+                    >
+                        <Icons.Trash className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
-            <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.card} ${theme.text.secondary}`}>
-                    {assignment.role}
-                </span>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                    className={`p-1 rounded hover:bg-red-500/10 text-red-500/60 hover:text-red-400 transition-colors`}
-                    title="Remove Member"
-                >
-                    <Icons.Trash className="w-4 h-4" />
-                </button>
-            </div>
+            {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2 ml-11">
+                    {tags.map(tag => (
+                        <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
@@ -647,6 +659,26 @@ const EventSection = ({
                                         Add
                                     </button>
                                 </div>
+
+                                {/* Team Requirements Status */}
+                                {(event.team_requirements || []).length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        {event.team_requirements.map((req, i) => {
+                                            const assigned = (event.assignments || []).filter(a => a.role === req.role).length;
+                                            const fulfilled = assigned >= req.count;
+                                            return (
+                                                <span key={i} className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-medium ${
+                                                    fulfilled
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                }`}>
+                                                    {fulfilled ? '✓' : '!'} {req.role}: {assigned}/{req.count}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+
                                 {event.assignments && event.assignments.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         {event.assignments.map((asgn, i) => (
@@ -659,16 +691,23 @@ const EventSection = ({
                                         ))}
                                     </div>
                                 ) : (
-                                    <EmptyState
-                                        title="No team assigned"
-                                        message="Assign team members to this event."
-                                        icon={Icons.Users}
-                                        compact={true}
-                                        action={{
-                                            label: "Assign Member",
-                                            onClick: onAddTeamMember
-                                        }}
-                                    />
+                                    <div>
+                                        <EmptyState
+                                            title="No team assigned"
+                                            message="Assign team members to this event."
+                                            icon={Icons.Users}
+                                            compact={true}
+                                            action={{
+                                                label: "Assign Member",
+                                                onClick: onAddTeamMember
+                                            }}
+                                        />
+                                        {(event.team_requirements || []).length > 0 && (
+                                            <p className="text-amber-500/70 text-xs text-center mt-2">
+                                                {event.team_requirements.reduce((s, r) => s + r.count, 0)} people needed across {event.team_requirements.length} role{event.team_requirements.length > 1 ? 's' : ''} — none assigned
+                                            </p>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -1553,6 +1592,7 @@ const ProjectPage = () => {
                 onClose={() => setTeamMemberModal({ open: false, eventId: null, assignment: null })}
                 onSave={handleSaveTeamMember}
                 assignment={teamMemberModal.assignment}
+                verticalId={project?.vertical}
             />
 
             {/* Delete Team Member Modal */}
