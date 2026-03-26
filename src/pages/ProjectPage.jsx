@@ -339,14 +339,13 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                             </AnimatePresence>
                         </div>
 
-                    </div>
-                    {task.quantity && (
-                        <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5`}>
+                        {task.quantity && (
                             <span className={`px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary}`}>
                                 Qty: {task.quantity}
                             </span>
-                        </div>
-                    )}
+                        )}
+
+                    </div>
                 </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -1074,6 +1073,13 @@ const ProjectPage = () => {
     const deliverables = tasks.filter(t => t.category === 'deliverable');
     const generalTasks = tasks.filter(t => t.category !== 'deliverable');
 
+    // Sort events by start_date ascending
+    const sortedEvents = [...(project.events || [])].sort((a, b) => {
+        const dateA = a.start_date ? new Date(a.start_date) : new Date(0);
+        const dateB = b.start_date ? new Date(b.start_date) : new Date(0);
+        return dateA - dateB;
+    });
+
     return (
         <div className="p-4 md:p-8 pb-20 max-w-[1400px] mx-auto">
             {/* Header */}
@@ -1251,22 +1257,66 @@ const ProjectPage = () => {
             {/* Tasks Tab (Split View) */}
             {activeTab === 'tasks' && (
                 <div className="mb-8 space-y-10">
-                    {/* 1. Deliverables Section */}
+                    {/* 1. Deliverables Section — Grouped per Event */}
                     <div>
                         <div className="flex justify-between items-center mb-6">
                             <h3 className={`text-lg font-bold ${theme.text.primary} uppercase tracking-wider flex items-center gap-2`}>
                                 <Icons.Package className={`w-5 h-5 ${theme.text.secondary}`} />
                                 Deliverables ({deliverables.length})
                             </h3>
-                            {/* We don't usually add deliverables here directly, but could if needed */}
                         </div>
                         {deliverables.length === 0 ? (
                             <p className={`${theme.text.secondary} italic`}>No deliverables tracked.</p>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {deliverables.map(task => (
-                                    <TaskCard key={task.id} task={task} onClick={() => setTaskModal({ open: true, task })} />
-                                ))}
+                            <div className="space-y-8">
+                                {/* Group deliverables by event */}
+                                {sortedEvents.map(event => {
+                                    const eventDeliverables = deliverables.filter(t => t.event_id === event.id);
+                                    if (eventDeliverables.length === 0) return null;
+                                    const eventDate = event.start_date
+                                        ? new Date(event.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                        : 'TBD';
+                                    return (
+                                        <div key={event.id}>
+                                            <div className={`flex items-center gap-3 mb-4 pb-2 border-b ${theme.canvas.border}`}>
+                                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-xs">
+                                                    <Icons.Calendar className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <h4 className={`text-sm font-bold ${theme.text.primary}`}>{event.type}</h4>
+                                                    <p className={`text-xs ${theme.text.secondary}`}>{eventDate}</p>
+                                                </div>
+                                                <span className={`text-xs ${theme.text.secondary} ml-auto`}>{eventDeliverables.length} item{eventDeliverables.length !== 1 ? 's' : ''}</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                {eventDeliverables.map(task => (
+                                                    <TaskCard key={task.id} task={task} onClick={() => setTaskModal({ open: true, task })} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {/* Deliverables without an event (general/project-level) */}
+                                {(() => {
+                                    const unlinked = deliverables.filter(t => !t.event_id);
+                                    if (unlinked.length === 0) return null;
+                                    return (
+                                        <div>
+                                            <div className={`flex items-center gap-3 mb-4 pb-2 border-b ${theme.canvas.border}`}>
+                                                <div className={`w-8 h-8 rounded-lg ${theme.canvas.card} flex items-center justify-center`}>
+                                                    <Icons.Package className={`w-4 h-4 ${theme.text.secondary}`} />
+                                                </div>
+                                                <h4 className={`text-sm font-bold ${theme.text.primary}`}>General</h4>
+                                                <span className={`text-xs ${theme.text.secondary} ml-auto`}>{unlinked.length} item{unlinked.length !== 1 ? 's' : ''}</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                {unlinked.map(task => (
+                                                    <TaskCard key={task.id} task={task} onClick={() => setTaskModal({ open: true, task })} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         )}
                     </div>
@@ -1329,9 +1379,9 @@ const ProjectPage = () => {
                         Events ({project.events?.length || 0})
                     </h3>
 
-                    {project.events && project.events.length > 0 ? (
+                    {sortedEvents.length > 0 ? (
                         <div className="space-y-4">
-                            {project.events.map((event, index) => (
+                            {sortedEvents.map((event, index) => (
                                 <EventSection
                                     key={event.id || index}
                                     event={event}

@@ -25,15 +25,15 @@ const FinancePayouts = ({ refreshTrigger }) => {
             const [txRes, ascRes, projRes] = await Promise.all([
                 getTransactions({ category: FINANCE_CATEGORIES.ASSOCIATE_PAYOUT }),
                 getAssociates(),
-                getProjects()
+                getProjects({}, true)
             ]);
             setTransactions(txRes);
 
             if (ascRes.data) setAssociates(ascRes.data);
             else if (Array.isArray(ascRes)) setAssociates(ascRes);
 
-            if (projRes.data) setProjects(projRes.data);
-            else if (Array.isArray(projRes)) setProjects(projRes);
+            const projData = projRes.data || projRes;
+            setProjects(Array.isArray(projData) ? projData : []);
 
         } catch (error) {
             console.error("Failed to load payouts", error);

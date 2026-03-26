@@ -11,14 +11,14 @@ const InvoiceItem = ({ invoice, theme, onEditInvoice, projectCode, isHistory = f
     return (
         <div className={`p-3 sm:p-4 rounded-lg border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 ${theme.canvas.card} ${theme.canvas.border} ${isHistory ? 'bg-gray-50/50 dark:bg-zinc-800/30 ml-4 sm:ml-8 border-l-4 border-l-gray-300 dark:border-l-zinc-600' : 'bg-white dark:bg-zinc-800'}`}>
             <div className="flex items-start sm:items-center space-x-3 sm:space-x-4">
-                <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${isQuote ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                <div className={`p-1.5 sm:p-2 rounded-full shrink-0 ${isQuote ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'}`}>
                     <FileText className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                 </div>
                 <div>
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <p className={`font-medium text-sm sm:text-base ${theme.text.primary}`}>{invoice.invoice_no}</p>
                         {isQuote && (
-                            <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">QUOTE</span>
+                            <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-medium">QUOTE</span>
                         )}
                         {isHistory && <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-700 text-gray-500">HISTORY</span>}
                     </div>

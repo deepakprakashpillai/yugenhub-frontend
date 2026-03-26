@@ -227,6 +227,13 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 total_amount: calculateTotal()
             };
 
+            // Prevent submitting with placeholder or error invoice numbers
+            if (!payload.invoice_no || payload.invoice_no === 'Select Project...' || payload.invoice_no === 'Generating...' || payload.invoice_no === 'ERROR-GEN') {
+                toast.error('Please select a project to generate a valid number');
+                setLoading(false);
+                return;
+            }
+
 
 
             if (initialData && initialData.id) {
@@ -299,13 +306,13 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         >
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 {/* Type Selection */}
-                <div className="flex p-1 bg-gray-100 rounded-lg mb-4">
+                <div className="flex p-1 bg-gray-100 dark:bg-zinc-800 rounded-lg mb-4">
                     <button
                         type="button"
                         onClick={() => setDocType('invoice')}
                         className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${docType === 'invoice'
-                            ? 'bg-white text-indigo-600 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
                         Invoice
@@ -314,8 +321,8 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                         type="button"
                         onClick={() => setDocType('quote')}
                         className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${docType === 'quote'
-                            ? 'bg-white text-indigo-600 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white dark:bg-zinc-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
                         Quote
@@ -417,7 +424,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
                     <div className="space-y-3">
                         {formData.line_items.map((item, index) => (
-                            <div key={item.id} className={`p-3 rounded-lg border ${theme.canvas.border} bg-gray-50/50`}>
+                            <div key={item.id} className={`p-3 rounded-lg border ${theme.canvas.border} bg-gray-50/50 dark:bg-zinc-800/30`}>
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center">
                                     {/* Description */}
                                     <div className="flex-1 w-full">
@@ -473,7 +480,7 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                                             <button
                                                 type="button"
                                                 onClick={() => removeLineItem(index)}
-                                                className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                                                className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                                                 disabled={formData.line_items.length === 1}
                                             >
                                                 <Trash size={14} />

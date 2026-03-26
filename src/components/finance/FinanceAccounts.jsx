@@ -18,7 +18,7 @@ const AccountCard = ({ account, theme }) => {
     return (
         <div className={`p-4 sm:p-6 rounded-xl border ${theme.canvas.card} ${theme.canvas.border} shadow-sm flex flex-col justify-between`}>
             <div className="flex justify-between items-start mb-3 sm:mb-4">
-                <div className={`p-2 sm:p-3 rounded-lg bg-blue-50 text-blue-600 scale-[0.8] sm:scale-100 origin-top-left`}>
+                <div className={`p-2 sm:p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 scale-[0.8] sm:scale-100 origin-top-left`}>
                     {getIcon(account.type)}
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.bg} border ${theme.canvas.border}`}>
@@ -35,7 +35,7 @@ const AccountCard = ({ account, theme }) => {
     );
 };
 
-const FinanceAccounts = () => {
+const FinanceAccounts = ({ refreshTrigger }) => {
     const { theme } = useTheme();
     const [accounts, setAccounts] = useState([]);
 
@@ -58,7 +58,7 @@ const FinanceAccounts = () => {
 
     useEffect(() => {
         loadAccounts();
-    }, []);
+    }, [refreshTrigger]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -128,7 +128,7 @@ const FinanceAccounts = () => {
                         </div>
                         <div className="flex space-x-2">
                             <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Save</button>
-                            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancel</button>
+                            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-zinc-600">Cancel</button>
                         </div>
                     </form>
                 </div>

@@ -24,7 +24,7 @@ const FinanceTransactions = ({ refreshTrigger }) => {
             const [txs, ascRes, projRes] = await Promise.all([
                 getTransactions(),
                 getAssociates(),
-                getProjects()
+                getProjects({}, true)
             ]);
             setTransactions(txs);
 
@@ -32,8 +32,8 @@ const FinanceTransactions = ({ refreshTrigger }) => {
             if (ascRes.data) setAssociates(ascRes.data);
             else if (Array.isArray(ascRes)) setAssociates(ascRes);
 
-            if (projRes.data) setProjects(projRes.data);
-            else if (Array.isArray(projRes)) setProjects(projRes);
+            const projData = projRes.data || projRes;
+            setProjects(Array.isArray(projData) ? projData : []);
 
         } catch (error) {
             console.error("Failed to load transactions", error);
@@ -52,7 +52,7 @@ const FinanceTransactions = ({ refreshTrigger }) => {
             <div className="flex justify-between items-center mb-3 sm:mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold">Transactions</h2>
                 <div className="flex gap-2">
-                    <button className={`p-2 rounded-lg border ${theme.canvas.border} hover:bg-gray-100 dark:hover:bg-gray-800`}>
+                    <button className={`p-2 rounded-lg border ${theme.canvas.border} opacity-40 cursor-not-allowed`} title="Filters coming soon" disabled>
                         <Filter size={18} />
                     </button>
                     <button

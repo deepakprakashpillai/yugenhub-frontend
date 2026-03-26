@@ -78,7 +78,7 @@ const Toolbar = ({
                 )}
             </div>
 
-            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto md:flex-wrap md:gap-3 pb-0.5 md:pb-0 scrollbar-none mt-1 md:mt-0">
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-visible md:flex-wrap md:gap-3 pb-0.5 md:pb-0 mt-1 md:mt-0">
 
 
 

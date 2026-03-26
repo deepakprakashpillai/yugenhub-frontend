@@ -3,19 +3,22 @@ import Modal from './Modal';
 import { Icons } from '../Icons';
 import api from '../../api/axios';
 import { useTheme } from '../../context/ThemeContext';
-
-const ROLES = ['Photographer', 'Cinematographer', 'Editor', 'Drone Pilot', 'Lead', 'Assistant'];
+import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
 const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading = false }) => {
     const { theme } = useTheme();
+    const { config } = useAgencyConfig();
     const isEditing = !!assignment;
     const [associates, setAssociates] = useState([]);
     const [loadingAssociates, setLoadingAssociates] = useState(false);
 
+    // Use config-driven roles instead of hardcoded list
+    const roleOptions = config?.associateRoles || [];
+
     const [formData, setFormData] = useState({
         associate_id: assignment?.associate_id || '',
         associate_name: assignment?.associate_name || '',
-        role: assignment?.role || 'Photographer'
+        role: assignment?.role || roleOptions[0] || ''
     });
 
     // Sync formData with assignment prop when it changes or modal opens
@@ -24,7 +27,7 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
             setFormData({
                 associate_id: assignment?.associate_id || '',
                 associate_name: assignment?.associate_name || assignment?.name || '',
-                role: assignment?.role || 'Photographer'
+                role: assignment?.role || roleOptions[0] || ''
             });
         }
     }, [assignment, isOpen]);
@@ -52,7 +55,7 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
             ...prev,
             associate_id: associateId,
             associate_name: associate?.name || '',
-            role: associate?.primary_role || prev.role || 'Photographer'
+            role: associate?.primary_role || prev.role || roleOptions[0] || ''
         }));
     };
 
@@ -122,7 +125,8 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                         required
                         className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                     >
-                        {ROLES.map(role => (
+                        <option value="">Select a role</option>
+                        {roleOptions.map(role => (
                             <option key={role} value={role}>{role}</option>
                         ))}
                     </select>

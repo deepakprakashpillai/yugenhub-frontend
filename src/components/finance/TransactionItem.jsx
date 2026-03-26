@@ -8,17 +8,17 @@ const TransactionItem = ({ transaction, theme, associates, projects, config }) =
 
     let colorClass, Icon, amountColor;
     if (isIncome) {
-        colorClass = 'text-green-600 bg-green-50';
+        colorClass = 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400';
         Icon = ArrowUpRight;
-        amountColor = 'text-green-600';
+        amountColor = 'text-green-600 dark:text-green-400';
     } else if (isTransfer) {
-        colorClass = 'text-blue-600 bg-blue-50';
+        colorClass = 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400';
         Icon = RefreshCw;
-        amountColor = 'text-blue-600';
+        amountColor = 'text-blue-600 dark:text-blue-400';
     } else {
-        colorClass = 'text-red-600 bg-red-50';
+        colorClass = 'text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400';
         Icon = ArrowDownRight;
-        amountColor = 'text-red-600';
+        amountColor = 'text-red-600 dark:text-red-400';
     }
 
     // Resolve Details
@@ -77,16 +77,16 @@ const TransactionItem = ({ transaction, theme, associates, projects, config }) =
         const label = verticalConfig?.label || v;
         // Generate a consistent color from vertical index
         const colorPalette = [
-            'bg-rose-100 text-rose-700 border-rose-200',
-            'bg-sky-100 text-sky-700 border-sky-200',
-            'bg-indigo-100 text-indigo-700 border-indigo-200',
-            'bg-purple-100 text-purple-700 border-purple-200',
-            'bg-amber-100 text-amber-700 border-amber-200',
-            'bg-emerald-100 text-emerald-700 border-emerald-200',
-            'bg-cyan-100 text-cyan-700 border-cyan-200',
+            'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800',
+            'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800',
+            'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800',
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800',
+            'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+            'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+            'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800',
         ];
         const idx = config?.verticals?.findIndex(vc => vc.id === v) ?? 0;
-        const style = colorPalette[idx % colorPalette.length] || 'bg-gray-100 text-gray-700 border-gray-200';
+        const style = colorPalette[idx % colorPalette.length] || 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-zinc-700';
         return (
             <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${style} ml-2`}>
                 {label}
@@ -139,7 +139,7 @@ const TransactionItem = ({ transaction, theme, associates, projects, config }) =
                 {/* Amount Section */}
                 <div className="text-right">
                     <p className={`text-sm sm:text-lg font-bold ${amountColor}`}>
-                        {isIncome ? '+' : '-'} ₹{transaction.amount.toLocaleString('en-IN')}
+                        {isIncome ? '+' : isTransfer ? '↔' : '-'} ₹{transaction.amount.toLocaleString('en-IN')}
                     </p>
                 </div>
             </div>
