@@ -285,7 +285,7 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
             </div>
 
             {/* Tab Bar */}
-            <div className={`flex border-b ${theme.canvas.border} ${theme.canvas.bg} px-6 gap-1`}>
+            <div className={`flex border-b ${theme.canvas.border} ${theme.canvas.bg} px-2 md:px-6 gap-0.5 overflow-x-auto scrollbar-none`}>
                 {tabs.map(tab => {
                     const TabIcon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -293,7 +293,7 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-1.5 px-4 py-3 text-xs font-medium border-b-2 transition-all
+                            className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-4 py-3 text-xs font-medium border-b-2 transition-all whitespace-nowrap flex-shrink-0
                                 ${isActive
                                     ? `${theme.text.primary} border-current`
                                     : `${theme.text.secondary} border-transparent hover:${theme.text.primary}`
