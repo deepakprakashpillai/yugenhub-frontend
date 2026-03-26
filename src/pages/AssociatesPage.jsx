@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
@@ -164,6 +164,10 @@ const AssociatesPage = () => {
     const [typeFilter, setTypeFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [dropdownRect, setDropdownRect] = useState(null);
+    const roleRef = useRef(null);
+    const typeRef = useRef(null);
+    const statusRef = useRef(null);
 
     // Modal State
     const [associateModal, setAssociateModal] = useState({ open: false, associate: null });
@@ -206,8 +210,16 @@ const AssociatesPage = () => {
         fetchAssociates();
     }, [fetchAssociates]);
 
+    const refs = { role: roleRef, type: typeRef, status: statusRef };
     const toggleDropdown = (name) => {
-        setActiveDropdown(activeDropdown === name ? null : name);
+        if (activeDropdown === name) {
+            setActiveDropdown(null);
+            setDropdownRect(null);
+        } else {
+            const rect = refs[name].current.getBoundingClientRect();
+            setDropdownRect({ top: rect.bottom + 8, left: rect.left });
+            setActiveDropdown(name);
+        }
     };
 
     const handleSaveAssociate = async (associateData) => {
@@ -260,12 +272,42 @@ const AssociatesPage = () => {
 
     return (
         <div className="p-3 md:p-8 pb-24 md:pb-20 max-w-[1600px] mx-auto min-h-screen relative">
-            {/* Opaque Overlay for closing dropdowns - High Z-Index Logic */}
+            {/* Overlay + fixed-position dropdowns (escape overflow clipping) */}
             {activeDropdown && (
-                <div
-                    className="fixed inset-0 z-40 bg-transparent"
-                    onClick={() => setActiveDropdown(null)}
-                />
+                <>
+                    <div
+                        className="fixed inset-0 z-[998] bg-transparent"
+                        onClick={() => { setActiveDropdown(null); setDropdownRect(null); }}
+                    />
+                    <div
+                        className={`fixed z-[999] w-52 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2`}
+                        style={{ top: dropdownRect?.top, left: dropdownRect?.left }}
+                    >
+                        {activeDropdown === 'role' && (
+                            <>
+                                <button onClick={() => { setRoleFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Roles</button>
+                                {(config?.associateRoles || []).map(role => (
+                                    <button key={role} onClick={() => { setRoleFilter(role); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{role}</button>
+                                ))}
+                            </>
+                        )}
+                        {activeDropdown === 'type' && (
+                            <>
+                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Types</button>
+                                {['Freelance', 'In-house'].map(type => (
+                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
+                                ))}
+                            </>
+                        )}
+                        {activeDropdown === 'status' && (
+                            <>
+                                <button onClick={() => { setStatusFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Status</button>
+                                <button onClick={() => { setStatusFilter('active'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Active</button>
+                                <button onClick={() => { setStatusFilter('inactive'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Inactive</button>
+                            </>
+                        )}
+                    </div>
+                </>
             )}
 
             <h1 className={`text-2xl md:text-4xl font-black mb-4 md:mb-8 ${theme.text.primary} uppercase tracking-tighter`}>Associates</h1>
@@ -294,11 +336,12 @@ const AssociatesPage = () => {
 
                 <div className="flex items-center gap-2 w-full xl:w-auto overflow-x-auto xl:flex-wrap xl:gap-3 pb-0.5 xl:pb-0 scrollbar-none">
                     {/* Role Filter */}
-                    <div className="relative shrink-0">
+                    <div className="shrink-0">
                         <button
+                            ref={roleRef}
                             onClick={() => toggleDropdown('role')}
                             className={clsx(
-                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap",
                                 roleFilter || activeDropdown === 'role' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
                             style={roleFilter || activeDropdown === 'role' ? {
@@ -311,22 +354,15 @@ const AssociatesPage = () => {
                             {roleFilter || 'All Roles'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'role' && "-rotate-90")} />
                         </button>
-                        {activeDropdown === 'role' && (
-                            <div className={`absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setRoleFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Roles</button>
-                                {(config?.associateRoles || []).map(role => (
-                                    <button key={role} onClick={() => { setRoleFilter(role); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{role}</button>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     {/* Type Filter */}
-                    <div className="relative shrink-0">
+                    <div className="shrink-0">
                         <button
+                            ref={typeRef}
                             onClick={() => toggleDropdown('type')}
                             className={clsx(
-                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap",
                                 typeFilter || activeDropdown === 'type' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
                             style={typeFilter || activeDropdown === 'type' ? {
@@ -339,22 +375,15 @@ const AssociatesPage = () => {
                             {typeFilter || 'Employment Type'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'type' && "-rotate-90")} />
                         </button>
-                        {activeDropdown === 'type' && (
-                            <div className={`absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Types</button>
-                                {['Freelance', 'In-house'].map(type => (
-                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     {/* Status Filter */}
-                    <div className="relative shrink-0">
+                    <div className="shrink-0">
                         <button
+                            ref={statusRef}
                             onClick={() => toggleDropdown('status')}
                             className={clsx(
-                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap",
                                 statusFilter || activeDropdown === 'status' ? "" : `${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:${theme.text.primary}`
                             )}
                             style={statusFilter || activeDropdown === 'status' ? {
@@ -367,13 +396,6 @@ const AssociatesPage = () => {
                             {statusFilter ? (statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)) : 'All Status'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'status' && "-rotate-90")} />
                         </button>
-                        {activeDropdown === 'status' && (
-                            <div className={`absolute top-full left-0 xl:left-auto xl:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setStatusFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Status</button>
-                                <button onClick={() => { setStatusFilter('active'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Active</button>
-                                <button onClick={() => { setStatusFilter('inactive'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Inactive</button>
-                            </div>
-                        )}
                     </div>
 
                     {/* View Toggle - hidden on mobile */}
@@ -463,6 +485,7 @@ const AssociatesPage = () => {
             <FloatingActionButton
                 onClick={() => setAssociateModal({ open: true, associate: null })}
                 label="Add Associate"
+                hidden={associateModal.open}
             />
 
             {/* Associate Modal */}

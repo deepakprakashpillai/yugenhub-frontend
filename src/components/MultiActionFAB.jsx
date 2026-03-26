@@ -5,7 +5,7 @@ import { Icons } from './Icons';
 import clsx from 'clsx';
 import { useTheme } from '../context/ThemeContext';
 
-const MultiActionFAB = ({ actions = [], mainLabel = 'Add', className }) => {
+const MultiActionFAB = ({ actions = [], mainLabel = 'Add', className, hidden = false }) => {
     const { theme, accentColor } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -50,9 +50,9 @@ const MultiActionFAB = ({ actions = [], mainLabel = 'Add', className }) => {
             <motion.button
                 layout
                 onClick={toggleOpen}
-                whileHover={{ scale: 1.05, translateY: -2 }}
-                whileTap={{ scale: 0.92 }}
-                animate={{ rotate: isOpen ? 45 : 0 }}
+                whileHover={hidden ? {} : { scale: 1.05, translateY: -2 }}
+                whileTap={hidden ? {} : { scale: 0.92 }}
+                animate={{ rotate: isOpen ? 45 : 0, scale: hidden ? 0 : 1, opacity: hidden ? 0 : 1 }}
                 className={clsx(
                     "flex items-center justify-center w-14 h-14",
                     "text-white",
@@ -62,7 +62,7 @@ const MultiActionFAB = ({ actions = [], mainLabel = 'Add', className }) => {
                     "hover:shadow-[14px_14px_0px_0px_rgba(0,0,0,0.2)] dark:hover:shadow-[14px_14px_0px_0px_rgba(255,255,255,0.07)]",
                     "transition-all duration-300"
                 )}
-                style={{ backgroundColor: accentColor }}
+                style={{ backgroundColor: accentColor, pointerEvents: hidden ? 'none' : undefined }}
                 title={isOpen ? 'Close' : mainLabel}
             >
                 <Icons.Plus className="w-6 h-6" />

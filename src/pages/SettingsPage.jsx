@@ -72,6 +72,8 @@ function SettingsPage() {
     const DangerZone = () => {
         const [syncing, setSyncing] = useState(false);
         const [syncResult, setSyncResult] = useState(null);
+        const [seeding, setSeeding] = useState(false);
+        const [seedResult, setSeedResult] = useState(null);
 
         const handleRevalidateAll = async () => {
             setSyncing(true);
@@ -89,6 +91,22 @@ function SettingsPage() {
             }
         };
 
+        const handleSeedDefaults = async () => {
+            setSeeding(true);
+            setSeedResult(null);
+            try {
+                const res = await api.post('/settings/seed-defaults');
+                setSeedResult(res.data);
+                const count = res.data.seeded?.length || 0;
+                toast.success(count > 0 ? `Seeded defaults for ${count} config section${count !== 1 ? 's' : ''}` : 'All config sections already have data — nothing to seed');
+            } catch (err) {
+                console.error(err);
+                toast.error('Failed to seed defaults');
+            } finally {
+                setSeeding(false);
+            }
+        };
+
         return (
             <div className="space-y-6">
                 <div>
@@ -97,8 +115,47 @@ function SettingsPage() {
                 </div>
 
                 {/* Maintenance */}
-                <div className={`border ${theme.canvas.border} rounded-2xl p-6`}>
-                    <h3 className={`text-sm font-semibold ${theme.text.primary} mb-4`}>Maintenance</h3>
+                <div className={`border ${theme.canvas.border} rounded-2xl p-6 space-y-6`}>
+                    <h3 className={`text-sm font-semibold ${theme.text.primary}`}>Maintenance</h3>
+
+                    {/* Seed Defaults */}
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                            <p className={`text-sm font-bold ${theme.text.primary}`}>Seed Config Defaults</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                                Fills in default values for any config sections that are currently empty — finance categories, lead sources, deliverable types, associate roles, and project statuses. Skips anything that already has data.
+                            </p>
+                            {seedResult && (
+                                <div className="mt-3 space-y-1">
+                                    {seedResult.seeded?.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {seedResult.seeded.map(s => (
+                                                <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 font-medium">✓ {s}</span>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {seedResult.skipped?.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 mt-1">
+                                            {seedResult.skipped.map(s => (
+                                                <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 font-medium">— {s}</span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            onClick={handleSeedDefaults}
+                            disabled={seeding}
+                            className="shrink-0 px-4 py-2 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+                        >
+                            {seeding ? 'Seeding…' : 'Seed Defaults'}
+                        </button>
+                    </div>
+
+                    <div className={`border-t ${theme.canvas.border}`} />
+
+                    {/* Revalidate Projects */}
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                             <p className={`text-sm font-bold ${theme.text.primary}`}>Revalidate All Projects</p>

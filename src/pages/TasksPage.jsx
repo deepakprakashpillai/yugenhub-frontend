@@ -298,7 +298,7 @@ const TasksPage = () => {
 
             {/* Create Task Button */}
             {['owner', 'admin'].includes(user?.role) && (
-                <FloatingActionButton label="Add Task" onClick={() => { setEditingTask(null); setIsModalOpen(true); }} />
+                <FloatingActionButton label="Add Task" onClick={() => { setEditingTask(null); setIsModalOpen(true); }} hidden={isModalOpen} />
             )}
 
             {/* Modal */}

@@ -316,6 +316,7 @@ const VerticalPage = ({ vertical, title }) => {
             <FloatingActionButton
                 onClick={() => setProjectSlideOver(true)}
                 label="Add Project"
+                hidden={projectSlideOver || clientModal.open}
             />
 
             {/* Project Slide-Over */}

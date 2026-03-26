@@ -4,7 +4,7 @@ import { Icons } from './Icons';
 import clsx from 'clsx';
 import { useTheme } from '../context/ThemeContext';
 
-const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
+const FloatingActionButton = ({ onClick, label = 'Add', className, hidden = false }) => {
     const { accentColor } = useTheme();
     const [isHovered, setIsHovered] = useState(false);
 
@@ -15,9 +15,9 @@ const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            whileHover={{ scale: 1.05, translateY: -2 }}
-            whileTap={{ scale: 0.95 }}
+            animate={{ scale: hidden ? 0 : 1, opacity: hidden ? 0 : 1 }}
+            whileHover={hidden ? {} : { scale: 1.05, translateY: -2 }}
+            whileTap={hidden ? {} : { scale: 0.95 }}
             transition={{
                 type: 'spring',
                 stiffness: 300,
@@ -38,7 +38,8 @@ const FloatingActionButton = ({ onClick, label = 'Add', className }) => {
             style={{
                 marginBottom: 'env(safe-area-inset-bottom, 0px)',
                 backgroundColor: accentColor,
-                height: '3.5rem'
+                height: '3.5rem',
+                pointerEvents: hidden ? 'none' : undefined,
             }}
             title={label}
         >

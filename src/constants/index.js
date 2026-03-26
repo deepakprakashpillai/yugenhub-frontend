@@ -16,7 +16,8 @@ export const TRANSACTION_TYPES = {
 };
 
 export const FINANCE_CATEGORIES = {
-    ASSOCIATE_PAYOUT: 'Associate Payout'
+    ASSOCIATE_PAYOUT: 'Associate Payout',
+    PROJECT_PAYMENT: 'Project Payment'
 };
 
 export const INVOICE_STATUS = {

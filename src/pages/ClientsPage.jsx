@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import api from '../api/axios';
 import StatsHeader from '../components/StatsHeader';
 import { Icons } from '../components/Icons';
@@ -156,6 +156,9 @@ const ClientsPage = () => {
     const [typeFilter, setTypeFilter] = useState('');
     const [sort, setSort] = useState('newest'); // default
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [dropdownRect, setDropdownRect] = useState(null);
+    const sortRef = useRef(null);
+    const typeRef = useRef(null);
 
     // Modal State
     const [clientModal, setClientModal] = useState({ open: false, client: null });
@@ -171,17 +174,6 @@ const ClientsPage = () => {
     useEffect(() => {
         setPage(1);
     }, [debouncedSearch, typeFilter, sort]);
-
-    // Close dropdowns when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (!event.target.closest('.filter-dropdown')) {
-                setActiveDropdown(null);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     const fetchClients = useCallback(async () => {
         setLoading(true);
@@ -204,8 +196,16 @@ const ClientsPage = () => {
         fetchClients();
     }, [fetchClients]);
 
+    const refs = { sort: sortRef, type: typeRef };
     const toggleDropdown = (name) => {
-        setActiveDropdown(activeDropdown === name ? null : name);
+        if (activeDropdown === name) {
+            setActiveDropdown(null);
+            setDropdownRect(null);
+        } else {
+            const rect = refs[name].current.getBoundingClientRect();
+            setDropdownRect({ top: rect.bottom + 8, left: rect.left });
+            setActiveDropdown(name);
+        }
     };
 
     const handleSaveClient = async (clientData) => {
@@ -244,12 +244,34 @@ const ClientsPage = () => {
 
     return (
         <div className="p-3 md:p-8 pb-24 md:pb-20 max-w-[1600px] mx-auto min-h-screen relative">
-            {/* Opaque Overlay for closing dropdowns - High Z-Index Logic */}
+            {/* Overlay + fixed-position dropdowns (escape overflow clipping) */}
             {activeDropdown && (
-                <div
-                    className="fixed inset-0 z-40 bg-transparent"
-                    onClick={() => setActiveDropdown(null)}
-                />
+                <>
+                    <div
+                        className="fixed inset-0 z-[998] bg-transparent"
+                        onClick={() => { setActiveDropdown(null); setDropdownRect(null); }}
+                    />
+                    <div
+                        className={`fixed z-[999] w-52 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2`}
+                        style={{ top: dropdownRect?.top, left: dropdownRect?.left }}
+                    >
+                        {activeDropdown === 'sort' && (
+                            <>
+                                <button onClick={() => { setSort('newest'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Newest First</button>
+                                <button onClick={() => { setSort('projects_desc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Most Projects</button>
+                                <button onClick={() => { setSort('projects_asc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Least Projects</button>
+                            </>
+                        )}
+                        {activeDropdown === 'type' && (
+                            <>
+                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Clients</button>
+                                {['Active Client', 'Lead', 'Legacy'].map(type => (
+                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
+                                ))}
+                            </>
+                        )}
+                    </div>
+                </>
             )}
 
 
@@ -281,11 +303,12 @@ const ClientsPage = () => {
                 <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto md:flex-wrap md:gap-3 pb-0.5 md:pb-0 scrollbar-none">
 
                     {/* Sort Dropdown */}
-                    <div className="relative filter-dropdown shrink-0">
+                    <div className="shrink-0">
                         <button
+                            ref={sortRef}
                             onClick={() => toggleDropdown('sort')}
                             className={clsx(
-                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap",
                                 activeDropdown === 'sort' ? "" : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary} ${theme.canvas.hover}`
                             )}
                             style={activeDropdown === 'sort' ? {
@@ -297,21 +320,15 @@ const ClientsPage = () => {
                             {sort === 'projects_desc' ? 'Most Projects' : sort === 'projects_asc' ? 'Least Projects' : 'Newest First'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'sort' && "-rotate-90")} />
                         </button>
-                        {activeDropdown === 'sort' && (
-                            <div className={`absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setSort('newest'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Newest First</button>
-                                <button onClick={() => { setSort('projects_desc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Most Projects</button>
-                                <button onClick={() => { setSort('projects_asc'); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>Least Projects</button>
-                            </div>
-                        )}
                     </div>
 
                     {/* Type Filter */}
-                    <div className="relative filter-dropdown shrink-0">
+                    <div className="shrink-0">
                         <button
+                            ref={typeRef}
                             onClick={() => toggleDropdown('type')}
                             className={clsx(
-                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap relative z-50",
+                                "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border text-xs md:text-sm font-medium transition-colors whitespace-nowrap",
                                 typeFilter || activeDropdown === 'type' ? "" : `${theme.canvas.bg} ${theme.canvas.border} ${theme.text.secondary} ${theme.canvas.hover}`
                             )}
                             style={typeFilter || activeDropdown === 'type' ? {
@@ -324,14 +341,6 @@ const ClientsPage = () => {
                             {typeFilter || 'All Clients'}
                             <Icons.ChevronRight className={clsx("w-3 h-3 rotate-90 transition-transform", activeDropdown === 'type' && "-rotate-90")} />
                         </button>
-                        {activeDropdown === 'type' && (
-                            <div className={`absolute top-full left-0 md:left-auto md:right-0 mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl py-2 z-50`}>
-                                <button onClick={() => { setTypeFilter(''); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>All Clients</button>
-                                {['Active Client', 'Lead', 'Legacy'].map(type => (
-                                    <button key={type} onClick={() => { setTypeFilter(type); setActiveDropdown(null); }} className={`block w-full text-left px-4 py-3 md:py-2 text-sm ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary}`}>{type}</button>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     {/* View Toggle - hidden on mobile */}
@@ -430,6 +439,7 @@ const ClientsPage = () => {
             <FloatingActionButton
                 onClick={() => setClientModal({ open: true, client: null })}
                 label="Add Client"
+                hidden={clientModal.open}
             />
 
             {/* Client Modal */}
