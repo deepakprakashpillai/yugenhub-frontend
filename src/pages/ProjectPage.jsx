@@ -1519,6 +1519,7 @@ const ProjectPage = () => {
                     setDeleteEventModal({ open: true, event: eventModal.event });
                 } : null}
                 loading={actionLoading}
+                verticalId={project?.vertical}
             />
 
             {/* Delete Event Modal */}

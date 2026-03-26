@@ -92,16 +92,29 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
 };
 
 // Inline Editable Team Member Row
-const TeamMemberRow = ({ member, onUpdate, onDelete }) => {
+const TeamMemberRow = ({ member, onUpdate, onDelete, assignmentTags }) => {
     const [editing, setEditing] = useState(false);
     const [data, setData] = useState(member);
+
+    useEffect(() => {
+        setData(member);
+    }, [member]);
 
     const handleSave = () => {
         onUpdate(data);
         setEditing(false);
     };
 
+    const toggleTag = (tag) => {
+        const current = data.tags || [];
+        const updated = current.includes(tag)
+            ? current.filter(t => t !== tag)
+            : [...current, tag];
+        setData({ ...data, tags: updated });
+    };
+
     const name = member.associate_name || member.name || 'Unknown';
+    const memberTags = member.tags || [];
 
     if (editing) {
         return (
@@ -120,6 +133,30 @@ const TeamMemberRow = ({ member, onUpdate, onDelete }) => {
                     placeholder="Role (e.g., Photographer)"
                     className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
                 />
+                {assignmentTags.length > 0 && (
+                    <div className="space-y-1.5">
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Tags</p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {assignmentTags.map(tag => {
+                                const selected = (data.tags || []).includes(tag);
+                                return (
+                                    <button
+                                        key={tag}
+                                        type="button"
+                                        onClick={() => toggleTag(tag)}
+                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-all ${
+                                            selected
+                                                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                                                : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:border-zinc-500'
+                                        }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
                 <div className="flex gap-2">
                     <button onClick={handleSave} className="flex-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded font-medium">
                         Save
@@ -133,27 +170,38 @@ const TeamMemberRow = ({ member, onUpdate, onDelete }) => {
     }
 
     return (
-        <div className="flex items-center justify-between p-3 bg-zinc-800/30 rounded-lg group hover:bg-zinc-800/50 transition-colors">
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
-                    {name.charAt(0)}
+        <div className="p-3 bg-zinc-800/30 rounded-lg group hover:bg-zinc-800/50 transition-colors">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                        {name.charAt(0)}
+                    </div>
+                    <div>
+                        <p className="text-white text-sm font-medium">{name}</p>
+                        <p className="text-zinc-500 text-xs">{member.role}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-white text-sm font-medium">{name}</p>
-                    <p className="text-zinc-500 text-xs">{member.role}</p>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-300">{member.role}</span>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => setEditing(true)} className="p-1 rounded hover:bg-zinc-700 text-zinc-400">
+                            <Icons.Edit className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={onDelete} className="p-1 rounded hover:bg-red-500/20 text-zinc-400 hover:text-red-400">
+                            <Icons.Trash className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-700 text-zinc-300">{member.role}</span>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => setEditing(true)} className="p-1 rounded hover:bg-zinc-700 text-zinc-400">
-                        <Icons.Edit className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={onDelete} className="p-1 rounded hover:bg-red-500/20 text-zinc-400 hover:text-red-400">
-                        <Icons.Trash className="w-3.5 h-3.5" />
-                    </button>
+            {memberTags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2 ml-11">
+                    {memberTags.map(tag => (
+                        <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">
+                            {tag}
+                        </span>
+                    ))}
                 </div>
-            </div>
+            )}
         </div>
     );
 };
@@ -165,10 +213,15 @@ const EventSlideOver = ({
     event,
     onSave,
     onDelete,
-    loading = false
+    loading = false,
+    verticalId
 }) => {
     const isEditing = !!event?.id;
     const { config } = useAgencyConfig();
+
+    const verticalConfig = config?.verticals?.find(v => v.id === verticalId);
+    const assignmentTags = verticalConfig?.assignment_tags || [];
+    const verticalTeamRequirements = verticalConfig?.team_requirements || [];
 
     const [formData, setFormData] = useState({
         type: '',
@@ -183,10 +236,11 @@ const EventSlideOver = ({
 
     const [deliverables, setDeliverables] = useState([]);
     const [assignments, setAssignments] = useState([]);
+    const [teamRequirements, setTeamRequirements] = useState([]);
     const [showAddDeliverable, setShowAddDeliverable] = useState(false);
     const [showAddMember, setShowAddMember] = useState(false);
     const [newDeliverable, setNewDeliverable] = useState({ type: '', quantity: 1, due_date: '', notes: '' });
-    const [newMember, setNewMember] = useState({ name: '', role: '' });
+    const [newMember, setNewMember] = useState({ name: '', role: '', tags: [] });
 
     // Helper to parse datetime string into date and time parts
     const parseDateTime = (dateTimeStr) => {
@@ -227,10 +281,12 @@ const EventSlideOver = ({
             });
             setDeliverables(event.deliverables || []);
             setAssignments(event.assignments || []);
+            setTeamRequirements(event.team_requirements || []);
         } else if (isOpen) {
             setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
             setDeliverables([]);
             setAssignments([]);
+            setTeamRequirements([]);
         }
     }, [isOpen, event]);
 
@@ -276,7 +332,8 @@ const EventSlideOver = ({
             end_date,
             notes: formData.notes,
             deliverables: deliverables.map(d => ({ ...d, due_date: d.due_date || null })),
-            assignments
+            assignments,
+            team_requirements: teamRequirements
         });
     };
 
@@ -311,7 +368,7 @@ const EventSlideOver = ({
         }
 
         setAssignments([...assignments, { id: uuidv4(), associate_name: newMember.name, ...newMember }]);
-        setNewMember({ name: '', role: '' });
+        setNewMember({ name: '', role: '', tags: [] });
         setShowAddMember(false);
     };
 
@@ -321,6 +378,43 @@ const EventSlideOver = ({
 
     const deleteMember = (id) => {
         setAssignments(assignments.filter(a => a.id !== id));
+    };
+
+    // Compute assigned count per role
+    const assignedCountByRole = assignments.reduce((acc, a) => {
+        if (a.role) acc[a.role] = (acc[a.role] || 0) + 1;
+        return acc;
+    }, {});
+
+    // Team requirements handlers
+    const addTeamRequirement = () => {
+        const existingRoles = teamRequirements.map(r => r.role);
+        const firstUnused = (config?.associateRoles || []).find(r => !existingRoles.includes(r));
+        if (!firstUnused) return;
+        setTeamRequirements([...teamRequirements, { role: firstUnused, count: 1 }]);
+    };
+
+    const updateTeamRequirement = (index, field, value) => {
+        setTeamRequirements(teamRequirements.map((req, i) =>
+            i === index ? { ...req, [field]: value } : req
+        ));
+    };
+
+    const removeTeamRequirement = (index) => {
+        setTeamRequirements(teamRequirements.filter((_, i) => i !== index));
+    };
+
+    const loadVerticalDefaults = () => {
+        if (verticalTeamRequirements.length === 0) return;
+        setTeamRequirements(verticalTeamRequirements.map(r => ({ role: r.role, count: r.count })));
+    };
+
+    const toggleNewMemberTag = (tag) => {
+        const current = newMember.tags || [];
+        const updated = current.includes(tag)
+            ? current.filter(t => t !== tag)
+            : [...current, tag];
+        setNewMember({ ...newMember, tags: updated });
     };
 
     return (
@@ -525,6 +619,30 @@ const EventSlideOver = ({
                                     placeholder="Role (e.g., Photographer)"
                                     className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
                                 />
+                                {assignmentTags.length > 0 && (
+                                    <div className="space-y-1.5">
+                                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Tags</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {assignmentTags.map(tag => {
+                                                const selected = (newMember.tags || []).includes(tag);
+                                                return (
+                                                    <button
+                                                        key={tag}
+                                                        type="button"
+                                                        onClick={() => toggleNewMemberTag(tag)}
+                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-all ${
+                                                            selected
+                                                                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                                                                : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:border-zinc-500'
+                                                        }`}
+                                                    >
+                                                        {tag}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex gap-2">
                                     <button onClick={addMember} className="flex-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded font-medium">
                                         Add Member
@@ -542,6 +660,7 @@ const EventSlideOver = ({
                                 member={member}
                                 onUpdate={(data) => updateMember(member.id, data)}
                                 onDelete={() => deleteMember(member.id)}
+                                assignmentTags={assignmentTags}
                             />
                         ))}
 
@@ -549,6 +668,82 @@ const EventSlideOver = ({
                             <p className="text-zinc-600 text-sm italic p-3 bg-zinc-800/30 rounded-lg text-center">
                                 No team members yet
                             </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Team Requirements Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm uppercase tracking-widest text-zinc-500 font-medium flex items-center gap-2">
+                            <Icons.CheckSquare className="w-4 h-4" />
+                            Team Requirements
+                        </h3>
+                        <div className="flex items-center gap-2">
+                            {verticalTeamRequirements.length > 0 && (
+                                <button
+                                    onClick={loadVerticalDefaults}
+                                    className="text-xs text-zinc-500 hover:text-zinc-300 font-medium"
+                                >
+                                    Load defaults
+                                </button>
+                            )}
+                            <button
+                                onClick={addTeamRequirement}
+                                disabled={(teamRequirements.length >= (config?.associateRoles || []).length)}
+                                className="text-xs text-purple-400 hover:text-purple-300 font-medium disabled:opacity-30"
+                            >
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        {teamRequirements.length === 0 ? (
+                            <p className="text-zinc-600 text-sm italic p-3 bg-zinc-800/30 rounded-lg text-center">
+                                No requirements set{verticalTeamRequirements.length > 0 ? ' — load defaults or add manually' : ''}
+                            </p>
+                        ) : (
+                            teamRequirements.map((req, i) => {
+                                const assigned = assignedCountByRole[req.role] || 0;
+                                const isFulfilled = assigned >= req.count;
+                                return (
+                                    <div key={i} className="flex items-center gap-3 px-3 py-2 bg-zinc-800/30 rounded-lg group">
+                                        <select
+                                            value={req.role}
+                                            onChange={e => updateTeamRequirement(i, 'role', e.target.value)}
+                                            className="flex-1 bg-transparent border-none text-sm text-white focus:outline-none cursor-pointer"
+                                        >
+                                            {(config?.associateRoles || []).map(r => (
+                                                <option key={r} value={r}>{r}</option>
+                                            ))}
+                                        </select>
+                                        <div className="flex items-center gap-1.5 text-xs">
+                                            <span className={isFulfilled ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
+                                                {assigned}
+                                            </span>
+                                            <span className="text-zinc-600">/</span>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={20}
+                                                value={req.count}
+                                                onChange={e => updateTeamRequirement(i, 'count', Math.max(1, parseInt(e.target.value) || 1))}
+                                                className="w-10 text-center bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-white text-xs focus:outline-none"
+                                            />
+                                            <span className={`text-base leading-none ${isFulfilled ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                                {isFulfilled ? '✓' : '!'}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => removeTeamRequirement(i)}
+                                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-all"
+                                        >
+                                            <Icons.X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                );
+                            })
                         )}
                     </div>
                 </div>
