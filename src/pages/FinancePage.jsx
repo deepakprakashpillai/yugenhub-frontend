@@ -153,7 +153,7 @@ const FinancePage = () => {
                 {renderContent()}
             </div>
 
-            <MultiActionFAB actions={fabActions} />
+            <MultiActionFAB actions={fabActions} hidden={transactionOpen || invoiceOpen} />
 
             <TransactionSlideOver
                 isOpen={transactionOpen}

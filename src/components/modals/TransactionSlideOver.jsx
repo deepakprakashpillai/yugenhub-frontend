@@ -11,6 +11,8 @@ import SearchableSelect from '../ui/SearchableSelect';
 import DatePicker from '../ui/DatePicker';
 import { FINANCE_CATEGORIES, TRANSACTION_TYPES, VERTICALS } from '../../constants';
 
+const PROJECT_PAYMENT_CAT = FINANCE_CATEGORIES.PROJECT_PAYMENT;
+
 const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
     const { theme } = useTheme();
     const { config } = useAgencyConfig();
@@ -37,6 +39,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
     });
 
     const isTransfer = formData.type === TRANSACTION_TYPES.TRANSFER;
+    const isProjectIncomeMode = !!(formData.project_id && formData.type === TRANSACTION_TYPES.INCOME);
 
     const [filteredCategories, setFilteredCategories] = useState([]);
     const [availableSubcategories, setAvailableSubcategories] = useState([]);
@@ -141,7 +144,7 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         }
     }, [selectedVertical, projects]);
 
-    // Auto-select vertical if project is selected (reverse lookup)
+    // Auto-select vertical, client, and category when project is selected
     useEffect(() => {
         if (formData.project_id && projects.length > 0) {
             const project = projects.find(p => p._id === formData.project_id || p.id === formData.project_id);
@@ -149,9 +152,17 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 if (project.vertical && project.vertical !== selectedVertical) {
                     setSelectedVertical(project.vertical);
                 }
-                if (project.client_id) {
-                    setFormData(prev => ({ ...prev, client_id: project.client_id }));
-                }
+                setFormData(prev => {
+                    const updates = {};
+                    if (project.client_id) updates.client_id = project.client_id;
+                    // Auto-switch to income + Project Payment category when a project is linked
+                    if (prev.type !== TRANSACTION_TYPES.INCOME) updates.type = TRANSACTION_TYPES.INCOME;
+                    if (prev.category !== PROJECT_PAYMENT_CAT) {
+                        updates.category = PROJECT_PAYMENT_CAT;
+                        updates.subcategory = '';
+                    }
+                    return { ...prev, ...updates };
+                });
             }
         }
     }, [formData.project_id, projects, selectedVertical]);
@@ -397,11 +408,14 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 {!isTransfer && (
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-medium mb-1 text-gray-500">Category</label>
+                            <label className="block text-xs font-medium mb-1 text-gray-500">
+                                Category {isProjectIncomeMode && <span className="text-indigo-400 ml-1">auto</span>}
+                            </label>
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '', associate_id: '' })}
-                                className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
+                                disabled={isProjectIncomeMode}
+                                className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none ${isProjectIncomeMode ? 'opacity-60 cursor-not-allowed' : ''}`}
                             >
                                 <option value="">Select...</option>
                                 {filteredCategories.map(c => (
@@ -423,7 +437,9 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                             </div>
                         ) : (
                             <div>
-                                <label className="block text-xs font-medium mb-1 text-gray-500">Subcategory</label>
+                                <label className="block text-xs font-medium mb-1 text-gray-500">
+                                    {isProjectIncomeMode ? 'Payment Type' : 'Subcategory'}
+                                </label>
                                 <select
                                     value={formData.subcategory}
                                     onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
