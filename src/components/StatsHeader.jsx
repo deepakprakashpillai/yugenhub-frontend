@@ -18,10 +18,10 @@ const StatCard = ({ label, value, trend, delay }) => {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity hidden md:block">
                 <div className="w-16 h-16 bg-gradient-to-br from-white to-transparent rounded-full blur-xl" />
             </div>
-            <span className={`text-2xl md:text-4xl font-black ${theme.text.primary} mb-0.5 md:mb-1 tracking-tighter`}>{value}</span>
-            <span className={`${theme.text.secondary} text-[10px] md:text-xs font-bold uppercase tracking-wider md:tracking-widest`}>{label}</span>
+            <span className={`text-xl md:text-4xl font-black ${theme.text.primary} mb-0.5 md:mb-1 tracking-tighter`}>{value}</span>
+            <span className={`${theme.text.secondary} text-[10px] md:text-xs font-bold uppercase tracking-wide text-center leading-tight`}>{label}</span>
             {trend && (
-                <span className="text-emerald-500 text-[10px] md:text-xs mt-1 md:mt-2 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="text-emerald-500 text-xs mt-1 md:mt-2 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                     {trend}
                 </span>
             )}
@@ -71,7 +71,7 @@ const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
         }
 
         return (
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 md:mb-8">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4 md:mb-8">
                 <StatCard label="Active" value={stats.active} delay={0} />
                 <StatCard label="Ongoing" value={stats.ongoing} delay={0.1} />
                 <StatCard label="This Month" value={stats.this_month} delay={0.2} />
@@ -82,10 +82,10 @@ const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
     // --- Clients Logic ---
     if (type === 'clients') {
         return (
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 md:mb-8">
-                <StatCard label="Total Clients" value={stats.total} delay={0} />
-                <StatCard label="Active Clients" value={stats.active} delay={0.1} />
-                <StatCard label="New This Month" value={stats.this_month} delay={0.2} />
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4 md:mb-8">
+                <StatCard label="Total" value={stats.total} delay={0} />
+                <StatCard label="Active" value={stats.active} delay={0.1} />
+                <StatCard label="This Month" value={stats.this_month} delay={0.2} />
             </div>
         );
     }
@@ -93,10 +93,10 @@ const StatsHeader = ({ vertical, type = 'project', view = 'all' }) => {
     // --- Associates Logic ---
     if (type === 'associates') {
         return (
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 md:mb-8">
-                <StatCard label="Total Team" value={stats.total} delay={0} />
-                <StatCard label="Active Members" value={stats.active} delay={0.1} />
-                <StatCard label="Joined This Month" value={stats.this_month} delay={0.2} />
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-4 md:mb-8">
+                <StatCard label="Total" value={stats.total} delay={0} />
+                <StatCard label="Active" value={stats.active} delay={0.1} />
+                <StatCard label="This Month" value={stats.this_month} delay={0.2} />
             </div>
         );
     }

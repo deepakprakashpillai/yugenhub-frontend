@@ -119,7 +119,7 @@ const FinancePage = () => {
             <div className={`px-3 py-3 sm:px-4 sm:py-4 md:p-6 border-b ${theme.canvas.border} flex justify-between items-center`}>
                 <div>
                     <h1 className="text-xl sm:text-2xl font-bold">Finance</h1>
-                    <p className={`text-[10px] sm:text-sm mt-0.5 sm:mt-1 ${theme.text.secondary}`}>Manage your agency's finances</p>
+                    <p className={`text-xs sm:text-sm mt-0.5 sm:mt-1 ${theme.text.secondary}`}>Manage your agency's finances</p>
                 </div>
             </div>
 
@@ -136,13 +136,13 @@ const FinancePage = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`pb-3 sm:pb-4 flex items-center space-x-1.5 md:space-x-2 text-[11px] sm:text-xs md:text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
+                            className={`pb-3 sm:pb-4 pt-1 flex items-center space-x-1.5 md:space-x-2 text-xs md:text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id
                                 ? theme.canvas.tabs.active
                                 : theme.canvas.tabs.inactive
                                 }`}
                         >
                             <tab.icon size={14} />
-                            <span className="whitespace-nowrap">{isMobile ? tab.label.split(' ')[0] : tab.label}</span>
+                            <span className="whitespace-nowrap">{tab.label}</span>
                         </button>
                     ))}
                 </div>

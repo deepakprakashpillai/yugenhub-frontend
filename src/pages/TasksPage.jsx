@@ -181,18 +181,18 @@ const TasksPage = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 sm:mb-6">
                 <div>
                     <h1 className={`text-xl sm:text-2xl md:text-4xl font-black ${theme.text.primary} uppercase tracking-tighter`}>Tasks</h1>
-                    <p className={`${theme.text.secondary} text-[10px] sm:text-sm mt-0.5 sm:mt-1`}>Manage your deliverables and to-dos</p>
+                    <p className={`${theme.text.secondary} text-xs sm:text-sm mt-0.5 sm:mt-1`}>Manage your deliverables and to-dos</p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
                     {/* View Mode Toggle */}
-                    <div className={`flex gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border}`}>
+                    <div className={`flex gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border} shrink-0`}>
                         {VIEW_MODES.map(vm => (
                             <button
                                 key={vm.key}
                                 onClick={() => setViewMode(vm.key)}
                                 className={clsx(
-                                    "flex items-center gap-1.5 px-3 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all",
+                                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all",
                                     viewMode === vm.key ? "shadow" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={viewMode === vm.key ? {
@@ -208,11 +208,11 @@ const TasksPage = () => {
                     </div>
 
                     {/* My Tasks / All Tasks Toggle */}
-                    <div className={`flex gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border}`}>
+                    <div className={`flex gap-1 ${theme.canvas.card} p-1 rounded-xl border ${theme.canvas.border} shrink-0`}>
                         <button
                             onClick={() => setTab('my_tasks')}
                             className={clsx(
-                                "px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all",
+                                "px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap",
                                 tab === 'my_tasks' ? "shadow" : `${theme.text.secondary} ${theme.canvas.hover}`
                             )}
                             style={tab === 'my_tasks' ? {
@@ -226,7 +226,7 @@ const TasksPage = () => {
                             <button
                                 onClick={() => setTab('all_tasks')}
                                 className={clsx(
-                                    "px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all",
+                                    "px-3 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap",
                                     tab === 'all_tasks' ? "shadow" : `${theme.text.secondary} ${theme.canvas.hover}`
                                 )}
                                 style={tab === 'all_tasks' ? {
@@ -249,7 +249,7 @@ const TasksPage = () => {
                             key={ct.key}
                             onClick={() => setCategoryTab(ct.key)}
                             className={clsx(
-                                "flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap",
+                                "flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap",
                                 categoryTab === ct.key
                                     ? "shadow-sm"
                                     : `${theme.text.secondary} ${theme.canvas.hover}`

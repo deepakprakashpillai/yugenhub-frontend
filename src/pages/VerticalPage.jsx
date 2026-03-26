@@ -249,7 +249,7 @@ const VerticalPage = ({ vertical, title }) => {
 
             {/* LOADING STATE - SKELETONS */}
             {loading && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {Array.from({ length: 8 }).map((_, i) => (
                         <SkeletonCard key={i} />
                     ))}
@@ -266,7 +266,7 @@ const VerticalPage = ({ vertical, title }) => {
                 <AnimatePresence mode='wait'>
                     {/* GRID VIEW */}
                     {viewMode === 'grid' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                             {displayProjects.map((project) => (
                                 <ProjectCard
                                     key={project._id}
@@ -289,7 +289,7 @@ const VerticalPage = ({ vertical, title }) => {
 
             {/* PAGINATION CONTROLS */}
             {!loading && totalPages > 1 && (
-                <div className={`flex justify-center items-center gap-4 mt-12 ${theme.canvas.card} py-3 px-6 rounded-full w-fit mx-auto border ${theme.canvas.border} backdrop-blur-sm shadow-2xl`}>
+                <div className={`flex justify-center items-center gap-4 mt-6 md:mt-12 ${theme.canvas.card} py-3 px-6 rounded-full w-fit mx-auto border ${theme.canvas.border} backdrop-blur-sm shadow-2xl`}>
                     <button
                         disabled={page === 1}
                         onClick={() => setPage(p => Math.max(1, p - 1))}
