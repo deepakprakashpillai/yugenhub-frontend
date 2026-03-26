@@ -394,7 +394,10 @@ const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
     const name = assignment.associate_name || assignment.name || 'Unknown';
 
     return (
-        <div className={`flex items-center justify-between gap-3 p-3 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group`}>
+        <div
+            className={`flex items-center justify-between gap-3 p-3 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} cursor-pointer`}
+            onClick={onEdit}
+        >
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xs">
                     {name.charAt(0)}
@@ -408,23 +411,13 @@ const AssignmentItem = ({ assignment, onEdit, onDelete }) => {
                 <span className={`text-xs px-2 py-1 rounded-full ${theme.canvas.card} ${theme.text.secondary}`}>
                     {assignment.role}
                 </span>
-
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        className={`p-1 rounded sm:hover:${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
-                        title="Edit Member"
-                    >
-                        <Icons.Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                        className={`p-1 rounded hover:bg-red-500/10 text-red-500 hover:text-red-400 transition-colors`}
-                        title="Remove Member"
-                    >
-                        <Icons.Trash className="w-4 h-4" />
-                    </button>
-                </div>
+                <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                    className={`p-1 rounded hover:bg-red-500/10 text-red-500/60 hover:text-red-400 transition-colors`}
+                    title="Remove Member"
+                >
+                    <Icons.Trash className="w-4 h-4" />
+                </button>
             </div>
         </div>
     );
