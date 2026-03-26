@@ -181,6 +181,7 @@ const ProjectSlideOver = ({
             notes: '',
             deliverables: [],
             assignments: [],
+            team_requirements: [],
             ...initialCustomFields
         }]);
     };
@@ -250,10 +251,63 @@ const ProjectSlideOver = ({
                         id: uuidv4(),
                         associate_id: '',
                         role: '',
-                        name: ''
+                        name: '',
+                        tags: []
                     }
                 ]
             };
+            return newEvents;
+        });
+    };
+
+    // --- Team Requirement Handlers ---
+    const handleAddTeamRequirement = (eventIndex) => {
+        const vId = vertical?.toLowerCase();
+        const configVertical = config?.verticals?.find(v => v.id === vId);
+        const existing = events[eventIndex]?.team_requirements || [];
+        const firstUnused = (config?.associateRoles || []).find(r => !existing.some(e => e.role === r));
+        if (!firstUnused) return;
+        setEvents(prev => {
+            const newEvents = [...prev];
+            newEvents[eventIndex] = {
+                ...newEvents[eventIndex],
+                team_requirements: [...existing, { role: firstUnused, count: 1 }]
+            };
+            return newEvents;
+        });
+    };
+
+    const handleTeamRequirementChange = (eventIndex, reqIndex, field, value) => {
+        setEvents(prev => {
+            const newEvents = [...prev];
+            const reqs = [...(newEvents[eventIndex].team_requirements || [])];
+            reqs[reqIndex] = { ...reqs[reqIndex], [field]: value };
+            newEvents[eventIndex] = { ...newEvents[eventIndex], team_requirements: reqs };
+            return newEvents;
+        });
+    };
+
+    const handleRemoveTeamRequirement = (eventIndex, reqIndex) => {
+        setEvents(prev => {
+            const newEvents = [...prev];
+            newEvents[eventIndex] = {
+                ...newEvents[eventIndex],
+                team_requirements: (newEvents[eventIndex].team_requirements || []).filter((_, i) => i !== reqIndex)
+            };
+            return newEvents;
+        });
+    };
+
+    const handleToggleAssignmentTag = (eventIndex, assignmentIndex, tag) => {
+        setEvents(prev => {
+            const newEvents = [...prev];
+            const newAssignments = [...newEvents[eventIndex].assignments];
+            const current = newAssignments[assignmentIndex].tags || [];
+            newAssignments[assignmentIndex] = {
+                ...newAssignments[assignmentIndex],
+                tags: current.includes(tag) ? current.filter(t => t !== tag) : [...current, tag]
+            };
+            newEvents[eventIndex] = { ...newEvents[eventIndex], assignments: newAssignments };
             return newEvents;
         });
     };
@@ -413,6 +467,8 @@ const ProjectSlideOver = ({
         if (configVertical?.has_events === false) return null;
 
         const customEventFields = configVertical?.event_fields || [];
+        const assignmentTags = configVertical?.assignment_tags || [];
+        const verticalTeamRequirements = configVertical?.team_requirements || [];
 
         return (
             <div className={`mt-8 pt-6 border-t ${theme.canvas.border}`}>
@@ -671,6 +727,78 @@ const ProjectSlideOver = ({
                                     </div>
                                 </div>
 
+                                {/* Team Requirements Section */}
+                                <div className={`p-5 ${theme.canvas.bg} bg-opacity-30 border-t ${theme.canvas.border}`}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className={`flex items-center gap-2 text-sm font-medium ${theme.text.secondary}`}>
+                                            <Icons.CheckSquare className="w-4 h-4" />
+                                            Team Requirements
+                                            <span className={`px-2 py-0.5 rounded-full ${theme.canvas.card} text-xs ${theme.text.secondary} font-medium border ${theme.canvas.border}`}>{(event.team_requirements || []).length}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {verticalTeamRequirements.length > 0 && (
+                                                <button
+                                                    onClick={() => {
+                                                        setEvents(prev => {
+                                                            const newEvents = [...prev];
+                                                            newEvents[index] = { ...newEvents[index], team_requirements: verticalTeamRequirements.map(r => ({ role: r.role, count: r.count })) };
+                                                            return newEvents;
+                                                        });
+                                                    }}
+                                                    className={`text-xs ${theme.text.secondary} hover:${theme.text.primary} font-medium px-2.5 py-1.5 hover:${theme.canvas.hover} rounded-lg transition-colors`}
+                                                >
+                                                    Load defaults
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleAddTeamRequirement(index)}
+                                                disabled={(event.team_requirements || []).length >= (config?.associateRoles || []).length}
+                                                className="text-xs flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-medium px-2.5 py-1.5 hover:bg-purple-500/10 rounded-lg transition-colors disabled:opacity-30"
+                                            >
+                                                <Icons.Plus className="w-3.5 h-3.5" />
+                                                Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {(event.team_requirements || []).map((req, rIndex) => (
+                                            <div key={rIndex} className={`flex items-center gap-3 p-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg`}>
+                                                <select
+                                                    value={req.role}
+                                                    onChange={e => handleTeamRequirementChange(index, rIndex, 'role', e.target.value)}
+                                                    className={`flex-1 bg-transparent border-none text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                >
+                                                    {(config?.associateRoles || []).map(r => (
+                                                        <option key={r} value={r}>{r}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`text-xs ${theme.text.secondary}`}>Count</span>
+                                                    <input
+                                                        type="number"
+                                                        min={1}
+                                                        max={20}
+                                                        value={req.count}
+                                                        onChange={e => handleTeamRequirementChange(index, rIndex, 'count', Math.max(1, parseInt(e.target.value) || 1))}
+                                                        className={`w-14 text-center ${theme.canvas.bg} border ${theme.canvas.border} rounded px-2 py-1 text-sm ${theme.text.primary} focus:outline-none`}
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => handleRemoveTeamRequirement(index, rIndex)}
+                                                    className={`${theme.text.secondary} hover:text-red-400 p-1 rounded hover:bg-red-500/10 transition-colors`}
+                                                >
+                                                    <Icons.X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {(event.team_requirements || []).length === 0 && (
+                                            <div className={`text-center py-4 border border-dashed ${theme.canvas.border} rounded-lg`}>
+                                                <p className={`text-xs ${theme.text.secondary} italic`}>No requirements set{verticalTeamRequirements.length > 0 ? ' — load defaults or add manually' : ''}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
                                 {/* Team Section */}
                                 <div className={`p-5 ${theme.canvas.bg} bg-opacity-30 border-t ${theme.canvas.border}`}>
                                     <div className="flex items-center justify-between mb-4">
@@ -689,34 +817,59 @@ const ProjectSlideOver = ({
                                     </div>
                                     <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                         {event.assignments.map((assign, aIndex) => (
-                                            <div key={assign.id} className={`flex flex-col sm:grid sm:grid-cols-[1fr,1fr,auto] gap-2 sm:gap-3 items-start sm:items-center ${theme.canvas.card} p-3 sm:p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors relative`}>
-                                                <div className="w-full min-w-0 pr-8 sm:pr-0">
-                                                    <select
-                                                        value={assign.associate_id}
-                                                        onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
-                                                        className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                            <div key={assign.id} className={`${theme.canvas.card} border ${theme.canvas.border} rounded-lg group/item hover:border-zinc-500 transition-colors`}>
+                                                <div className="flex flex-col sm:grid sm:grid-cols-[1fr,1fr,auto] gap-2 sm:gap-3 items-start sm:items-center p-3 sm:p-2.5 relative">
+                                                    <div className="w-full min-w-0 pr-8 sm:pr-0">
+                                                        <select
+                                                            value={assign.associate_id}
+                                                            onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
+                                                            className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                        >
+                                                            <option value="" disabled>Select Member</option>
+                                                            {associates.map(assoc => (
+                                                                <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div className={`w-full min-w-0 sm:border-l ${theme.canvas.border} sm:pl-3 mt-1 sm:mt-0`}>
+                                                        <input
+                                                            type="text"
+                                                            value={assign.role}
+                                                            onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
+                                                            placeholder="Role (e.g. Lead)"
+                                                            className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 placeholder-zinc-500`}
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveAssignment(index, aIndex)}
+                                                        className={`absolute right-2 top-2 sm:relative sm:right-auto sm:top-auto ${theme.text.secondary} hover:text-red-400 p-1.5 opacity-100 sm:opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
                                                     >
-                                                        <option value="" disabled>Select Member</option>
-                                                        {associates.map(assoc => (
-                                                            <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
-                                                        ))}
-                                                    </select>
+                                                        <Icons.X className="w-4 h-4" />
+                                                    </button>
                                                 </div>
-                                                <div className={`w-full min-w-0 sm:border-l ${theme.canvas.border} sm:pl-3 mt-1 sm:mt-0`}>
-                                                    <input
-                                                        type="text"
-                                                        value={assign.role}
-                                                        onChange={(e) => handleAssignmentChange(index, aIndex, 'role', e.target.value)}
-                                                        placeholder="Role (e.g. Lead)"
-                                                        className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 placeholder-zinc-500`}
-                                                    />
-                                                </div>
-                                                <button
-                                                    onClick={() => handleRemoveAssignment(index, aIndex)}
-                                                    className={`absolute right-2 top-2 sm:relative sm:right-auto sm:top-auto ${theme.text.secondary} hover:text-red-400 p-1.5 opacity-100 sm:opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
-                                                >
-                                                    <Icons.X className="w-4 h-4" />
-                                                </button>
+                                                {assignmentTags.length > 0 && (
+                                                    <div className={`px-3 pb-2.5 border-t ${theme.canvas.border} pt-2`}>
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {assignmentTags.map(tag => {
+                                                                const selected = (assign.tags || []).includes(tag);
+                                                                return (
+                                                                    <button
+                                                                        key={tag}
+                                                                        type="button"
+                                                                        onClick={() => handleToggleAssignmentTag(index, aIndex, tag)}
+                                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-all ${
+                                                                            selected
+                                                                                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40'
+                                                                                : `${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border} hover:border-zinc-500`
+                                                                        }`}
+                                                                    >
+                                                                        {tag}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                         {event.assignments.length === 0 && (

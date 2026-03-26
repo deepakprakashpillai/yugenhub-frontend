@@ -5,7 +5,7 @@ import api from '../../api/axios';
 import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 
-const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading = false }) => {
+const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading = false, verticalId }) => {
     const { theme } = useTheme();
     const { config } = useAgencyConfig();
     const isEditing = !!assignment;
@@ -15,10 +15,14 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
     // Use config-driven roles instead of hardcoded list
     const roleOptions = config?.associateRoles || [];
 
+    const verticalConfig = config?.verticals?.find(v => v.id === verticalId);
+    const assignmentTags = verticalConfig?.assignment_tags || [];
+
     const [formData, setFormData] = useState({
         associate_id: assignment?.associate_id || '',
         associate_name: assignment?.associate_name || '',
-        role: assignment?.role || roleOptions[0] || ''
+        role: assignment?.role || roleOptions[0] || '',
+        tags: assignment?.tags || []
     });
 
     // Sync formData with assignment prop when it changes or modal opens
@@ -27,7 +31,8 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
             setFormData({
                 associate_id: assignment?.associate_id || '',
                 associate_name: assignment?.associate_name || assignment?.name || '',
-                role: assignment?.role || roleOptions[0] || ''
+                role: assignment?.role || roleOptions[0] || '',
+                tags: assignment?.tags || []
             });
         }
     }, [assignment, isOpen]);
@@ -64,6 +69,14 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
             ...prev,
             [e.target.name]: e.target.value
         }));
+    };
+
+    const toggleTag = (tag) => {
+        const current = formData.tags || [];
+        const updated = current.includes(tag)
+            ? current.filter(t => t !== tag)
+            : [...current, tag];
+        setFormData(prev => ({ ...prev, tags: updated }));
     };
 
     const handleSubmit = (e) => {
@@ -131,6 +144,32 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                         ))}
                     </select>
                 </div>
+
+                {/* Tags */}
+                {assignmentTags.length > 0 && (
+                    <div>
+                        <label className={`block text-sm ${theme.text.secondary} mb-1.5`}>Tags</label>
+                        <div className="flex flex-wrap gap-2">
+                            {assignmentTags.map(tag => {
+                                const selected = (formData.tags || []).includes(tag);
+                                return (
+                                    <button
+                                        key={tag}
+                                        type="button"
+                                        onClick={() => toggleTag(tag)}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                                            selected
+                                                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40'
+                                                : `${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border} hover:border-zinc-500`
+                                        }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-2">
