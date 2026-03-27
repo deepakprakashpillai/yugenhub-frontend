@@ -60,3 +60,11 @@ export const createPayout = async (payoutData) => {
     const response = await api.post('/finance/payouts', payoutData);
     return response.data;
 };
+
+export const adjustAccountBalance = async (accountId, targetBalance, note) => {
+    const response = await api.post(`/finance/accounts/${accountId}/adjust-balance`, {
+        target_balance: targetBalance,
+        note,
+    });
+    return response.data;
+};
