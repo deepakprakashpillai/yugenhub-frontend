@@ -1,13 +1,18 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import { FINANCE_CATEGORIES, TRANSACTION_TYPES } from '../../constants';
 
 const TransactionItem = ({ transaction, theme, associates, projects, config }) => {
     const isIncome = transaction.type === TRANSACTION_TYPES.INCOME;
     const isTransfer = transaction.type === TRANSACTION_TYPES.TRANSFER;
+    const isAdjustment = transaction.category === 'Balance Adjustment';
 
     let colorClass, Icon, amountColor;
-    if (isIncome) {
+    if (isAdjustment) {
+        colorClass = 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400';
+        Icon = SlidersHorizontal;
+        amountColor = 'text-amber-600 dark:text-amber-400';
+    } else if (isIncome) {
         colorClass = 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400';
         Icon = ArrowUpRight;
         amountColor = 'text-green-600 dark:text-green-400';
@@ -111,7 +116,12 @@ const TransactionItem = ({ transaction, theme, associates, projects, config }) =
                                 {displayTitle}
                             </h4>
                             {vertical && getVerticalBadge(vertical)}
-                            {transaction.subcategory && !isPayout && (
+                            {isAdjustment && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    adjustment
+                                </span>
+                            )}
+                            {transaction.subcategory && !isPayout && !isAdjustment && (
                                 <span className={`text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 ${theme.text.secondary}`}>
                                     {transaction.subcategory}
                                 </span>

@@ -76,7 +76,7 @@ const FinancePage = () => {
             case 'overview':
                 return <FinanceOverview refreshTrigger={refreshTrigger} />;
             case 'accounts':
-                return <FinanceAccounts refreshTrigger={refreshTrigger} />;
+                return <FinanceAccounts refreshTrigger={refreshTrigger} onRefresh={handleRefresh} />;
             case 'transactions':
                 return <FinanceTransactions refreshTrigger={refreshTrigger} />;
             case 'projects':

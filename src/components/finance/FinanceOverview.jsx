@@ -34,9 +34,44 @@ const SectionCard = ({ title, children, theme, action, className = '' }) => (
     </div>
 );
 
+const PERIODS = [
+    { id: 'this_month', label: 'This Month' },
+    { id: 'last_3m', label: 'Last 3 Months' },
+    { id: 'last_6m', label: 'Last 6 Months' },
+    { id: 'this_year', label: 'This Year' },
+    { id: 'all', label: 'All Time' },
+];
+
+function getPeriodRange(periodId) {
+    const now = new Date();
+    switch (periodId) {
+        case 'this_month': {
+            const start = new Date(now.getFullYear(), now.getMonth(), 1);
+            return { start, end: now };
+        }
+        case 'last_3m': {
+            const start = new Date(now);
+            start.setMonth(start.getMonth() - 3);
+            return { start, end: now };
+        }
+        case 'last_6m': {
+            const start = new Date(now);
+            start.setMonth(start.getMonth() - 6);
+            return { start, end: now };
+        }
+        case 'this_year': {
+            const start = new Date(now.getFullYear(), 0, 1);
+            return { start, end: now };
+        }
+        default:
+            return null; // all time
+    }
+}
+
 const FinanceOverview = ({ refreshTrigger }) => {
     const { theme } = useTheme();
     const { config } = useAgencyConfig();
+    const [period, setPeriod] = useState('this_month');
     const [overview, setOverview] = useState(null);
     const [allTransactions, setAllTransactions] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -84,9 +119,20 @@ const FinanceOverview = ({ refreshTrigger }) => {
         );
     }
 
-    const income = overview?.income || 0;
-    const expenses = overview?.expenses || 0;
-    const netProfit = overview?.net_profit ?? (income - expenses);
+    // --- Period filter ---
+    const periodRange = getPeriodRange(period);
+    const filteredTransactions = periodRange
+        ? allTransactions.filter(t => {
+            const d = t.date ? new Date(t.date) : null;
+            return d && d >= periodRange.start && d <= periodRange.end;
+        })
+        : allTransactions;
+
+    // Compute period stats from filtered transactions
+    const income = filteredTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expenses = filteredTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const netProfit = income - expenses;
+    // Outstanding is always current state (not period-specific)
     const outstanding = overview?.outstanding_receivables || 0;
 
     // --- Pending Collections: projects with quote_amount, excluding enquiry/cancelled ---
@@ -174,9 +220,9 @@ const FinanceOverview = ({ refreshTrigger }) => {
         .filter(p => p.balanceDue > 0 || p.action.priority <= 3)
         .sort((a, b) => a.action.priority - b.action.priority || b.balanceDue - a.balanceDue);
 
-    // --- Expense breakdown by category ---
-    const expenseByCategory = allTransactions
-        .filter(t => t.type === 'expense')
+    // --- Expense breakdown by category (period-filtered, exclude balance adjustments) ---
+    const expenseByCategory = filteredTransactions
+        .filter(t => t.type === 'expense' && t.category !== 'Balance Adjustment')
         .reduce((acc, t) => {
             const cat = t.category || 'Uncategorised';
             acc[cat] = (acc[cat] || 0) + t.amount;
@@ -187,9 +233,9 @@ const FinanceOverview = ({ refreshTrigger }) => {
         .slice(0, 6);
     const maxExpense = expenseCategories[0]?.[1] || 1;
 
-    // --- Income breakdown by subcategory (Project Payment types + others) ---
-    const incomeByType = allTransactions
-        .filter(t => t.type === 'income')
+    // --- Income breakdown by subcategory (period-filtered, exclude balance adjustments) ---
+    const incomeByType = filteredTransactions
+        .filter(t => t.type === 'income' && t.category !== 'Balance Adjustment')
         .reduce((acc, t) => {
             const key = t.category === 'Project Payment' && t.subcategory
                 ? t.subcategory
@@ -207,11 +253,30 @@ const FinanceOverview = ({ refreshTrigger }) => {
     };
     const getIncomeColor = (key) => INCOME_COLORS[key] || '#6b7280';
 
-    // Recent transactions (last 8)
-    const recentTxs = allTransactions.slice(0, 8);
+    // Recent transactions within period (last 8, sorted newest first)
+    const recentTxs = [...filteredTransactions]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 8);
 
     return (
         <div className="space-y-4 sm:space-y-5">
+            {/* --- Period Selector --- */}
+            <div className="flex items-center gap-2 flex-wrap">
+                {PERIODS.map(p => (
+                    <button
+                        key={p.id}
+                        onClick={() => setPeriod(p.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                            period === p.id
+                                ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                                : `${theme.canvas.hover} ${theme.text.secondary} border border-transparent`
+                        }`}
+                    >
+                        {p.label}
+                    </button>
+                ))}
+            </div>
+
             {/* --- Stat Cards --- */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <StatCard title="Total Income" value={income} icon={ArrowUpRight} accent="#22c55e" theme={theme} />
@@ -354,7 +419,11 @@ const FinanceOverview = ({ refreshTrigger }) => {
             {/* --- Row 3: Recent Transactions + Expense Breakdown --- */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 {/* Recent Transactions */}
-                <SectionCard title="Recent Transactions" theme={theme} className="xl:col-span-2 col-span-1">
+                <SectionCard
+                    title={`Recent Transactions${period !== 'all' ? ` · ${PERIODS.find(p => p.id === period)?.label}` : ''}`}
+                    theme={theme}
+                    className="xl:col-span-2 col-span-1"
+                >
                     <div className="space-y-2">
                         {recentTxs.length === 0 ? (
                             <p className={`text-center py-4 text-sm ${theme.text.secondary}`}>No transactions yet</p>
