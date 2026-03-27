@@ -8,6 +8,7 @@ import {
 import { Icons } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import api from '../api/axios';
 import { toast } from 'sonner';
@@ -45,6 +46,7 @@ const SECTIONS = [
 function SettingsPage() {
     const { user } = useAuth();
     const { theme } = useTheme();
+    const { refreshConfig } = useAgencyConfig();
     const isMobile = useIsMobile();
     const [activeSection, setActiveSection] = useState('account');
     const role = user?.role || 'member';
@@ -98,7 +100,12 @@ function SettingsPage() {
                 const res = await api.post('/settings/seed-defaults');
                 setSeedResult(res.data);
                 const count = res.data.seeded?.length || 0;
-                toast.success(count > 0 ? `Seeded defaults for ${count} config section${count !== 1 ? 's' : ''}` : 'All config sections already have data — nothing to seed');
+                if (count > 0) {
+                    await refreshConfig();
+                    toast.success(`Seeded defaults for ${count} config section${count !== 1 ? 's' : ''}`);
+                } else {
+                    toast.info('All config sections already have data — nothing to seed');
+                }
             } catch (err) {
                 console.error(err);
                 toast.error('Failed to seed defaults');
@@ -137,7 +144,9 @@ function SettingsPage() {
                                     {seedResult.skipped?.length > 0 && (
                                         <div className="flex flex-wrap gap-1.5 mt-1">
                                             {seedResult.skipped.map(s => (
-                                                <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 font-medium">— {s}</span>
+                                                <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 font-medium">
+                                                    — {s} {seedResult.skipped_counts?.[s] ? `(${seedResult.skipped_counts[s]})` : ''}
+                                                </span>
                                             ))}
                                         </div>
                                     )}
