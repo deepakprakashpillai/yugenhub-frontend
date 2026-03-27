@@ -131,18 +131,19 @@ const VerticalPage = ({ vertical, title }) => {
             const cleanedEvents = (projectData.events || []).map(event => {
                 const cleanedEvent = { ...event };
 
-                // Combine date and time
-                if (cleanedEvent.start_date) {
+                // Combine date and time only if not already a full datetime string
+                // (ProjectSlideOver may have already combined them)
+                if (cleanedEvent.start_date && !cleanedEvent.start_date.includes('T')) {
                     cleanedEvent.start_date = cleanedEvent.start_time
                         ? `${cleanedEvent.start_date}T${cleanedEvent.start_time}:00`
                         : `${cleanedEvent.start_date}T00:00:00`;
                 }
 
-                if (cleanedEvent.end_date) {
+                if (cleanedEvent.end_date && !cleanedEvent.end_date.includes('T')) {
                     cleanedEvent.end_date = cleanedEvent.end_time
                         ? `${cleanedEvent.end_date}T${cleanedEvent.end_time}:00`
                         : `${cleanedEvent.end_date}T00:00:00`;
-                } else {
+                } else if (!cleanedEvent.end_date) {
                     cleanedEvent.end_date = null; // Fix "" -> null
                 }
 
