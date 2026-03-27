@@ -94,22 +94,35 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         }
     }, [isOpen, initialData]);
 
-    // Update available categories when type changes
+    // Hardcoded fallback subcategories for Project Payment (used when not yet in agency config)
+    const PROJECT_PAYMENT_SUBCATEGORIES = [
+        { id: 'advance', name: 'Advance' },
+        { id: 'partial', name: 'Partial' },
+        { id: 'settlement', name: 'Settlement' },
+        { id: 'bonus', name: 'Bonus' },
+    ];
+
+    // Update available categories when type or config changes
+    // Note: formData.category intentionally NOT in deps — clearing should only trigger on type change
     useEffect(() => {
-        // Transfers don't need categories
         if (formData.type === TRANSACTION_TYPES.TRANSFER) {
             setFilteredCategories([]);
             return;
         }
 
         let relevantCats = [];
-
         if (config?.finance_categories) {
             relevantCats = config.finance_categories.filter(c => c.type === formData.type);
         }
 
-        // Special Case: Associate Payout for Expense
-        // Always add this option for expenses, regardless of config
+        // Always inject Project Payment for income if not configured yet
+        if (formData.type === TRANSACTION_TYPES.INCOME) {
+            if (!relevantCats.find(c => c.name === PROJECT_PAYMENT_CAT)) {
+                relevantCats = [{ id: 'project_payment', name: PROJECT_PAYMENT_CAT, subcategories: PROJECT_PAYMENT_SUBCATEGORIES }, ...relevantCats];
+            }
+        }
+
+        // Always inject Associate Payout for expense
         if (formData.type === TRANSACTION_TYPES.EXPENSE) {
             if (!relevantCats.find(c => c.name === FINANCE_CATEGORIES.ASSOCIATE_PAYOUT)) {
                 relevantCats = [{ id: 'payout', name: FINANCE_CATEGORIES.ASSOCIATE_PAYOUT, subcategories: [] }, ...relevantCats];
@@ -118,21 +131,29 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
         setFilteredCategories(relevantCats);
 
-        // Clear selections if type changes (and current cat is invalid)
-        // Guard: only clear if config has actually loaded, to avoid wiping pre-filled values
-        if (config?.finance_categories && relevantCats.length > 0 && formData.category && !relevantCats.find(c => c.name === formData.category)) {
-            setFormData(prev => ({ ...prev, category: '', subcategory: '', associate_id: '' }));
-        }
-    }, [formData.type, config, formData.category]);
+        // Clear category only on type change, and never when in project income mode
+        setFormData(prev => {
+            const isProjectMode = !!prev.project_id;
+            const stillValid = relevantCats.find(c => c.name === prev.category);
+            if (prev.category && !stillValid && !isProjectMode) {
+                return { ...prev, category: '', subcategory: '', associate_id: '' };
+            }
+            return prev;
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData.type, config]);
 
     // Update subcategories when category changes
     useEffect(() => {
-        const selectedCat = filteredCategories.find(c => c.name === formData.category);
-        if (selectedCat) {
-            setAvailableSubcategories(selectedCat.subcategories || []);
-        } else {
-            setAvailableSubcategories([]);
+        // Project Payment: use config subcategories if available, else hardcoded fallback
+        if (formData.category === PROJECT_PAYMENT_CAT) {
+            const configCat = filteredCategories.find(c => c.name === PROJECT_PAYMENT_CAT);
+            const subs = configCat?.subcategories?.length ? configCat.subcategories : PROJECT_PAYMENT_SUBCATEGORIES;
+            setAvailableSubcategories(subs);
+            return;
         }
+        const selectedCat = filteredCategories.find(c => c.name === formData.category);
+        setAvailableSubcategories(selectedCat ? (selectedCat.subcategories || []) : []);
     }, [formData.category, filteredCategories]);
 
     // Filter projects based on vertical
