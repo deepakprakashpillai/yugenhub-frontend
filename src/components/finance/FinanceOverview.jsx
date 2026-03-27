@@ -110,9 +110,9 @@ const FinanceOverview = ({ refreshTrigger }) => {
         const hasPartial = subs.has('Partial');
         const hasSettlement = subs.has('Settlement');
 
-        // Count events that have already passed
+        // Count events that have already passed (events use start_date)
         const pastEvents = (project.events || []).filter(e => {
-            const d = e.date ? new Date(e.date) : null;
+            const d = e.start_date ? new Date(e.start_date) : null;
             return d && d < now;
         });
 
@@ -137,21 +137,41 @@ const FinanceOverview = ({ refreshTrigger }) => {
         return { label: status, color: '#6b7280', priority: 7 };
     }
 
+    // Derive a display name from vertical title_template or fallback to metadata fields
+    const deriveProjectName = (p) => {
+        const verticalConfig = config?.verticals?.find(v => v.id === p.vertical);
+        const template = verticalConfig?.title_template;
+        if (template) {
+            const meta = p.metadata || {};
+            const resolved = template
+                .replace(/\{(\w+)\}/g, (_, fn) => {
+                    const val = meta[fn];
+                    return val && typeof val === 'string' ? val.split(' ')[0] : (val ? String(val) : '');
+                })
+                .trim()
+                .replace(/^[&\s]+|[&\s]+$/g, '');
+            if (resolved && resolved !== '&') return resolved;
+        }
+        return p.metadata?.project_type || p.vertical || 'Project';
+    };
+
     const pendingCollections = projects
         .filter(p =>
             !SKIP_STATUSES.includes(p.status) &&
             parseFloat(p.metadata?.quote_amount || 0) > 0
         )
         .map(p => {
+            const pid = p._id || p.id;
             const quote = parseFloat(p.metadata.quote_amount);
-            const txData = projectTxMap[p.id];
+            const txData = projectTxMap[pid];
             const collected = txData?.total || 0;
             const balanceDue = Math.max(0, quote - collected);
             const pct = Math.min((collected / quote) * 100, 100);
             const action = getCollectionAction(p, txData, balanceDue);
-            return { id: p.id, name: p.name, code: p.code, quote, collected, balanceDue, pct, action };
+            const name = deriveProjectName(p);
+            return { id: pid, name, code: p.code, quote, collected, balanceDue, pct, action };
         })
-        .filter(p => p.balanceDue > 0 || p.action.priority <= 3) // show only if balance due or high-priority action
+        .filter(p => p.balanceDue > 0 || p.action.priority <= 3)
         .sort((a, b) => a.action.priority - b.action.priority || b.balanceDue - a.balanceDue);
 
     // --- Expense breakdown by category ---
