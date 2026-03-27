@@ -23,14 +23,10 @@ const FinanceSection = () => {
     const [addingSubcategoryTo, setAddingSubcategoryTo] = useState(null); // parentId
 
     useEffect(() => {
-        if (config?.finance_categories) {
-            setTimeout(() => setCategories(JSON.parse(JSON.stringify(config.finance_categories))), 0);
-        } else {
-            // Fetch if not in context yet (should be handled by context update)
-            api.get('/settings/finance/categories')
-                .then(res => setCategories(res.data.categories))
-                .catch(err => console.error(err));
-        }
+        // Always fetch from the endpoint which applies validation + default fallback
+        api.get('/settings/finance/categories')
+            .then(res => setCategories(res.data.categories))
+            .catch(err => console.error(err));
     }, [config]);
 
     const toggleExpand = (id) => {
