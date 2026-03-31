@@ -87,7 +87,7 @@ function VideoWatermark({ text }) {
 }
 
 // --- ThumbnailGrid: WhatsApp-style file preview ---
-function ThumbnailGrid({ files, onFileClick, onDownloadAll, downloadProgress, t, token, deliverable, watermarkText }) {
+function ThumbnailGrid({ files, onFileClick, onShowAll, onDownloadAll, downloadProgress, t, token, deliverable, watermarkText }) {
   const mediaFiles = files.filter(isMedia);
   const nonMediaFiles = files.filter(f => !isMedia(f));
   const maxVisible = 4;
@@ -119,7 +119,7 @@ function ThumbnailGrid({ files, onFileClick, onDownloadAll, downloadProgress, t,
               <button
                 key={file.id}
                 type="button"
-                onClick={() => onFileClick(mediaIndex)}
+                onClick={() => isLast && onShowAll ? onShowAll() : onFileClick(mediaIndex)}
                 className={cellClass}
               >
                 {isVideo ? (
@@ -636,12 +636,110 @@ function FeedbackThread({ feedback, t, accentColor }) {
   );
 }
 
+// --- MediaGridModal: Full-screen grid view of all media ---
+function MediaGridModal({ files, isOpen, onClose, onFileClick, t }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !files.length) return null;
+
+  const mediaFiles = files.filter(isMedia);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-40 bg-black/95 flex flex-col"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-white font-semibold text-sm">{mediaFiles.length} Photos & Videos</span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Grid */}
+        <div className="flex-1 overflow-y-auto px-2 sm:px-4 pb-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-1.5">
+            {mediaFiles.map((file) => {
+              const fileIndex = files.indexOf(file);
+              const isVideoFile = file.content_type?.startsWith('video/');
+              return (
+                <button
+                  key={file.id}
+                  type="button"
+                  onClick={() => onFileClick(fileIndex)}
+                  className="relative aspect-square overflow-hidden rounded-lg group focus:outline-none"
+                >
+                  {isVideoFile ? (
+                    <div className="w-full h-full bg-black flex items-center justify-center">
+                      {file.thumbnail_r2_url ? (
+                        <img
+                          src={file.thumbnail_r2_url}
+                          alt={file.file_name}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={file.r2_url}
+                          className="w-full h-full object-cover"
+                          muted
+                          preload="metadata"
+                        />
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                          <Play className="w-4 h-4 text-white ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={getThumbnailUrl(file)}
+                      alt={file.file_name}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function DeliverableCard({ deliverable, token, t, accentColor, onRefresh, watermarkText }) {
   const [expanded, setExpanded] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [loading, setLoading] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [showGridModal, setShowGridModal] = useState(false);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [downloadProgress, setDownloadProgress] = useState(null);
@@ -714,6 +812,7 @@ function DeliverableCard({ deliverable, token, t, accentColor, onRefresh, waterm
           <ThumbnailGrid
             files={deliverable.files}
             onFileClick={handleFileClick}
+            onShowAll={() => setShowGridModal(true)}
             onDownloadAll={deliverable.files.length > 1 ? handleDownloadAll : null}
             downloadProgress={downloadProgress}
             t={t}
@@ -736,6 +835,19 @@ function DeliverableCard({ deliverable, token, t, accentColor, onRefresh, waterm
               {deliverable.status}
             </span>
           </div>
+
+          {/* Gallery link for Digital Album deliverables */}
+          {deliverable.gallery_url && (
+            <a
+              href={deliverable.gallery_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 w-full justify-center min-h-[44px]"
+              style={{ backgroundColor: accentColor }}
+            >
+              <ExternalLink className="w-4 h-4" /> View Gallery
+            </a>
+          )}
 
           {/* Actions — only show when files have been uploaded */}
           {deliverable.files?.length > 0 && (
@@ -845,6 +957,18 @@ function DeliverableCard({ deliverable, token, t, accentColor, onRefresh, waterm
         onRefresh={onRefresh}
         watermarkText={watermarkText}
         downloadsDisabled={deliverable.downloads_disabled}
+      />
+
+      {/* Grid modal — tile view of all media */}
+      <MediaGridModal
+        files={deliverable.files || []}
+        isOpen={showGridModal}
+        onClose={() => setShowGridModal(false)}
+        onFileClick={(index) => {
+          setShowGridModal(false);
+          handleFileClick(index);
+        }}
+        t={t}
       />
     </>
   );
@@ -994,6 +1118,37 @@ export default function PortalPage() {
             </div>
           </div>
         </section>
+
+        {/* Gallery CTA — shown when linked album is published */}
+        {data.gallery_url && (
+          <section>
+            <a
+              href={data.gallery_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between w-full rounded-2xl border px-5 py-4 sm:px-6 sm:py-5 transition-all group"
+              style={{
+                borderColor: accentColor + '44',
+                backgroundColor: accentColor + '0d',
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: accentColor + '22' }}>
+                  <svg className="w-5 h-5" style={{ color: accentColor }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm sm:text-base" style={{ color: accentColor }}>View Your Gallery</p>
+                  <p className={`text-xs ${t.textSecondary} mt-0.5`}>Your photos are ready — explore the full gallery</p>
+                </div>
+              </div>
+              <svg className="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" style={{ color: accentColor }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
+          </section>
+        )}
 
         {/* Event Timeline */}
         {data.events?.length > 0 && (

@@ -1,20 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
+
+// Format a date string as a local YYYY-MM-DDTHH:MM value for datetime-local inputs.
+// Uses local timezone throughout to avoid date-shifting on round-trips.
+const toLocalDateTimeInput = (dateStr) => {
+    if (!dateStr) return '';
+    const dt = new Date(dateStr);
+    if (isNaN(dt.getTime())) return '';
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const hours = String(dt.getHours()).padStart(2, '0');
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
 const EventModal = ({ isOpen, onClose, onSave, event = null, loading = false }) => {
     const { theme } = useTheme();
     const isEditing = !!event;
 
     const [formData, setFormData] = useState({
-        type: event?.type || '',
-        venue_name: event?.venue_name || '',
-        venue_location: event?.venue_location || '',
-        start_date: event?.start_date ? new Date(event.start_date).toISOString().slice(0, 16) : '',
-        end_date: event?.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : '',
-        notes: event?.notes || ''
+        type: '',
+        venue_name: '',
+        venue_location: '',
+        start_date: '',
+        end_date: '',
+        notes: ''
     });
+
+    useEffect(() => {
+        if (isOpen && event) {
+            setFormData({
+                type: event.type || '',
+                venue_name: event.venue_name || '',
+                venue_location: event.venue_location || '',
+                start_date: toLocalDateTimeInput(event.start_date),
+                end_date: toLocalDateTimeInput(event.end_date),
+                notes: event.notes || ''
+            });
+        } else if (isOpen) {
+            setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', end_date: '', notes: '' });
+        }
+    }, [isOpen, event]);
 
     const handleChange = (e) => {
         setFormData(prev => ({
@@ -25,6 +54,8 @@ const EventModal = ({ isOpen, onClose, onSave, event = null, loading = false }) 
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        // datetime-local values without a timezone are parsed as local time by the browser,
+        // so new Date(...).toISOString() correctly converts them to UTC.
         onSave({
             ...formData,
             start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,

@@ -64,8 +64,14 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
     // Initialize formData when modal opens or task changes
     useEffect(() => {
         if (isOpen && task) {
+            // For deliverable tasks, the title is stored as "Type (EventType)" e.g. "Photos (Haldi)".
+            // Strip the " (EventType)" suffix so the base type matches the config select options.
+            let titleForForm = task.title || '';
+            if (task.category === 'deliverable' && titleForForm.includes(' (')) {
+                titleForForm = titleForForm.substring(0, titleForForm.lastIndexOf(' ('));
+            }
             setFormData({
-                title: task.title || '',
+                title: titleForForm,
                 description: task.description || '',
                 status: task.status || 'todo',
                 priority: task.priority || 'medium',

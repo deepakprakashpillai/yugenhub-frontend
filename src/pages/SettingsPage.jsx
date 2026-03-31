@@ -76,6 +76,8 @@ function SettingsPage() {
         const [syncResult, setSyncResult] = useState(null);
         const [seeding, setSeeding] = useState(false);
         const [seedResult, setSeedResult] = useState(null);
+        const [syncingGallery, setSyncingGallery] = useState(false);
+        const [galleryResult, setGalleryResult] = useState(null);
 
         const handleRevalidateAll = async () => {
             setSyncing(true);
@@ -111,6 +113,25 @@ function SettingsPage() {
                 toast.error('Failed to seed defaults');
             } finally {
                 setSeeding(false);
+            }
+        };
+
+        const handleSyncGalleryAlbums = async () => {
+            setSyncingGallery(true);
+            setGalleryResult(null);
+            try {
+                const res = await api.post('/settings/sync-gallery-albums');
+                setGalleryResult(res.data);
+                if (res.data.created > 0) {
+                    toast.success(`Gallery sync complete — ${res.data.created} album${res.data.created !== 1 ? 's' : ''} created`);
+                } else {
+                    toast.info('All projects already have gallery albums — nothing to do');
+                }
+            } catch (err) {
+                console.error(err);
+                toast.error('Gallery sync failed');
+            } finally {
+                setSyncingGallery(false);
             }
         };
 
@@ -198,6 +219,36 @@ function SettingsPage() {
                             className="shrink-0 px-4 py-2 bg-purple-500/10 text-purple-400 text-xs font-bold rounded-lg hover:bg-purple-500/20 transition-colors disabled:opacity-50"
                         >
                             {syncing ? 'Running…' : 'Run Revalidation'}
+                        </button>
+                    </div>
+
+                    <div className={`border-t ${theme.canvas.border}`} />
+
+                    {/* Sync Gallery Albums */}
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                            <p className={`text-sm font-bold ${theme.text.primary}`}>Sync Gallery Albums</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                                Ensures every project has a linked gallery album with one tab per event. Safe to run multiple times — skips projects that already have an album.
+                            </p>
+                            {galleryResult && (
+                                <div className="mt-3 flex flex-wrap gap-3">
+                                    <span className={`text-xs ${galleryResult.created > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
+                                        ✓ {galleryResult.created} created
+                                    </span>
+                                    <span className="text-xs text-zinc-500">— {galleryResult.skipped} already existed</span>
+                                    {galleryResult.failed > 0 && (
+                                        <span className="text-xs text-red-400">✗ {galleryResult.failed} failed</span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            onClick={handleSyncGalleryAlbums}
+                            disabled={syncingGallery}
+                            className="shrink-0 px-4 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                        >
+                            {syncingGallery ? 'Syncing…' : 'Sync Albums'}
                         </button>
                     </div>
                 </div>
