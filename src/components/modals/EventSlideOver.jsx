@@ -13,6 +13,10 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
     const [editing, setEditing] = useState(false);
     const [data, setData] = useState(deliverable);
 
+    useEffect(() => {
+        setData(deliverable);
+    }, [deliverable]);
+
     const handleSave = () => {
         onUpdate(data);
         setEditing(false);
@@ -30,6 +34,9 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
                         {(config?.deliverableTypes || []).map(dt => (
                             <option key={dt} value={dt}>{dt}</option>
                         ))}
+                        {data.type && !(config?.deliverableTypes || []).includes(data.type) && (
+                            <option key={data.type} value={data.type}>{data.type}</option>
+                        )}
                     </select>
                     <input
                         type="number"
@@ -243,15 +250,20 @@ const EventSlideOver = ({
     const [newDeliverable, setNewDeliverable] = useState({ type: '', quantity: 1, due_date: '', notes: '' });
     const [newMember, setNewMember] = useState({ name: '', role: '', tags: [] });
 
-    // Helper to parse datetime string into date and time parts
+    // Helper to parse datetime string into date and time parts.
+    // Uses local timezone consistently (both date and time extracted from local representation)
+    // to avoid date-shifting on round-trips for users in positive UTC offset timezones.
     const parseDateTime = (dateTimeStr) => {
         if (!dateTimeStr) return { date: '', time: '' };
         const dt = new Date(dateTimeStr);
         if (isNaN(dt.getTime())) return { date: '', time: '' };
 
-        const date = dt.toISOString().slice(0, 10);
-        const hours = dt.getHours().toString().padStart(2, '0');
-        const minutes = dt.getMinutes().toString().padStart(2, '0');
+        const year = dt.getFullYear();
+        const month = String(dt.getMonth() + 1).padStart(2, '0');
+        const day = String(dt.getDate()).padStart(2, '0');
+        const hours = String(dt.getHours()).padStart(2, '0');
+        const minutes = String(dt.getMinutes()).padStart(2, '0');
+        const date = `${year}-${month}-${day}`;
         const time = (hours !== '00' || minutes !== '00') ? `${hours}:${minutes}` : '';
 
         return { date, time };
