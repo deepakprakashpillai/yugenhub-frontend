@@ -42,7 +42,7 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
         const fetchAssociates = async () => {
             setLoadingAssociates(true);
             try {
-                const res = await api.get('/associates');
+                const res = await api.get('/associates', { params: { limit: 1000 } });
                 setAssociates(res.data.data || res.data || []);
             } catch (err) {
                 console.error('Failed to fetch associates:', err);
