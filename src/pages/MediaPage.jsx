@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { LayoutGrid, List, Plus, Upload, Search, FolderPlus, X, ChevronLeft } from 'lucide-react';
+import { LayoutGrid, List, Upload, Search, FolderPlus, X, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -7,17 +7,24 @@ import FolderTree from '../components/media/FolderTree';
 import FileGrid from '../components/media/FileGrid';
 import FileList from '../components/media/FileList';
 import Breadcrumb from '../components/media/Breadcrumb';
+import RenameModal from '../components/media/RenameModal';
+import MoveModal from '../components/media/MoveModal';
+import ShareModal from '../components/media/ShareModal';
+import FileInfoPanel from '../components/media/FileInfoPanel';
+import MediaLightbox from '../components/media/MediaLightbox';
+import R2UsageWidget from '../components/media/R2UsageWidget';
 import * as mediaApi from '../api/media';
 
 // ─── Upload helpers ────────────────────────────────────────────────────────────
 
 async function uploadFile(file, folderId) {
     const { upload_url, media_item_id } = await mediaApi.getUploadUrl(file.name, file.type, folderId);
-    await fetch(upload_url, {
+    const r2Response = await fetch(upload_url, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
     });
+    if (!r2Response.ok) throw new Error(`Upload failed: ${r2Response.status}`);
     await mediaApi.registerFile(media_item_id, file.size);
 }
 
@@ -25,6 +32,7 @@ async function uploadFile(file, folderId) {
 
 export default function MediaPage() {
     const { theme } = useTheme();
+    // eslint-disable-next-line no-unused-vars
     const { user } = useAuth();
 
     const [folders, setFolders] = useState([]);
@@ -35,11 +43,21 @@ export default function MediaPage() {
     const [searchResults, setSearchResults] = useState(null); // null = not searching
     const [loadingFolders, setLoadingFolders] = useState(true);
     const [loadingItems, setLoadingItems] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState({ done: 0, total: 0 });
     const [showNewFolder, setShowNewFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
     const [sidebarOpen, setSidebarOpen] = useState(false); // mobile sidebar
+    const [isDragOver, setIsDragOver] = useState(false);
+    const [renameTarget, setRenameTarget] = useState(null);
+    const [renameFolderTarget, setRenameFolderTarget] = useState(null);
+    const [moveTarget, setMoveTarget] = useState(null);
+    const [shareTarget, setShareTarget] = useState(null);
+    const [infoTarget, setInfoTarget] = useState(null);
+    const [lightboxItem, setLightboxItem] = useState(null);
     const fileInputRef = useRef(null);
     const searchDebounce = useRef(null);
 
@@ -57,21 +75,26 @@ export default function MediaPage() {
     }, []);
 
     // Load files in current folder
-    const loadItems = useCallback(async (folderId) => {
-        if (!folderId) { setItems([]); return; }
+    const loadItems = useCallback(async (folderId, pg = 1, append = false) => {
+        if (!folderId) { setItems([]); setHasMore(false); setPage(1); return; }
         try {
-            setLoadingItems(true);
-            const data = await mediaApi.getFolderItems(folderId);
-            setItems(data.items ?? data);
+            if (append) setLoadingMore(true);
+            else setLoadingItems(true);
+            const data = await mediaApi.getFolderItems(folderId, pg);
+            const newItems = data.data ?? [];
+            setItems(prev => append ? [...prev, ...newItems] : newItems);
+            setPage(pg);
+            setHasMore(pg < (data.total_pages ?? 1));
         } catch {
             toast.error('Failed to load files');
         } finally {
             setLoadingItems(false);
+            setLoadingMore(false);
         }
     }, []);
 
     useEffect(() => { loadFolders(); }, [loadFolders]);
-    useEffect(() => { if (!searchQuery) { loadItems(currentFolderId); setSearchResults(null); } }, [currentFolderId, loadItems, searchQuery]);
+    useEffect(() => { if (!searchQuery) { loadItems(currentFolderId, 1, false); setSearchResults(null); } }, [currentFolderId, loadItems, searchQuery]);
 
     // Search with debounce
     useEffect(() => {
@@ -80,7 +103,7 @@ export default function MediaPage() {
         searchDebounce.current = setTimeout(async () => {
             try {
                 const data = await mediaApi.searchFiles(searchQuery.trim());
-                setSearchResults(data.items ?? data);
+                setSearchResults(data.data ?? []);
             } catch {
                 toast.error('Search failed');
             }
@@ -148,20 +171,119 @@ export default function MediaPage() {
         try {
             await mediaApi.deleteFile(item.id);
             toast.success('File deleted');
+            if (lightboxItem?.id === item.id) setLightboxItem(null);
             loadItems(currentFolderId);
         } catch {
             toast.error('Delete failed');
         }
     };
 
-    // Placeholders — modals added in Step 8
-    const handleRename = (item) => toast.info('Rename coming in next update');
-    const handleMove = (item) => toast.info('Move coming in next update');
-    const handleShare = (item) => toast.info('Share coming in next update');
-    const handlePreview = (item) => toast.info('Preview coming in next update');
+    const handleRename = (item) => setRenameTarget(item);
+    const handleMove = (item) => setMoveTarget(item);
+    const handleShare = (item) => setShareTarget(item);
+    const handlePreview = (item) => setLightboxItem(item);
+
+    const handleFolderRenameSubmit = async (newName) => {
+        try {
+            await mediaApi.renameFolder(renameFolderTarget.id, newName);
+            toast.success('Folder renamed');
+            loadFolders();
+        } catch {
+            toast.error('Rename failed');
+            throw new Error('Rename failed');
+        }
+    };
+
+    const handleFolderDelete = async (folder) => {
+        if (!window.confirm(`Delete folder "${folder.name}" and all its contents? This cannot be undone.`)) return;
+        try {
+            await mediaApi.deleteFolder(folder.id);
+            toast.success('Folder deleted');
+            if (currentFolderId === folder.id) setCurrentFolderId(null);
+            loadFolders();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Delete failed');
+        }
+    };
+
+    const lightboxItems = searchResults ?? items;
+    const lightboxIndex = lightboxItems.findIndex(i => i.id === lightboxItem?.id);
+    const handleLightboxNext = lightboxIndex < lightboxItems.length - 1
+        ? () => setLightboxItem(lightboxItems[lightboxIndex + 1])
+        : undefined;
+    const handleLightboxPrev = lightboxIndex > 0
+        ? () => setLightboxItem(lightboxItems[lightboxIndex - 1])
+        : undefined;
+
+    const handleRenameSubmit = async (newName) => {
+        try {
+            await mediaApi.renameFile(renameTarget.id, newName);
+            toast.success('File renamed');
+            if (infoTarget?.id === renameTarget.id) setInfoTarget(t => ({ ...t, name: newName }));
+            loadItems(currentFolderId);
+        } catch {
+            toast.error('Rename failed');
+            throw new Error('Rename failed');
+        }
+    };
+
+    const handleMoveSubmit = async (folderId) => {
+        try {
+            await mediaApi.moveFile(moveTarget.id, folderId);
+            toast.success('File moved');
+            loadItems(currentFolderId);
+        } catch {
+            toast.error('Move failed');
+            throw new Error('Move failed');
+        }
+    };
 
     return (
         <div className={`flex h-screen ${theme.canvas.bg} ${theme.text.primary} overflow-hidden`}>
+            <RenameModal
+                isOpen={!!renameTarget}
+                onClose={() => setRenameTarget(null)}
+                item={renameTarget}
+                type="file"
+                onRename={handleRenameSubmit}
+            />
+            <RenameModal
+                isOpen={!!renameFolderTarget}
+                onClose={() => setRenameFolderTarget(null)}
+                item={renameFolderTarget}
+                type="folder"
+                onRename={handleFolderRenameSubmit}
+            />
+            <MoveModal
+                isOpen={!!moveTarget}
+                onClose={() => setMoveTarget(null)}
+                item={moveTarget}
+                folders={folders}
+                onMove={handleMoveSubmit}
+            />
+            <ShareModal
+                isOpen={!!shareTarget}
+                onClose={() => setShareTarget(null)}
+                item={shareTarget}
+            />
+            <FileInfoPanel
+                isOpen={!!infoTarget}
+                onClose={() => setInfoTarget(null)}
+                item={infoTarget}
+                onDownload={handleDownload}
+            />
+            <MediaLightbox
+                isOpen={!!lightboxItem}
+                onClose={() => setLightboxItem(null)}
+                item={lightboxItem}
+                items={lightboxItems}
+                onDownload={handleDownload}
+                onShare={(item) => { setLightboxItem(null); setShareTarget(item); }}
+                onDelete={handleDelete}
+                onInfo={(item) => { setLightboxItem(null); setInfoTarget(item); }}
+                onNext={handleLightboxNext}
+                onPrev={handleLightboxPrev}
+            />
 
             {/* ── Mobile sidebar overlay ─────────────────────────────────── */}
             {sidebarOpen && (
@@ -223,6 +345,8 @@ export default function MediaPage() {
                             folders={folders}
                             selectedId={currentFolderId}
                             onSelect={(id) => { setCurrentFolderId(id); setSearchQuery(''); setSidebarOpen(false); }}
+                            onRename={setRenameFolderTarget}
+                            onDelete={handleFolderDelete}
                         />
                     )}
                 </div>
@@ -295,6 +419,9 @@ export default function MediaPage() {
                     </div>
                 </div>
 
+                {/* R2 Usage Widget */}
+                <R2UsageWidget />
+
                 {/* Breadcrumb */}
                 {!searchQuery && (
                     <div className={`px-4 md:px-6 py-2 border-b ${theme.canvas.border}`}>
@@ -323,7 +450,18 @@ export default function MediaPage() {
 
                 {/* File content */}
                 {(currentFolderId || searchQuery) && (
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6">
+                    <div
+                        className={`flex-1 overflow-y-auto p-4 md:p-6 transition-colors ${isDragOver && currentFolderId ? `ring-2 ring-accent/40 ring-inset` : ''}`}
+                        onDragOver={e => { e.preventDefault(); if (currentFolderId) setIsDragOver(true); }}
+                        onDragLeave={() => setIsDragOver(false)}
+                        onDrop={e => {
+                            e.preventDefault();
+                            setIsDragOver(false);
+                            if (currentFolderId && e.dataTransfer.files.length) {
+                                handleFilesSelected(e.dataTransfer.files);
+                            }
+                        }}
+                    >
                         {loadingItems ? (
                             <div className={`text-center py-16 text-sm ${theme.text.secondary}`}>Loading files…</div>
                         ) : viewMode === 'grid' ? (
@@ -346,6 +484,22 @@ export default function MediaPage() {
                                 onDelete={handleDelete}
                                 onPreview={handlePreview}
                             />
+                        )}
+
+                        {/* Load more */}
+                        {hasMore && !searchQuery && !loadingItems && (
+                            <div className="flex justify-center pt-6 pb-2">
+                                <button
+                                    onClick={() => loadItems(currentFolderId, page + 1, true)}
+                                    disabled={loadingMore}
+                                    className={`px-5 py-2 rounded-xl text-sm font-semibold border transition-all ${theme.canvas.border} ${theme.canvas.card} ${theme.text.secondary} hover:${theme.text.primary} disabled:opacity-40`}
+                                >
+                                    {loadingMore ? 'Loading…' : `Load more`}
+                                </button>
+                            </div>
+                        )}
+                        {loadingMore && (
+                            <div className={`text-center py-4 text-xs ${theme.text.secondary}`}>Loading more files…</div>
                         )}
                     </div>
                 )}

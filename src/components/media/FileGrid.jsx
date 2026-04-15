@@ -3,13 +3,6 @@ import { Image, Video, FileText, File, MoreVertical } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import FileContextMenu from './FileContextMenu';
 
-function fileIcon(contentType) {
-    if (contentType?.startsWith('image/')) return Image;
-    if (contentType?.startsWith('video/')) return Video;
-    if (contentType === 'application/pdf') return FileText;
-    return File;
-}
-
 function typeBadge(contentType) {
     if (contentType?.startsWith('image/')) return { label: 'IMG', color: 'bg-blue-500/20 text-blue-400' };
     if (contentType?.startsWith('video/')) return { label: 'VID', color: 'bg-purple-500/20 text-purple-400' };
@@ -17,10 +10,9 @@ function typeBadge(contentType) {
     return { label: 'FILE', color: 'bg-zinc-500/20 text-zinc-400' };
 }
 
-function FileCard({ item, onContextMenu, onMenuClick, onDownload, onRename, onMove, onShare, onDelete, onPreview }) {
+function FileCard({ item, onDownload, onRename, onMove, onShare, onDelete, onPreview }) {
     const { theme } = useTheme();
     const [menuPos, setMenuPos] = useState(null);
-    const Icon = fileIcon(item.content_type);
     const badge = typeBadge(item.content_type);
 
     const openMenu = (e) => {
@@ -44,8 +36,14 @@ function FileCard({ item, onContextMenu, onMenuClick, onDownload, onRename, onMo
                         className="w-full h-full object-cover"
                         loading="lazy"
                     />
+                ) : item.content_type?.startsWith('image/') ? (
+                    <Image size={32} className={theme.text.secondary} />
+                ) : item.content_type?.startsWith('video/') ? (
+                    <Video size={32} className={theme.text.secondary} />
+                ) : item.content_type === 'application/pdf' ? (
+                    <FileText size={32} className={theme.text.secondary} />
                 ) : (
-                    <Icon size={32} className={theme.text.secondary} />
+                    <File size={32} className={theme.text.secondary} />
                 )}
                 {/* Type badge */}
                 <span className={`absolute top-2 left-2 text-[8px] font-bold px-1.5 py-0.5 rounded-md ${badge.color}`}>

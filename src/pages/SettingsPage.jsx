@@ -78,6 +78,46 @@ function SettingsPage() {
         const [seedResult, setSeedResult] = useState(null);
         const [syncingGallery, setSyncingGallery] = useState(false);
         const [galleryResult, setGalleryResult] = useState(null);
+        const [migrationJob, setMigrationJob] = useState(null); // null = not fetched yet
+        const [migrationLoading, setMigrationLoading] = useState(false);
+        const migrationPollRef = useRef(null);
+
+        // Fetch current migration status on mount
+        useEffect(() => {
+            api.get('/settings/migrate-to-media/status')
+                .then(res => setMigrationJob(res.data))
+                .catch(() => {}); // owner-only endpoint; non-owners get 403 silently
+            return () => clearInterval(migrationPollRef.current);
+        }, []);
+
+        const handleRunMigration = async () => {
+            if (!window.confirm('Run migration? This will reorganise files in your R2 bucket and cannot be undone.')) return;
+            setMigrationLoading(true);
+            try {
+                const res = await api.post('/settings/migrate-to-media');
+                setMigrationJob(res.data);
+                // Poll every 3s until complete or failed
+                migrationPollRef.current = setInterval(async () => {
+                    try {
+                        const status = await api.get('/settings/migrate-to-media/status');
+                        setMigrationJob(status.data);
+                        if (status.data.status === 'completed' || status.data.status === 'failed') {
+                            clearInterval(migrationPollRef.current);
+                            setMigrationLoading(false);
+                        }
+                    } catch {
+                        clearInterval(migrationPollRef.current);
+                        setMigrationLoading(false);
+                    }
+                }, 3000);
+            } catch (err) {
+                toast.error(err.response?.data?.detail || 'Failed to start migration');
+                setMigrationLoading(false);
+            }
+        };
+
+        const migrationStatus = migrationJob?.status;
+        const isRunning = migrationStatus === 'running' || migrationStatus === 'queued';
 
         const handleRevalidateAll = async () => {
             setSyncing(true);
@@ -252,6 +292,55 @@ function SettingsPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Media Migration */}
+                {migrationJob !== undefined && (
+                    <div className={`border ${theme.canvas.border} rounded-2xl p-6 space-y-4`}>
+                        <h3 className={`text-sm font-semibold ${theme.text.primary}`}>Media Library Migration</h3>
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                                <p className={`text-sm font-bold ${theme.text.primary}`}>Migrate Files to Media Library</p>
+                                <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                                    Reorganises all existing deliverable and album files into the new Media tab structure.
+                                    This will move files in your R2 bucket. This cannot be undone.
+                                </p>
+
+                                {/* Status */}
+                                <div className="mt-3 flex items-center gap-2">
+                                    <span className={`w-2 h-2 rounded-full shrink-0 ${
+                                        migrationStatus === 'completed' ? 'bg-emerald-400' :
+                                        migrationStatus === 'failed' ? 'bg-red-400' :
+                                        isRunning ? 'bg-amber-400 animate-pulse' :
+                                        'bg-zinc-600'
+                                    }`} />
+                                    <span className={`text-xs font-medium ${
+                                        migrationStatus === 'completed' ? 'text-emerald-400' :
+                                        migrationStatus === 'failed' ? 'text-red-400' :
+                                        isRunning ? 'text-amber-400' :
+                                        theme.text.secondary
+                                    }`}>
+                                        {migrationStatus === 'not_started' || !migrationStatus
+                                            ? 'Not started'
+                                            : migrationStatus === 'queued'
+                                            ? 'Queued…'
+                                            : migrationStatus === 'running'
+                                            ? `Running — ${migrationJob.migrated ?? 0}/${migrationJob.total ?? '?'} files`
+                                            : migrationStatus === 'completed'
+                                            ? `Completed — ${migrationJob.migrated ?? 0} files migrated${migrationJob.failed > 0 ? `, ${migrationJob.failed} failed` : ''}`
+                                            : `Failed`}
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleRunMigration}
+                                disabled={migrationLoading || isRunning}
+                                className="shrink-0 px-4 py-2 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                            >
+                                {isRunning ? 'Running…' : 'Run Migration'}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Danger */}
                 <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6">
