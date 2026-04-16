@@ -95,13 +95,13 @@ export default function MediaLightbox({
 
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-white truncate">{item.name}</p>
-                            <p className="text-[11px] text-white/40">
+                            <p className="text-[11px] text-white/50">
                                 {formatBytes(item.size_bytes)} &middot; {formatDate(item.created_at)}
                             </p>
                         </div>
 
-                        {/* Action bar */}
-                        <div className="flex items-center gap-1">
+                        {/* Action bar — hidden on mobile, shown on desktop */}
+                        <div className="hidden md:flex items-center gap-1">
                             {onInfo && (
                                 <button
                                     onClick={() => onInfo(item)}
@@ -137,6 +137,7 @@ export default function MediaLightbox({
                                 <Trash2 size={16} />
                             </button>
                         </div>
+
                     </div>
 
                     {/* ── Content area ─────────────────────────────────────── */}
@@ -208,6 +209,47 @@ export default function MediaLightbox({
                             </p>
                         </div>
                     )}
+
+                    {/* ── Mobile bottom action bar ─────────────────────────── */}
+                    <div
+                        className="md:hidden flex items-center justify-around px-4 py-3 shrink-0 border-t border-white/10"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {onInfo && (
+                            <button
+                                onClick={() => onInfo(item)}
+                                className="flex flex-col items-center gap-1 p-2 text-white/50 hover:text-white transition-colors"
+                                aria-label="File info"
+                            >
+                                <Info size={20} />
+                                <span className="text-[10px]">Info</span>
+                            </button>
+                        )}
+                        <button
+                            onClick={() => onShare(item)}
+                            className="flex flex-col items-center gap-1 p-2 text-white/50 hover:text-white transition-colors"
+                            aria-label="Share"
+                        >
+                            <Share2 size={20} />
+                            <span className="text-[10px]">Share</span>
+                        </button>
+                        <button
+                            onClick={() => onDownload(item)}
+                            className="flex flex-col items-center gap-1 p-2 text-white/50 hover:text-white transition-colors"
+                            aria-label="Download"
+                        >
+                            <Download size={20} />
+                            <span className="text-[10px]">Download</span>
+                        </button>
+                        <button
+                            onClick={() => onDelete(item)}
+                            className="flex flex-col items-center gap-1 p-2 text-red-400/60 hover:text-red-400 transition-colors"
+                            aria-label="Delete"
+                        >
+                            <Trash2 size={20} />
+                            <span className="text-[10px]">Delete</span>
+                        </button>
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>

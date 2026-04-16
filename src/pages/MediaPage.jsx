@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { LayoutGrid, List, Upload, Search, FolderPlus, X, ChevronLeft } from 'lucide-react';
+import { LayoutGrid, List, Upload, Search, FolderPlus, X, Menu } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -361,14 +361,15 @@ export default function MediaPage() {
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className={`md:hidden p-1.5 rounded-lg ${theme.canvas.hover} ${theme.text.secondary}`}
+                        aria-label="Open folders"
                     >
-                        <ChevronLeft size={15} className="rotate-180" />
+                        <Menu size={16} />
                     </button>
 
                     <h1 className={`${theme.text.heading} text-base shrink-0`}>Media</h1>
 
-                    {/* Search */}
-                    <div className={`flex-1 max-w-xs flex items-center gap-2 px-3 py-1.5 rounded-xl border ${theme.canvas.border} ${theme.canvas.card}`}>
+                    {/* Search — full-width on mobile */}
+                    <div className={`flex-1 md:max-w-xs flex items-center gap-2 px-3 py-1.5 rounded-xl border ${theme.canvas.border} ${theme.canvas.card}`}>
                         <Search size={12} className={theme.text.secondary} />
                         <input
                             value={searchQuery}
@@ -419,8 +420,10 @@ export default function MediaPage() {
                     </div>
                 </div>
 
-                {/* R2 Usage Widget */}
-                <R2UsageWidget />
+                {/* R2 Usage Widget — desktop only */}
+                <div className="hidden md:block">
+                    <R2UsageWidget />
+                </div>
 
                 {/* Breadcrumb */}
                 {!searchQuery && (
@@ -451,9 +454,9 @@ export default function MediaPage() {
                 {/* File content */}
                 {(currentFolderId || searchQuery) && (
                     <div
-                        className={`flex-1 overflow-y-auto p-4 md:p-6 transition-colors ${isDragOver && currentFolderId ? `ring-2 ring-accent/40 ring-inset` : ''}`}
+                        className={`flex-1 overflow-y-auto p-4 md:p-6 relative transition-colors ${isDragOver && currentFolderId ? 'bg-accent/5' : ''}`}
                         onDragOver={e => { e.preventDefault(); if (currentFolderId) setIsDragOver(true); }}
-                        onDragLeave={() => setIsDragOver(false)}
+                        onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setIsDragOver(false); }}
                         onDrop={e => {
                             e.preventDefault();
                             setIsDragOver(false);
@@ -462,8 +465,36 @@ export default function MediaPage() {
                             }
                         }}
                     >
+                        {/* Drag-over overlay */}
+                        {isDragOver && currentFolderId && (
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center border-2 border-dashed border-accent/50 rounded-xl bg-accent/5 pointer-events-none">
+                                <Upload size={36} className="text-accent/60 mb-3" />
+                                <p className="text-sm font-semibold text-accent/80">Drop files here</p>
+                            </div>
+                        )}
+
                         {loadingItems ? (
-                            <div className={`text-center py-16 text-sm ${theme.text.secondary}`}>Loading files…</div>
+                            viewMode === 'grid' ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                                    {Array.from({ length: 12 }).map((_, i) => (
+                                        <div key={i} className={`rounded-xl border ${theme.canvas.border} overflow-hidden animate-pulse`}>
+                                            <div className={`aspect-[4/5] ${theme.canvas.card}`} />
+                                            <div className="px-2 py-2">
+                                                <div className={`h-2.5 rounded ${theme.canvas.card} w-3/4`} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className={`rounded-xl border ${theme.canvas.border} overflow-hidden animate-pulse`}>
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <div key={i} className={`flex items-center gap-3 px-4 py-3 border-b ${theme.canvas.border} last:border-0`}>
+                                            <div className={`h-3 rounded ${theme.canvas.card} flex-1`} />
+                                            <div className={`h-3 rounded ${theme.canvas.card} w-16 hidden md:block`} />
+                                        </div>
+                                    ))}
+                                </div>
+                            )
                         ) : viewMode === 'grid' ? (
                             <FileGrid
                                 items={displayedItems}

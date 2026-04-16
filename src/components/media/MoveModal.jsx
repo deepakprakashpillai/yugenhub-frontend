@@ -25,7 +25,7 @@ export default function MoveModal({ isOpen, onClose, item, folders, onMove }) {
                 <p className={`text-xs ${theme.text.secondary}`}>
                     Moving: <span className={`font-semibold ${theme.text.primary}`}>{item?.name}</span>
                 </p>
-                <div className={`rounded-xl border ${theme.canvas.border} ${theme.canvas.card} p-2 max-h-60 overflow-y-auto`}>
+                <div className={`rounded-xl border ${theme.canvas.border} ${theme.canvas.card} p-2 max-h-80 overflow-y-auto`}>
                     <FolderTree
                         folders={folders}
                         selectedId={selectedId}

@@ -46,9 +46,14 @@ export default function FileList({ items, onDownload, onRename, onMove, onShare,
     return (
         <div className={`rounded-xl border ${theme.canvas.border} overflow-hidden`}>
             {/* Header */}
-            <div className={`grid grid-cols-[1fr_80px_100px_80px_40px] gap-3 px-4 py-2 border-b ${theme.canvas.border} ${theme.canvas.card}`}>
-                {['Name', 'Type', 'Date', 'Size', ''].map(h => (
-                    <span key={h} className={`text-[9px] font-black uppercase tracking-widest ${theme.text.secondary}`}>{h}</span>
+            <div className={`grid grid-cols-[1fr_40px] md:grid-cols-[1fr_80px_100px_80px_40px] gap-3 px-4 py-2 border-b ${theme.canvas.border} ${theme.canvas.card}`}>
+                {['Name', 'Type', 'Date', 'Size', ''].map((h, i) => (
+                    <span
+                        key={h || i}
+                        className={`text-[9px] font-bold uppercase tracking-wider ${theme.text.secondary} ${i > 0 && i < 4 ? 'hidden md:block' : ''}`}
+                    >
+                        {h}
+                    </span>
                 ))}
             </div>
             {/* Rows */}
@@ -57,30 +62,31 @@ export default function FileList({ items, onDownload, onRename, onMove, onShare,
                 return (
                     <div
                         key={item.id}
-                        className={`grid grid-cols-[1fr_80px_100px_80px_40px] gap-3 px-4 py-2.5 border-b ${theme.canvas.border} last:border-0 ${theme.canvas.hover} cursor-pointer transition-colors`}
+                        className={`grid grid-cols-[1fr_40px] md:grid-cols-[1fr_80px_100px_80px_40px] gap-3 px-4 py-3 border-b ${theme.canvas.border} last:border-0 hover:bg-white/[0.03] cursor-pointer transition-colors`}
                         onClick={() => onPreview(item)}
                         onContextMenu={(e) => {
                             e.preventDefault();
                             setMenuState({ item, x: e.clientX, y: e.clientY });
                         }}
                     >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0">
                             {item.thumbnail_r2_url && item.thumbnail_status === 'done' ? (
-                                <img src={item.thumbnail_r2_url} alt="" className="w-7 h-7 rounded object-cover shrink-0" />
+                                <img src={item.thumbnail_r2_url} alt="" className="w-7 h-7 rounded object-cover shrink-0 hidden md:block" />
                             ) : (
                                 <Icon size={15} className={`shrink-0 ${theme.text.secondary}`} />
                             )}
-                            <span className={`text-xs truncate ${theme.text.primary}`}>{item.name}</span>
+                            <span title={item.name} className={`text-xs truncate ${theme.text.primary}`}>{item.name}</span>
                         </div>
-                        <span className={`text-xs self-center ${theme.text.secondary}`}>{typeLabel(item.content_type)}</span>
-                        <span className={`text-xs self-center ${theme.text.secondary}`}>{formatDate(item.created_at)}</span>
-                        <span className={`text-xs self-center ${theme.text.secondary}`}>{formatBytes(item.size_bytes)}</span>
+                        <span className={`text-xs self-center ${theme.text.secondary} hidden md:block`}>{typeLabel(item.content_type)}</span>
+                        <span className={`text-xs self-center ${theme.text.secondary} hidden md:block`}>{formatDate(item.created_at)}</span>
+                        <span className={`text-xs self-center ${theme.text.secondary} hidden md:block`}>{formatBytes(item.size_bytes)}</span>
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setMenuState({ item, x: e.clientX, y: e.clientY });
                             }}
                             className={`self-center ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
+                            aria-label="File options"
                         >
                             <MoreVertical size={14} />
                         </button>

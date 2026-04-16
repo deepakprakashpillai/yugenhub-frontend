@@ -70,7 +70,7 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                             ? 'bg-accent/10 text-accent font-semibold'
                             : `${theme.canvas.inactive} ${theme.canvas.hover}`}
                     `}
-                    style={{ paddingLeft: `${8 + depth * 14}px` }}
+                    style={{ paddingLeft: `${8 + depth * 10}px` }}
                 >
                     {hasChildren ? (
                         <ChevronRight
@@ -86,7 +86,7 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                     }
                     <span className="truncate flex-1">{node.name}</span>
                     {node.is_system && (
-                        <Lock size={9} className={`shrink-0 ${theme.text.secondary} opacity-50`} />
+                        <Lock size={9} className={`shrink-0 ${theme.text.secondary} opacity-50`} title="System folder" />
                     )}
                 </button>
 
@@ -95,7 +95,8 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                     <div className="relative shrink-0">
                         <button
                             onClick={handleMenuClick}
-                            className={`opacity-0 group-hover:opacity-100 p-1 rounded transition-all ${theme.text.secondary} hover:${theme.text.primary} ${theme.canvas.hover}`}
+                            className={`p-1 rounded transition-all ${theme.text.secondary} hover:${theme.text.primary} ${theme.canvas.hover} opacity-30 md:opacity-0 group-hover:opacity-100`}
+                            aria-label="Folder options"
                         >
                             <MoreHorizontal size={12} />
                         </button>
