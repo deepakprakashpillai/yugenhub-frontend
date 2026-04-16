@@ -10,12 +10,14 @@ import {
   replaceFile,
   getUploadUrl,
   toggleFileWatermark,
+  attachMediaToDeliverable,
 } from '../../api/projects';
 import FileUpload, { FileList } from './FileUpload';
 import DownloadLimitSettings from './DownloadLimitSettings';
 import VersionHistory from './VersionHistory';
 import PortalAnalyticsSlideOver from './PortalAnalyticsSlideOver';
-import { Trash2, Link, MessageSquare, Send, ChevronDown, ChevronUp, Package, Loader2, Calendar, FileText, BarChart3, Eye, X, Stamp, RefreshCw, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import MediaPickerModal from '../media/MediaPickerModal';
+import { Trash2, Link, MessageSquare, Send, ChevronDown, ChevronUp, Package, Loader2, Calendar, FileText, BarChart3, Eye, X, Stamp, RefreshCw, ChevronLeft, ChevronRight, Play, HardDrive } from 'lucide-react';
 
 const isMediaFile = (f) => f.content_type?.startsWith('image/') || f.content_type?.startsWith('video/');
 
@@ -57,6 +59,7 @@ function MediaLightbox({ files, index, onClose, onIndexChange }) {
 }
 
 // --- ThumbnailCell: single thumbnail with hover actions ---
+// eslint-disable-next-line no-unused-vars
 function ThumbnailCell({ file, index, onOpen, onDelete, onReplace, onToggleWatermark, togglingWatermarkId, replacingFileId, theme }) {
   const isVideo = file.content_type?.startsWith('video/');
   const wmDone = file.watermark_status === 'done';
@@ -216,6 +219,7 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
   const [watermarkText, setWatermarkText] = useState('');
   const [lightbox, setLightbox] = useState(null); // index
   const [allFilesOpen, setAllFilesOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const sc = STATUS_COLORS[deliverable.status] || STATUS_COLORS.Pending;
   const allMedia = deliverable.files?.length > 0 && deliverable.files.every(isMediaFile);
 
@@ -275,6 +279,17 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
       toast.error('Failed to update watermark');
     } finally {
       setTogglingWatermarkId(null);
+    }
+  };
+
+  const handleAttachMedia = async (mediaItem) => {
+    try {
+      await attachMediaToDeliverable(projectId, deliverable.id, mediaItem.id);
+      toast.success('File attached from Media library');
+      onRefresh();
+    } catch {
+      toast.error('Failed to attach file');
+      throw new Error('Attach failed');
     }
   };
 
@@ -377,15 +392,35 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
                   )}
                 </>
               )}
-              <FileUpload
-                projectId={projectId}
-                deliverableId={deliverable.id}
-                onUploadComplete={onRefresh}
-                compact
-              />
+              <div className="flex items-center gap-2 mt-2">
+                <FileUpload
+                  projectId={projectId}
+                  deliverableId={deliverable.id}
+                  onUploadComplete={onRefresh}
+                  compact
+                />
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(true)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${theme.canvas.border} ${theme.canvas.hover} ${theme.text.secondary} transition-colors shrink-0`}
+                >
+                  <HardDrive size={12} />
+                  From Media
+                </button>
+              </div>
             </>
           ) : (
-            <FileUpload projectId={projectId} deliverableId={deliverable.id} onUploadComplete={onRefresh} />
+            <div className="space-y-2">
+              <FileUpload projectId={projectId} deliverableId={deliverable.id} onUploadComplete={onRefresh} />
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${theme.canvas.border} ${theme.canvas.hover} ${theme.text.secondary} transition-colors`}
+              >
+                <HardDrive size={12} />
+                Select from Media
+              </button>
+            </div>
           )}
         </div>
 
@@ -487,6 +522,13 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
           onIndexChange={setLightbox}
         />
       )}
+
+      {/* Media picker */}
+      <MediaPickerModal
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handleAttachMedia}
+      />
 
       {/* Watermark text modal */}
       {watermarkModal && (
@@ -616,6 +658,7 @@ function DeliverablesByEvent({ deliverables, events, projectId, onRefresh, theme
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 export default function DeliverableManager({ projectId, events = [], project = {} }) {
   const { theme } = useTheme();
   const [deliverables, setDeliverables] = useState([]);

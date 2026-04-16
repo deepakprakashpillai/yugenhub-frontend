@@ -12,6 +12,7 @@ import {
   Bell,
   Calendar,
   Settings,
+  HardDrive,
   X
 } from 'lucide-react';
 
@@ -70,6 +71,10 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
 
   if (user?.role === ROLES.ADMIN || user?.role === ROLES.OWNER || user?.finance_access) {
     opsItems.push({ id: 'finance', label: 'Finance', icon: IndianRupee });
+  }
+
+  if (user?.role === ROLES.OWNER || user?.media_access) {
+    opsItems.push({ id: 'media', label: 'Media', icon: HardDrive });
   }
 
   const managementItems = [
