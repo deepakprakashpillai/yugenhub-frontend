@@ -112,7 +112,7 @@ const TaskKanbanCard = ({ task, onClick, onTaskUpdate, users = [] }) => {
         ...users.map(u => ({ value: u.id, label: u.name, icon: Icons.User, colorClass: 'text-zinc-300' }))
     ];
 
-    const assigneeName = users.find(u => u.id === task.assigned_to)?.name;
+    const assigneeName = task.assigned_associate_name || users.find(u => u.id === task.assigned_to)?.name;
 
     const currentPriority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
     const PriorityIcon = currentPriority.icon;
@@ -195,19 +195,26 @@ const TaskKanbanCard = ({ task, onClick, onTaskUpdate, users = [] }) => {
                     )}
                 </div>
 
-                <InlineDropdown
-                    value={task.assigned_to || ''}
-                    options={assigneeOpts}
-                    onChange={(val) => handleInlineUpdate('assigned_to', val || null)}
-                    alignRight
-                    trigger={
-                        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full ${theme.canvas.bg} border ${theme.canvas.border} flex items-center justify-center text-[9px] sm:text-[10px] font-bold hover:border-zinc-600 transition-colors`}
-                            title={assigneeName || 'Unassigned'}
-                        >
-                            {assigneeName ? assigneeName.charAt(0).toUpperCase() : '?'}
+                <div className="flex items-center gap-1">
+                    {task.incharge_user_id && (
+                        <div title={`Supervised by ${users.find(u => u.id === task.incharge_user_id)?.name || 'member'}`}>
+                            <Icons.Eye className="w-3 h-3 text-amber-500/70" />
                         </div>
-                    }
-                />
+                    )}
+                    <InlineDropdown
+                        value={task.assigned_to || ''}
+                        options={assigneeOpts}
+                        onChange={(val) => handleInlineUpdate('assigned_to', val || null)}
+                        alignRight
+                        trigger={
+                            <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full ${theme.canvas.bg} border ${theme.canvas.border} flex items-center justify-center text-[9px] sm:text-[10px] font-bold hover:border-zinc-600 transition-colors`}
+                                title={assigneeName || 'Unassigned'}
+                            >
+                                {assigneeName ? assigneeName.charAt(0).toUpperCase() : '?'}
+                            </div>
+                        }
+                    />
+                </div>
             </div>
         </div>
     );

@@ -19,3 +19,8 @@ export const deleteAssociate = async (associateId) => {
     const response = await api.delete(`/associates/${associateId}`);
     return response.data;
 };
+
+export const getActiveAssociatesSimple = async () => {
+    const response = await api.get('/associates/active-simple');
+    return response.data;
+};
