@@ -1,7 +1,6 @@
 export { default as Modal } from './Modal';
 export { default as ConfirmDeleteModal } from './ConfirmDeleteModal';
 export { default as EventModal } from './EventModal';
-export { default as DeliverableModal } from './DeliverableModal';
 export { default as TeamMemberModal } from './TeamMemberModal';
 export { default as MetadataModal } from './MetadataModal';
 export { default as SlideOver } from './SlideOver';

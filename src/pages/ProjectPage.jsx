@@ -171,6 +171,7 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
     };
 
     const assignedUser = users.find(u => u.id === task.assigned_to);
+    const displayAssigneeName = task.assigned_associate_name || assignedUser?.name;
     const filteredUsers = users.filter(u =>
         u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -238,15 +239,16 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                                     setShowAssigneeMenu(!showAssigneeMenu);
                                     setSearchQuery('');
                                 }}
-                                title={assignedUser ? `Assigned to: ${assignedUser.name}` : "Unassigned"}
+                                title={displayAssigneeName ? `Assigned to: ${displayAssigneeName}` : "Unassigned"}
                                 className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} hover:border-zinc-500 transition-all`}
                             >
-                                {assignedUser ? (
+                                {displayAssigneeName ? (
                                     <>
                                         <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">
-                                            {assignedUser.name.charAt(0)}
+                                            {displayAssigneeName.charAt(0)}
                                         </div>
-                                        <span className="max-w-[100px] truncate">{assignedUser.name}</span>
+                                        <span className="max-w-[100px] truncate">{displayAssigneeName}</span>
+                                        {task.incharge_user_id && <Icons.Eye className="w-3 h-3 text-amber-500/70 flex-shrink-0" />}
                                     </>
                                 ) : (
                                     <>

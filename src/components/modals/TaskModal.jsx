@@ -48,6 +48,12 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
     // Internal Users State (Bypass parent prop if needed)
     const [fetchedUsers, setFetchedUsers] = useState([]);
 
+    // Associate Assignment State (deliverable tasks only)
+    const [assignmentMode, setAssignmentMode] = useState('member'); // 'member' | 'associate'
+    const [associates, setAssociates] = useState([]);
+    const [assignedAssociateId, setAssignedAssociateId] = useState('');
+    const [inchargeUserId, setInchargeUserId] = useState('');
+
     const fetchHistory = useCallback(async () => {
         if (!task) return;
         setHistoryLoading(true);
@@ -122,7 +128,25 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 })
                 .catch(err => console.error("Modal user fetch failed", err));
         }
-    }, [isOpen, task, fetchHistory]);
+
+        // Initialize associate assignment state
+        if (isOpen && task && task.assigned_associate_id) {
+            setAssignmentMode('associate');
+            setAssignedAssociateId(task.assigned_associate_id);
+            setInchargeUserId(task.incharge_user_id || '');
+        } else if (isOpen) {
+            setAssignmentMode('member');
+            setAssignedAssociateId('');
+            setInchargeUserId('');
+        }
+
+        // Fetch associates for deliverable tasks
+        if (isOpen && isDeliverable) {
+            api.get('/associates/active-simple')
+                .then(res => setAssociates(Array.isArray(res.data) ? res.data : []))
+                .catch(err => console.error("Associate fetch failed", err));
+        }
+    }, [isOpen, task, fetchHistory, isDeliverable]);
 
     // Fetch Projects when Vertical Changes
     useEffect(() => {
@@ -173,10 +197,21 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
             return toast.error('A comment is required when blocking a task.');
         }
 
+        // Validate: incharge required for unlinked associates
+        if (isDeliverable && assignmentMode === 'associate' && assignedAssociateId) {
+            const selectedAssociate = associates.find(a => a._id === assignedAssociateId);
+            if (selectedAssociate && !selectedAssociate.linked_user_id && !inchargeUserId) {
+                return toast.error('An incharge member is required for associates without a YugenHub account.');
+            }
+        }
+
         const payload = {
             ...formData,
             due_date: formData.due_date || null,
-            assigned_to: formData.assigned_to || null,
+            assigned_to: assignmentMode === 'member' ? (formData.assigned_to || null) : null,
+            // Associate assignment fields (deliverable tasks only)
+            assigned_associate_id: (isDeliverable && assignmentMode === 'associate') ? (assignedAssociateId || null) : null,
+            incharge_user_id: (isDeliverable && assignmentMode === 'associate') ? (inchargeUserId || null) : null,
             // Only include quantity if it's a deliverable
             quantity: isDeliverable ? parseInt(formData.quantity) || 1 : undefined,
             // PRESERVE category if it was a deliverable
@@ -290,13 +325,76 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                             placeholder="Priority"
                             className="w-full md:w-32"
                         />
-                        <Select
-                            value={formData.assigned_to}
-                            onChange={(val) => handleSelectChange('assigned_to', val)}
-                            options={assigneeOptions}
-                            placeholder="Assignee"
-                            className="w-full md:w-40"
-                        />
+                        {isDeliverable ? (
+                            <div className="flex flex-wrap gap-2 items-center">
+                                {/* Toggle: Member / Associate */}
+                                <div className={`flex rounded-lg border ${theme.canvas.border} overflow-hidden flex-shrink-0`}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentMode('member')}
+                                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${assignmentMode === 'member' ? 'bg-purple-500 text-white' : `${theme.text.secondary} hover:${theme.text.primary}`}`}
+                                    >
+                                        Member
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAssignmentMode('associate')}
+                                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${assignmentMode === 'associate' ? 'bg-purple-500 text-white' : `${theme.text.secondary} hover:${theme.text.primary}`}`}
+                                    >
+                                        Associate
+                                    </button>
+                                </div>
+                                {assignmentMode === 'member' ? (
+                                    <Select
+                                        value={formData.assigned_to}
+                                        onChange={(val) => handleSelectChange('assigned_to', val)}
+                                        options={assigneeOptions}
+                                        placeholder="Assignee"
+                                        className="w-full md:w-40"
+                                    />
+                                ) : (
+                                    <>
+                                        <Select
+                                            value={assignedAssociateId}
+                                            onChange={(val) => { setAssignedAssociateId(val); setInchargeUserId(''); }}
+                                            options={[
+                                                { value: '', label: 'Select Associate', icon: Icons.User, color: theme.text.secondary },
+                                                ...associates.map(a => ({
+                                                    value: a._id,
+                                                    label: a.name,
+                                                    icon: Icons.User,
+                                                    color: theme.text.primary,
+                                                    description: a.primary_role
+                                                }))
+                                            ]}
+                                            placeholder="Select Associate"
+                                            className="w-full md:w-44"
+                                        />
+                                        {/* Incharge required when associate has no account */}
+                                        {assignedAssociateId && !associates.find(a => a._id === assignedAssociateId)?.linked_user_id && (
+                                            <Select
+                                                value={inchargeUserId}
+                                                onChange={setInchargeUserId}
+                                                options={[
+                                                    { value: '', label: 'Select Incharge', icon: Icons.Eye, color: theme.text.secondary },
+                                                    ...finalUsers.map(u => ({ value: u.id, label: u.name, icon: Icons.User, color: theme.text.primary }))
+                                                ]}
+                                                placeholder="Incharge (required)"
+                                                className="w-full md:w-44"
+                                            />
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <Select
+                                value={formData.assigned_to}
+                                onChange={(val) => handleSelectChange('assigned_to', val)}
+                                options={assigneeOptions}
+                                placeholder="Assignee"
+                                className="w-full md:w-40"
+                            />
+                        )}
 
                         {/* Vertical & Project Selection (only for non-deliverable tasks) */}
                         {!isDeliverable && (
