@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Eye, IndianRupee, X, Loader2, Check } from 'lucide-react';
+import { Shield, Eye, IndianRupee, HardDrive, X, Loader2, Check } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import api from '../../api/axios';
@@ -12,6 +12,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
 
     const [allowedVerticals, setAllowedVerticals] = useState([]);
     const [financeAccess, setFinanceAccess] = useState(false);
+    const [mediaAccess, setMediaAccess] = useState(false);
     const [canManageTeam, setCanManageTeam] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -19,6 +20,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
         if (user) {
             setAllowedVerticals(user.allowed_verticals || []);
             setFinanceAccess(user.finance_access || false);
+            setMediaAccess(user.media_access || false);
             setCanManageTeam(user.can_manage_team || false);
         }
     }, [user]);
@@ -50,6 +52,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
             await api.patch(`/settings/team/${user.id}/access`, {
                 allowed_verticals: allowedVerticals,
                 finance_access: financeAccess,
+                media_access: mediaAccess,
                 can_manage_team: canManageTeam,
             });
             toast.success('Access updated');
@@ -153,6 +156,32 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
                             </div>
                             <div className={`relative w-10 h-5 rounded-full transition-colors ${financeAccess ? 'bg-emerald-500' : 'bg-zinc-700'}`}>
                                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${financeAccess ? 'translate-x-5' : 'translate-x-0'}`} />
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* Media Access */}
+                    <div className="pt-4 border-t border-zinc-800">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
+                            <HardDrive size={14} /> Media Access
+                        </div>
+                        <button
+                            onClick={() => setMediaAccess(!mediaAccess)}
+                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${mediaAccess
+                                ? 'bg-emerald-500/10 border-emerald-500/25'
+                                : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
+                                }`}
+                        >
+                            <div>
+                                <p className={`text-sm font-medium ${mediaAccess ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                                    {mediaAccess ? 'Enabled' : 'Disabled'}
+                                </p>
+                                <p className="text-[11px] text-zinc-500 mt-0.5">
+                                    Allow this user to access the Media tab
+                                </p>
+                            </div>
+                            <div className={`relative w-10 h-5 rounded-full transition-colors ${mediaAccess ? 'bg-emerald-500' : 'bg-zinc-700'}`}>
+                                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${mediaAccess ? 'translate-x-5' : 'translate-x-0'}`} />
                             </div>
                         </button>
                     </div>

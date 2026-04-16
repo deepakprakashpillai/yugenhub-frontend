@@ -121,3 +121,11 @@ export const toggleFileWatermark = async (projectId, deliverableId, fileId, enab
     );
     return response.data;
 };
+
+export const attachMediaToDeliverable = async (projectId, deliverableId, mediaItemId) => {
+    const response = await api.post(
+        `/projects/${projectId}/deliverables/${deliverableId}/attach-media`,
+        { media_item_id: mediaItemId }
+    );
+    return response.data;
+};

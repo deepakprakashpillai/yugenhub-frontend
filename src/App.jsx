@@ -20,6 +20,7 @@ const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const FinancePage = lazy(() => import('./pages/FinancePage'));
+const MediaPage = lazy(() => import('./pages/MediaPage'));
 const PortalPage = lazy(() => import('./pages/PortalPage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
@@ -176,6 +177,11 @@ function AppRoutes() {
         <Route path="/finance" element={
           <ProtectedRoute>
             <FinancePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/media" element={
+          <ProtectedRoute>
+            <MediaPage />
           </ProtectedRoute>
         } />
 
