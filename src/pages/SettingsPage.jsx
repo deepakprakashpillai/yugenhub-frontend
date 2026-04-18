@@ -125,7 +125,7 @@ function SettingsPage() {
             try {
                 const res = await api.post('/projects/admin/revalidate-all');
                 setSyncResult(res.data);
-                const fixed = res.data.event_dates_fixed + res.data.tasks_created + res.data.portal_deliverables_created + res.data.portal_deliverables_removed;
+                const fixed = res.data.event_dates_fixed + res.data.tasks_created + res.data.portal_deliverables_created + res.data.portal_deliverables_removed + (res.data.task_titles_fixed || 0);
                 toast.success(fixed > 0 ? `Revalidation complete — ${fixed} issues fixed` : 'Revalidation complete — everything looks good');
             } catch (err) {
                 console.error(err);
@@ -230,7 +230,7 @@ function SettingsPage() {
                         <div className="flex-1">
                             <p className={`text-sm font-bold ${theme.text.primary}`}>Revalidate All Projects</p>
                             <p className={`text-xs ${theme.text.secondary} mt-1`}>
-                                Scans every project and fixes common data issues: corrupted event dates, missing deliverable tasks, and out-of-sync portal deliverables. Safe to run multiple times.
+                                Scans every project and fixes common data issues: corrupted event dates, missing deliverable tasks, mismatched deliverable task titles, and out-of-sync portal deliverables. Safe to run multiple times.
                             </p>
                             {syncResult && (
                                 <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1">
@@ -240,6 +240,9 @@ function SettingsPage() {
                                     </p>
                                     <p className={`text-xs ${syncResult.tasks_created > 0 ? 'text-blue-400' : 'text-zinc-500'}`}>
                                         {syncResult.tasks_created} missing tasks created
+                                    </p>
+                                    <p className={`text-xs ${(syncResult.task_titles_fixed || 0) > 0 ? 'text-purple-400' : 'text-zinc-500'}`}>
+                                        {syncResult.task_titles_fixed || 0} task titles normalised
                                     </p>
                                     <p className={`text-xs ${syncResult.portal_deliverables_created > 0 ? 'text-green-400' : 'text-zinc-500'}`}>
                                         {syncResult.portal_deliverables_created} portal deliverables created
