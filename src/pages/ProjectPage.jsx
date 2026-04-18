@@ -194,7 +194,7 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                     <Icons.Package className={`w-4 h-4 ${theme.text.secondary}`} />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h5 className={`${theme.text.primary} font-medium truncate`}>{task.title?.includes(' (') ? task.title.substring(0, task.title.lastIndexOf(' (')) : task.title}</h5>
+                    <h5 className={`${theme.text.primary} font-medium truncate`}>{task.name || (task.title?.includes(' (') ? task.title.substring(0, task.title.lastIndexOf(' (')) : task.title)}</h5>
                     <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5 flex-wrap`}>
 
                         {/* Inline Priority Marker */}

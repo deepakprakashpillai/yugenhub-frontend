@@ -714,21 +714,27 @@ const ProjectSlideOver = ({
                                                         <Icons.X className="w-4 h-4" />
                                                     </button>
                                                 </div>
-                                                <div className="mt-2 flex flex-col gap-1.5">
-                                                    <input
-                                                        type="text"
-                                                        value={del.name}
-                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'name', e.target.value)}
-                                                        placeholder="Display name (optional, uses type if blank)"
-                                                        className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} text-xs ${theme.text.primary} placeholder-zinc-500 focus:ring-0 focus:border-purple-500 py-1 px-0 transition-colors`}
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        value={del.notes}
-                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'notes', e.target.value)}
-                                                        placeholder="Comment / notes (optional)"
-                                                        className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} text-xs ${theme.text.secondary} placeholder-zinc-500 focus:ring-0 focus:border-purple-500 py-1 px-0 transition-colors`}
-                                                    />
+                                                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                                                    <div>
+                                                        <label className={`text-[10px] uppercase tracking-wider font-semibold ${theme.text.secondary}`}>Name <span className="normal-case font-normal opacity-60">(optional)</span></label>
+                                                        <input
+                                                            type="text"
+                                                            value={del.name}
+                                                            onChange={(e) => handleDeliverableChange(index, dIndex, 'name', e.target.value)}
+                                                            placeholder="e.g. Wedding Album"
+                                                            className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} text-xs ${theme.text.primary} placeholder-zinc-500 focus:ring-0 focus:border-purple-500 py-1 px-0 transition-colors`}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className={`text-[10px] uppercase tracking-wider font-semibold ${theme.text.secondary}`}>Notes <span className="normal-case font-normal opacity-60">(optional)</span></label>
+                                                        <input
+                                                            type="text"
+                                                            value={del.notes}
+                                                            onChange={(e) => handleDeliverableChange(index, dIndex, 'notes', e.target.value)}
+                                                            placeholder="Any comments..."
+                                                            className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} text-xs ${theme.text.secondary} placeholder-zinc-500 focus:ring-0 focus:border-purple-500 py-1 px-0 transition-colors`}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
