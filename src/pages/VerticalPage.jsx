@@ -209,7 +209,7 @@ const VerticalPage = ({ vertical, title }) => {
         setActionLoading(true);
         try {
             const response = await api.post('/clients', { id: uuidv4(), ...clientData });
-            const newClient = response.data;
+            const newClient = { _id: response.data.id, ...clientData };
             setClientModal({ open: false, callback: null });
             // Call the callback to select this client in the project form
             if (clientModal.callback) {
