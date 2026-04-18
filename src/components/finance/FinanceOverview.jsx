@@ -192,7 +192,7 @@ const FinanceOverview = ({ refreshTrigger }) => {
             const resolved = template
                 .replace(/\{(\w+)\}/g, (_, fn) => {
                     const val = meta[fn];
-                    return val && typeof val === 'string' ? val.split(' ')[0] : (val ? String(val) : '');
+                    return val && typeof val === 'string' ? val.split(' ').slice(0, 2).join(' ') : (val ? String(val) : '');
                 })
                 .trim()
                 .replace(/^[&\s]+|[&\s]+$/g, '');
