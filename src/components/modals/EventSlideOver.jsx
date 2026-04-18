@@ -47,6 +47,13 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
+                    <input
+                        type="text"
+                        value={data.name || ''}
+                        onChange={(e) => setData({ ...data, name: e.target.value })}
+                        placeholder="Display name (optional)"
+                        className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
+                    />
                     <DatePicker
                         value={data.due_date?.slice(0, 10) || ''}
                         onChange={(val) => setData({ ...data, due_date: val })}
@@ -80,8 +87,8 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
                     <Icons.Package className="w-4 h-4 text-zinc-400" />
                 </div>
                 <div>
-                    <p className="text-white text-sm font-medium">{deliverable.type}</p>
-                    <p className="text-zinc-500 text-xs">Qty: {deliverable.quantity}</p>
+                    <p className="text-white text-sm font-medium">{deliverable.name || deliverable.type}</p>
+                    <p className="text-zinc-500 text-xs">{deliverable.name ? deliverable.type : null}{deliverable.name ? ' · ' : ''}Qty: {deliverable.quantity}</p>
                 </div>
             </div>
             <div className="flex items-center gap-2">
@@ -247,7 +254,7 @@ const EventSlideOver = ({
     const [teamRequirements, setTeamRequirements] = useState([]);
     const [showAddDeliverable, setShowAddDeliverable] = useState(false);
     const [showAddMember, setShowAddMember] = useState(false);
-    const [newDeliverable, setNewDeliverable] = useState({ type: '', quantity: 1, due_date: '', notes: '' });
+    const [newDeliverable, setNewDeliverable] = useState({ type: '', name: '', quantity: 1, due_date: '', notes: '' });
     const [newMember, setNewMember] = useState({ name: '', role: '', tags: [] });
 
     // Helper to parse datetime string into date and time parts.
@@ -354,7 +361,7 @@ const EventSlideOver = ({
     const addDeliverable = () => {
         if (!newDeliverable.type.trim()) return;
         setDeliverables([...deliverables, { id: uuidv4(), ...newDeliverable }]);
-        setNewDeliverable({ type: '', quantity: 1, due_date: '', notes: '' });
+        setNewDeliverable({ type: '', name: '', quantity: 1, due_date: '', notes: '' });
         setShowAddDeliverable(false);
     };
 
@@ -572,6 +579,13 @@ const EventSlideOver = ({
                                         className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
                                     />
                                 </div>
+                                <input
+                                    type="text"
+                                    value={newDeliverable.name}
+                                    onChange={(e) => setNewDeliverable({ ...newDeliverable, name: e.target.value })}
+                                    placeholder="Display name (optional)"
+                                    className="w-full px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
+                                />
                                 <div className="flex gap-2">
                                     <button onClick={addDeliverable} className="flex-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded font-medium">
                                         Add Deliverable
