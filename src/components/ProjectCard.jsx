@@ -84,7 +84,7 @@ const ProjectCard = ({ project, onRefresh }) => {
             // Replace {field_name} placeholders with actual metadata values
             resolved = resolved.replace(/\{(\w+)\}/g, (match, fieldName) => {
                 const val = meta[fieldName];
-                if (val && typeof val === 'string') return val.split(' ')[0]; // Use first word for names
+                if (val && typeof val === 'string') return val.split(' ').slice(0, 2).join(' ');
                 if (val) return String(val);
                 return '';
             });

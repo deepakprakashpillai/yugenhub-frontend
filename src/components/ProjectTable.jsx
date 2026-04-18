@@ -39,7 +39,7 @@ const ProjectTable = ({ projects, onRefresh }) => {
             let resolved = template;
             resolved = resolved.replace(/\{(\w+)\}/g, (match, fieldName) => {
                 const val = meta[fieldName];
-                if (val && typeof val === 'string') return val.split(' ')[0];
+                if (val && typeof val === 'string') return val.split(' ').slice(0, 2).join(' ');
                 if (val) return String(val);
                 return '';
             });
