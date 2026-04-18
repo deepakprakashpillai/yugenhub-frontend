@@ -188,19 +188,19 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
     };
 
     return (
-        <div className={`flex items-start justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group relative`}>
+        <div className={`flex items-start justify-between gap-3 p-4 ${theme.canvas.hover || "bg-zinc-800/50"} rounded-xl border ${theme.canvas.border} group relative cursor-pointer`} onClick={onEdit}>
             <div className="flex items-start gap-4 flex-1 min-w-0">
                 <div className={`w-8 h-8 rounded-lg ${theme.canvas.card} flex items-center justify-center flex-shrink-0`}>
                     <Icons.Package className={`w-4 h-4 ${theme.text.secondary}`} />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h5 className={`${theme.text.primary} font-medium truncate`}>{task.title}</h5>
+                    <h5 className={`${theme.text.primary} font-medium truncate`}>{task.title?.includes(' (') ? task.title.substring(0, task.title.lastIndexOf(' (')) : task.title}</h5>
                     <div className={`flex items-center gap-3 text-xs ${theme.text.secondary} mt-1.5 flex-wrap`}>
 
                         {/* Inline Priority Marker */}
                         <div className="relative" ref={priorityRef}>
                             <button
-                                onClick={() => setShowPriorityMenu(!showPriorityMenu)}
+                                onClick={(e) => { e.stopPropagation(); setShowPriorityMenu(!showPriorityMenu); }}
                                 title={`Priority: ${task.priority}`}
                                 className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md ${theme.canvas.card} border ${theme.canvas.border} hover:border-zinc-500 transition-all`}
                             >
@@ -235,7 +235,8 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                         {/* Inline Assignee Marker */}
                         <div className="relative" ref={assigneeRef}>
                             <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     setShowAssigneeMenu(!showAssigneeMenu);
                                     setSearchQuery('');
                                 }}
@@ -308,7 +309,7 @@ const TaskItem = ({ task, onEdit, onDelete, onUpdate, users = [] }) => {
                         {/* Inline Due Date Marker */}
                         <div className="relative" ref={dateRef}>
                             <button
-                                onClick={() => setIsEditingDate(!isEditingDate)}
+                                onClick={(e) => { e.stopPropagation(); setIsEditingDate(!isEditingDate); }}
                                 className={clsx(
                                     "flex items-center gap-1.5 px-2 py-0.5 rounded-md border transition-all",
                                     task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done'
@@ -727,6 +728,7 @@ const ProjectPage = () => {
     const goBack = () => window.history.length > 1 ? navigate(-1) : navigate('/');
     const { config } = useAgencyConfig();
     const [project, setProject] = useState(null);
+    const [client, setClient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedEvents, setExpandedEvents] = useState({});
@@ -796,6 +798,14 @@ const ProjectPage = () => {
             setProject(res.data);
             setTasks(tasksRes.data.data || []);
             setUsers(usersRes.data);
+            if (res.data.client_id) {
+                try {
+                    const clientRes = await api.get(`/clients/${res.data.client_id}`);
+                    setClient(clientRes.data);
+                } catch {
+                    // non-fatal — client info is supplementary
+                }
+            }
             setExpandedEvents(prev => {
                 const updated = {};
                 res.data.events?.forEach((_, i) => {
@@ -1165,8 +1175,23 @@ const ProjectPage = () => {
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className={`absolute right-0 top-full mt-2 w-48 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
+                                        className={`absolute right-0 top-full mt-2 w-56 ${theme.canvas.card} border ${theme.canvas.border} rounded-xl shadow-2xl z-[60] overflow-hidden`}
                                     >
+                                        {client && (
+                                            <div className={`px-4 py-3 border-b ${theme.canvas.border}`}>
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                                                        <span className="text-xs font-bold text-purple-400">{client.name?.charAt(0)?.toUpperCase()}</span>
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className={`text-sm font-semibold ${theme.text.primary} truncate`}>{client.name}</p>
+                                                        {client.phone && (
+                                                            <a href={`tel:${client.phone}`} className="text-xs text-purple-400 font-mono">{client.phone}</a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                         <button
                                             onClick={() => { setHeaderMenu(false); setMetadataModal(true); }}
                                             className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left ${theme.text.secondary} hover:${theme.canvas.hover} hover:${theme.text.primary} transition-colors`}
@@ -1197,6 +1222,21 @@ const ProjectPage = () => {
                     <div className="w-48">
                         <ProgressBar total={projectTotal} completed={projectCompleted} />
                     </div>
+
+                    {/* Client quick-reference card */}
+                    {client && (
+                        <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border ${theme.canvas.border} ${theme.canvas.card} shrink-0`}>
+                            <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                                <span className="text-xs font-bold text-purple-400">{client.name?.charAt(0)?.toUpperCase()}</span>
+                            </div>
+                            <div className="min-w-0">
+                                <p className={`text-sm font-semibold ${theme.text.primary} truncate max-w-[140px]`}>{client.name}</p>
+                                {client.phone && (
+                                    <a href={`tel:${client.phone}`} onClick={e => e.stopPropagation()} className={`text-xs ${theme.text.secondary} hover:text-purple-400 transition-colors font-mono`}>{client.phone}</a>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-2">
                         <div className="relative">

@@ -325,7 +325,7 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <h4 className={`font-bold ${theme.text.primary}`}>{deliverable.title}</h4>
-            {deliverable.description && (
+            {deliverable.description && !deliverable.description.startsWith('Deliverable for ') && (
               <p className={`text-sm mt-0.5 ${theme.text.secondary}`}>{deliverable.description}</p>
             )}
           </div>

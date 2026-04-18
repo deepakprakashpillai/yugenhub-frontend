@@ -105,7 +105,7 @@ const ProjectSlideOver = ({
 
     // Filter clients based on search
     const filteredClients = clients.filter(c =>
-        c.name?.toLowerCase().includes(clientSearch.toLowerCase())
+        c.name?.toLowerCase().includes((clientSearch || '').toLowerCase())
     );
 
     const handleSelectClient = (client) => {
@@ -209,6 +209,7 @@ const ProjectSlideOver = ({
                     {
                         id: uuidv4(),
                         type: '',
+                        name: '',
                         quantity: 1,
                         status: 'Pending',
                         due_date: '',
@@ -683,34 +684,52 @@ const ProjectSlideOver = ({
                                     </div>
                                     <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                                         {event.deliverables.map((del, dIndex) => (
-                                            <div key={del.id} className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 ${theme.canvas.card} p-3 sm:p-2.5 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors relative`}>
-                                                <select
-                                                    value={del.type}
-                                                    onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                                    className={`w-full sm:flex-1 bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer pr-8 sm:pr-0`}
-                                                >
-                                                    <option value="" disabled>Select Type</option>
-                                                    {(config?.deliverableTypes || []).map(dt => (
-                                                        <option key={dt} value={dt}>{dt}</option>
-                                                    ))}
-                                                </select>
-                                                <div className={`hidden sm:block w-px h-6 ${theme.canvas.border}`}></div>
-                                                <div className="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
-                                                    <span className={`sm:hidden text-xs ${theme.text.secondary}`}>Qty:</span>
+                                            <div key={del.id} className={`${theme.canvas.card} p-3 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
+                                                <div className="flex items-center gap-2 sm:gap-3">
+                                                    <select
+                                                        value={del.type}
+                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
+                                                        className={`flex-1 bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
+                                                    >
+                                                        <option value="" disabled>Select Type</option>
+                                                        {(config?.deliverableTypes || []).map(dt => (
+                                                            <option key={dt} value={dt}>{dt}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className={`hidden sm:block w-px h-6 ${theme.canvas.border}`}></div>
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <span className={`text-xs ${theme.text.secondary}`}>Qty:</span>
+                                                        <input
+                                                            type="number"
+                                                            value={del.quantity}
+                                                            onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
+                                                            className={`w-12 bg-transparent border-0 text-base md:text-sm ${theme.text.secondary} focus:ring-0 p-0 text-center font-medium`}
+                                                            min="1"
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveDeliverable(index, dIndex)}
+                                                        className={`shrink-0 ${theme.text.secondary} hover:text-red-400 p-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
+                                                    >
+                                                        <Icons.X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="mt-2 flex flex-col gap-1.5">
                                                     <input
-                                                        type="number"
-                                                        value={del.quantity}
-                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'quantity', parseInt(e.target.value) || 1)}
-                                                        className={`flex-1 sm:w-12 bg-transparent border-0 text-base md:text-sm ${theme.text.secondary} focus:${theme.text.primary} focus:ring-0 p-0 sm:text-center font-medium`}
-                                                        min="1"
+                                                        type="text"
+                                                        value={del.name}
+                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'name', e.target.value)}
+                                                        placeholder="Display name (optional, uses type if blank)"
+                                                        className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} text-xs ${theme.text.primary} placeholder-zinc-500 focus:ring-0 focus:border-purple-500 py-1 px-0 transition-colors`}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={del.notes}
+                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'notes', e.target.value)}
+                                                        placeholder="Comment / notes (optional)"
+                                                        className={`w-full bg-transparent border-0 border-b ${theme.canvas.border} text-xs ${theme.text.secondary} placeholder-zinc-500 focus:ring-0 focus:border-purple-500 py-1 px-0 transition-colors`}
                                                     />
                                                 </div>
-                                                <button
-                                                    onClick={() => handleRemoveDeliverable(index, dIndex)}
-                                                    className={`absolute right-2 top-2 sm:relative sm:right-auto sm:top-auto ${theme.text.secondary} hover:text-red-400 p-1.5 opacity-100 sm:opacity-0 group-hover/item:opacity-100 transition-opacity rounded-md hover:${theme.canvas.hover}`}
-                                                >
-                                                    <Icons.X className="w-4 h-4" />
-                                                </button>
                                             </div>
                                         ))}
                                         {event.deliverables.length === 0 && (
