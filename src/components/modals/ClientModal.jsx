@@ -3,6 +3,7 @@ import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
 import { toast } from 'sonner';
+import Textarea from '../ui/Textarea';
 
 const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }) => {
     const { theme } = useTheme();
@@ -99,13 +100,12 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
 
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1`}>Notes</label>
-                    <textarea
+                    <Textarea
                         name="notes"
                         value={formData.notes}
                         onChange={handleChange}
                         rows={2}
                         placeholder="Any notes about this client..."
-                        className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500 resize-none`}
                     />
                 </div>
 

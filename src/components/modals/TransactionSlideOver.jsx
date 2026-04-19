@@ -8,6 +8,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
 import SearchableSelect from '../ui/SearchableSelect';
+import Select from '../ui/Select';
+import Textarea from '../ui/Textarea';
 import DatePicker from '../ui/DatePicker';
 import { FINANCE_CATEGORIES, TRANSACTION_TYPES, VERTICALS } from '../../constants';
 
@@ -338,19 +340,18 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 {/* 2. Vertical Selection */}
                 <div>
                     <label className="block text-xs font-medium mb-1 text-gray-500">Vertical</label>
-                    <select
+                    <Select
                         value={selectedVertical}
-                        onChange={(e) => {
-                            setSelectedVertical(e.target.value);
+                        onChange={(val) => {
+                            setSelectedVertical(val);
                             setFormData(prev => ({ ...prev, project_id: '' }));
                         }}
-                        className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
-                    >
-                        <option value={VERTICALS.GENERAL}>General</option>
-                        {config?.verticals?.map(v => (
-                            <option key={v.id} value={v.id}>{v.label}</option>
-                        ))}
-                    </select>
+                        options={[
+                            { value: VERTICALS.GENERAL, label: 'General' },
+                            ...(config?.verticals || []).map(v => ({ value: v.id, label: v.label }))
+                        ]}
+                        className="w-full"
+                    />
                 </div>
 
                 {/* 3. Project Selection (Conditional) */}
@@ -394,34 +395,26 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
                 <div>
                     <label className="block text-xs font-medium mb-1 text-gray-500">{isTransfer ? 'From Account' : 'Account'}</label>
-                    <select
-                        required
+                    <Select
                         value={formData.account_id}
-                        onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
-                        className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
-                    >
-                        <option value="" disabled>Select Account</option>
-                        {accounts.map(acc => (
-                            <option key={acc.id} value={acc.id}>{acc.name} (₹{acc.current_balance})</option>
-                        ))}
-                    </select>
+                        onChange={(val) => setFormData({ ...formData, account_id: val })}
+                        placeholder="Select Account"
+                        options={accounts.map(acc => ({ value: acc.id, label: `${acc.name} (₹${acc.current_balance})` }))}
+                        className="w-full"
+                    />
                 </div>
 
                 {/* Destination Account (Transfer only) */}
                 {isTransfer && (
                     <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                         <label className="block text-xs font-medium mb-1 text-gray-500">To Account</label>
-                        <select
-                            required
+                        <Select
                             value={formData.destination_account_id}
-                            onChange={(e) => setFormData({ ...formData, destination_account_id: e.target.value })}
-                            className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
-                        >
-                            <option value="" disabled>Select Destination</option>
-                            {accounts.filter(acc => acc.id !== formData.account_id).map(acc => (
-                                <option key={acc.id} value={acc.id}>{acc.name} (₹{acc.current_balance})</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFormData({ ...formData, destination_account_id: val })}
+                            placeholder="Select Destination"
+                            options={accounts.filter(acc => acc.id !== formData.account_id).map(acc => ({ value: acc.id, label: `${acc.name} (₹${acc.current_balance})` }))}
+                            className="w-full"
+                        />
                     </div>
                 )}
 
@@ -432,17 +425,14 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                             <label className="block text-xs font-medium mb-1 text-gray-500">
                                 Category {isProjectIncomeMode && <span className="text-indigo-400 ml-1">auto</span>}
                             </label>
-                            <select
+                            <Select
                                 value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '', associate_id: '' })}
+                                onChange={(val) => setFormData({ ...formData, category: val, subcategory: '', associate_id: '' })}
+                                placeholder="Select..."
                                 disabled={isProjectIncomeMode}
-                                className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none ${isProjectIncomeMode ? 'opacity-60 cursor-not-allowed' : ''}`}
-                            >
-                                <option value="">Select...</option>
-                                {filteredCategories.map(c => (
-                                    <option key={c.id || c.name} value={c.name}>{c.name}</option>
-                                ))}
-                            </select>
+                                options={filteredCategories.map(c => ({ value: c.name, label: c.name }))}
+                                className="w-full"
+                            />
                         </div>
 
                         {/* Subcategory OR Associate Payout */}
@@ -461,17 +451,14 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                                 <label className="block text-xs font-medium mb-1 text-gray-500">
                                     {isProjectIncomeMode ? 'Payment Type' : 'Subcategory'}
                                 </label>
-                                <select
+                                <Select
                                     value={formData.subcategory}
-                                    onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                                    className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
+                                    onChange={(val) => setFormData({ ...formData, subcategory: val })}
+                                    placeholder={availableSubcategories.length > 0 ? 'Select...' : 'None'}
                                     disabled={availableSubcategories.length === 0}
-                                >
-                                    <option value="">{availableSubcategories.length > 0 ? 'Select...' : 'None'}</option>
-                                    {availableSubcategories.map(s => (
-                                        <option key={s.id || s.name} value={s.name}>{s.name}</option>
-                                    ))}
-                                </select>
+                                    options={availableSubcategories.map(s => ({ value: s.name, label: s.name }))}
+                                    className="w-full"
+                                />
                             </div>
                         )}
                     </div>
@@ -481,11 +468,10 @@ const TransactionSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
 
                 <div>
                     <label className="block text-xs font-medium mb-1 text-gray-500">Notes</label>
-                    <textarea
+                    <Textarea
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
-                        rows="3"
+                        rows={3}
                         placeholder="Add details..."
                     />
                 </div>

@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import api from '../../api/axios';
 import { toast } from 'sonner';
+import { ConfirmModal } from '../modals';
 
 const FinanceSection = () => {
     const { theme } = useTheme();
@@ -21,6 +22,7 @@ const FinanceSection = () => {
     const [editingSubcategory, setEditingSubcategory] = useState(null); // { parentId, id, name }
     const [newSubcategoryName, setNewSubcategoryName] = useState('');
     const [addingSubcategoryTo, setAddingSubcategoryTo] = useState(null); // parentId
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
     useEffect(() => {
         // Always fetch from the endpoint which applies validation + default fallback
@@ -61,10 +63,17 @@ const FinanceSection = () => {
         setIsAddingCategory(false);
     };
 
-    const handleDeleteCategory = async (id) => {
-        if (!confirm('Area you sure? This will affect existing transactions report filtering.')) return;
-        const updated = categories.filter(c => c.id !== id);
-        await saveCategories(updated);
+    const handleDeleteCategory = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Category',
+            message: 'This will affect existing transactions report filtering. Are you sure?',
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                const updated = categories.filter(c => c.id !== id);
+                await saveCategories(updated);
+            }
+        });
     };
 
     const handleUpdateCategory = async () => {
@@ -260,6 +269,7 @@ const FinanceSection = () => {
     );
 
     return (
+        <>
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
                 <h2 className={`text-2xl font-bold ${theme.text.primary}`}>Finance Categories</h2>
@@ -323,6 +333,15 @@ const FinanceSection = () => {
                 </div>
             )}
         </div>
+        <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+            onConfirm={confirmModal.onConfirm}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            variant="warning"
+        />
+        </>
     );
 };
 

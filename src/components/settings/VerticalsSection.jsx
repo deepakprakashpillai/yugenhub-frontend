@@ -7,6 +7,8 @@ import {
     Tag, Users
 } from 'lucide-react';
 import { FIELD_TYPES } from '../../config/fieldTypes';
+import Select from '../ui/Select';
+import { ConfirmModal } from '../modals';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -72,15 +74,12 @@ const FieldEditor = ({ fields, onFieldsChange, label, theme }) => {
                         onKeyDown={e => e.key === 'Enter' && handleAdd()}
                         className={`flex-1 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-3 py-2 text-sm ${theme.text.primary} focus:outline-none focus:border-zinc-500 transition-colors`}
                     />
-                    <select
+                    <Select
                         value={newField.type}
-                        onChange={e => setNewField({ ...newField, type: e.target.value })}
-                        className={`w-28 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-2 py-2 text-sm ${theme.text.primary} focus:outline-none cursor-pointer`}
-                    >
-                        {Object.entries(FIELD_TYPES).map(([type, { label }]) => (
-                            <option key={type} value={type}>{label}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => setNewField({ ...newField, type: val })}
+                        options={Object.entries(FIELD_TYPES).map(([type, { label }]) => ({ value: type, label }))}
+                        className="w-28"
+                    />
                     <button
                         onClick={handleAdd}
                         disabled={!newField.label}
@@ -539,15 +538,12 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
                                     <div className="space-y-2">
                                         {(draft.team_requirements || []).map((req, i) => (
                                             <div key={i} className={`flex items-center gap-3 p-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg`}>
-                                                <select
+                                                <Select
                                                     value={req.role}
-                                                    onChange={e => updateTeamRequirement(i, 'role', e.target.value)}
-                                                    className={`flex-1 bg-transparent border-none text-sm ${theme.text.primary} focus:outline-none cursor-pointer`}
-                                                >
-                                                    {(associateRoles || []).map(r => (
-                                                        <option key={r} value={r}>{r}</option>
-                                                    ))}
-                                                </select>
+                                                    onChange={(val) => updateTeamRequirement(i, 'role', val)}
+                                                    options={(associateRoles || []).map(r => ({ value: r, label: r }))}
+                                                    className="flex-1"
+                                                />
                                                 <div className="flex items-center gap-1.5">
                                                     <span className={`text-[10px] ${theme.text.secondary}`}>Count</span>
                                                     <input
@@ -715,6 +711,7 @@ function VerticalsSection({ role }) {
     const [verticals, setVerticals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
     const isOwner = role === 'owner';
 
     const isCreating = editingId === 'new';
@@ -753,24 +750,25 @@ function VerticalsSection({ role }) {
         }
     };
 
-    const handleDeleteVertical = async (id) => {
-        const confirmed = confirm(
-            "⚠️ WARNING: Deleting this vertical will NOT delete the actual projects associated with it.\n\n" +
-            "However, those projects may become inaccessible or display incorrectly.\n\n" +
-            "Are you sure you want to delete this vertical?"
-        );
-        if (!confirmed) return;
-
-        try {
-            const newList = verticals.filter(v => v.id !== id);
-            await api.patch('/settings/verticals', { verticals: newList });
-            setVerticals(newList);
-            setEditingId(null);
-            await refreshConfig();
-            toast.success('Vertical Deleted');
-        } catch {
-            toast.error('Failed to delete');
-        }
+    const handleDeleteVertical = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Vertical',
+            message: 'WARNING: Deleting this vertical will NOT delete the actual projects associated with it. Those projects may become inaccessible or display incorrectly. Are you sure?',
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                try {
+                    const newList = verticals.filter(v => v.id !== id);
+                    await api.patch('/settings/verticals', { verticals: newList });
+                    setVerticals(newList);
+                    setEditingId(null);
+                    await refreshConfig();
+                    toast.success('Vertical Deleted');
+                } catch {
+                    toast.error('Failed to delete');
+                }
+            }
+        });
     };
 
     if (loading) return <div className={theme.text.secondary}>Loading configuration...</div>;
@@ -834,6 +832,14 @@ function VerticalsSection({ role }) {
                     </div>
                 </AnimatePresence>
             </div>
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                variant="danger"
+            />
         </div>
     );
 }

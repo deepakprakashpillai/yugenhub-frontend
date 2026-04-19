@@ -27,6 +27,7 @@ import AppearanceSection from '../components/settings/AppearanceSection';
 import FinanceSection from '../components/settings/FinanceSection';
 import AccountSection from '../components/settings/AccountSection';
 import AutomationsSection from '../components/settings/AutomationsSection';
+import { ConfirmModal } from '../components/modals';
 
 const SECTIONS = [
     { id: 'account', label: 'My Account', icon: UserCircle, roles: ['owner', 'admin', 'member'] },
@@ -81,6 +82,7 @@ function SettingsPage() {
         const [migrationJob, setMigrationJob] = useState(null); // null = not fetched yet
         const [migrationLoading, setMigrationLoading] = useState(false);
         const migrationPollRef = useRef(null);
+        const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
         // Fetch current migration status on mount
         useEffect(() => {
@@ -90,8 +92,19 @@ function SettingsPage() {
             return () => clearInterval(migrationPollRef.current);
         }, []);
 
-        const handleRunMigration = async () => {
-            if (!window.confirm('Run migration? This will reorganise files in your R2 bucket and cannot be undone.')) return;
+        const handleRunMigration = () => {
+            setConfirmModal({
+                isOpen: true,
+                title: 'Run Migration',
+                message: 'This will reorganise files in your R2 bucket and cannot be undone. Are you sure?',
+                onConfirm: async () => {
+                    setConfirmModal(s => ({ ...s, isOpen: false }));
+                    runMigration();
+                }
+            });
+        };
+
+        const runMigration = async () => {
             setMigrationLoading(true);
             try {
                 const res = await api.post('/settings/migrate-to-media');
@@ -176,6 +189,7 @@ function SettingsPage() {
         };
 
         return (
+            <>
             <div className="space-y-6">
                 <div>
                     <h2 className="text-2xl font-bold text-red-500">Danger Zone</h2>
@@ -358,6 +372,15 @@ function SettingsPage() {
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                variant="warning"
+            />
+            </>
         );
     };
 

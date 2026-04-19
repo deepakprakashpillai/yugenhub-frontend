@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import Select from '../ui/Select';
 
 function StatusDeleteModal({ isOpen, onClose, statusToDelete, allStatuses, onConfirm }) {
     const { theme } = useTheme();
@@ -57,16 +58,13 @@ function StatusDeleteModal({ isOpen, onClose, statusToDelete, allStatuses, onCon
                         </p>
                     )}
 
-                    <select
+                    <Select
                         value={reassignTo}
-                        onChange={e => setReassignTo(e.target.value)}
-                        className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-3 text-sm ${theme.text.primary} focus:outline-none focus:border-zinc-500 transition-colors`}
-                    >
-                        <option value="">Choose a status...</option>
-                        {availableStatuses.map(s => (
-                            <option key={s.id} value={s.id}>{s.label}</option>
-                        ))}
-                    </select>
+                        onChange={setReassignTo}
+                        placeholder="Choose a status..."
+                        options={availableStatuses.map(s => ({ value: s.id, label: s.label }))}
+                        className="w-full"
+                    />
                 </div>
 
                 {/* Footer */}

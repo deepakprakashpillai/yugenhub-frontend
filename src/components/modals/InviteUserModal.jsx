@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import Select from '../ui/Select';
 
 // Fallback roles if config hasn't loaded
 const FALLBACK_ROLES = [
@@ -153,15 +154,12 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
                         <p className={`text-[10px] ${theme.text.secondary} -mt-1`}>
                             This member will also be added as an in-house associate with this role.
                         </p>
-                        <select
+                        <Select
                             value={associateRole}
-                            onChange={e => setAssociateRole(e.target.value)}
-                            className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-3 text-sm ${theme.text.primary} focus:outline-none focus:border-zinc-700 transition-all cursor-pointer`}
-                        >
-                            {availableRoles.map(r => (
-                                <option key={r.id || r.label} value={r.label}>{r.label}</option>
-                            ))}
-                        </select>
+                            onChange={setAssociateRole}
+                            options={availableRoles.map(r => ({ value: r.label, label: r.label }))}
+                            className="w-full"
+                        />
                     </div>
 
                     <div className="pt-2 flex gap-3">

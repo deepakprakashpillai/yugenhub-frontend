@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Icons } from '../Icons';
 import { useTheme } from '../../context/ThemeContext';
+import Textarea from '../ui/Textarea';
 
 // Format a date string as a local YYYY-MM-DDTHH:MM value for datetime-local inputs.
 // Uses local timezone throughout to avoid date-shifting on round-trips.
@@ -133,13 +134,12 @@ const EventModal = ({ isOpen, onClose, onSave, event = null, loading = false }) 
                 {/* Notes */}
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1.5`}>Notes</label>
-                    <textarea
+                    <Textarea
                         name="notes"
                         value={formData.notes}
                         onChange={handleChange}
                         placeholder="Any special instructions..."
                         rows={3}
-                        className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} placeholder:${theme.text.secondary} focus:outline-none focus:border-purple-500 resize-none`}
                     />
                 </div>
 

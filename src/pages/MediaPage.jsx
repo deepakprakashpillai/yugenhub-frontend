@@ -14,6 +14,7 @@ import FileInfoPanel from '../components/media/FileInfoPanel';
 import MediaLightbox from '../components/media/MediaLightbox';
 import R2UsageWidget from '../components/media/R2UsageWidget';
 import * as mediaApi from '../api/media';
+import { ConfirmModal } from '../components/modals';
 
 // ─── Upload helpers ────────────────────────────────────────────────────────────
 
@@ -58,6 +59,7 @@ export default function MediaPage() {
     const [shareTarget, setShareTarget] = useState(null);
     const [infoTarget, setInfoTarget] = useState(null);
     const [lightboxItem, setLightboxItem] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
     const fileInputRef = useRef(null);
     const searchDebounce = useRef(null);
 
@@ -166,16 +168,23 @@ export default function MediaPage() {
         }
     };
 
-    const handleDelete = async (item) => {
-        if (!window.confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
-        try {
-            await mediaApi.deleteFile(item.id);
-            toast.success('File deleted');
-            if (lightboxItem?.id === item.id) setLightboxItem(null);
-            loadItems(currentFolderId);
-        } catch {
-            toast.error('Delete failed');
-        }
+    const handleDelete = (item) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete File',
+            message: `Delete "${item.name}"? This cannot be undone.`,
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                try {
+                    await mediaApi.deleteFile(item.id);
+                    toast.success('File deleted');
+                    if (lightboxItem?.id === item.id) setLightboxItem(null);
+                    loadItems(currentFolderId);
+                } catch {
+                    toast.error('Delete failed');
+                }
+            }
+        });
     };
 
     const handleRename = (item) => setRenameTarget(item);
@@ -194,16 +203,23 @@ export default function MediaPage() {
         }
     };
 
-    const handleFolderDelete = async (folder) => {
-        if (!window.confirm(`Delete folder "${folder.name}" and all its contents? This cannot be undone.`)) return;
-        try {
-            await mediaApi.deleteFolder(folder.id);
-            toast.success('Folder deleted');
-            if (currentFolderId === folder.id) setCurrentFolderId(null);
-            loadFolders();
-        } catch (err) {
-            toast.error(err.response?.data?.detail || 'Delete failed');
-        }
+    const handleFolderDelete = (folder) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Folder',
+            message: `Delete folder "${folder.name}" and all its contents? This cannot be undone.`,
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                try {
+                    await mediaApi.deleteFolder(folder.id);
+                    toast.success('Folder deleted');
+                    if (currentFolderId === folder.id) setCurrentFolderId(null);
+                    loadFolders();
+                } catch (err) {
+                    toast.error(err.response?.data?.detail || 'Delete failed');
+                }
+            }
+        });
     };
 
     const lightboxItems = searchResults ?? items;
@@ -240,6 +256,14 @@ export default function MediaPage() {
 
     return (
         <div className={`flex h-screen ${theme.canvas.bg} ${theme.text.primary} overflow-hidden`}>
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                variant="danger"
+            />
             <RenameModal
                 isOpen={!!renameTarget}
                 onClose={() => setRenameTarget(null)}

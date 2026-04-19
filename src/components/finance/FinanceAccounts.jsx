@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Plus, CreditCard, Wallet, Banknote, Building2, SlidersHorizontal, Check, X } from 'lucide-react';
 import { IndianRupee } from 'lucide-react';
 import { toast } from 'sonner';
+import Select from '../ui/Select';
 
 const ACCOUNT_ICONS = {
     bank: Building2,
@@ -197,17 +198,18 @@ const FinanceAccounts = ({ refreshTrigger, onRefresh }) => {
                         </div>
                         <div>
                             <label className={`block text-xs font-medium mb-1 ${theme.text.secondary}`}>Type</label>
-                            <select
+                            <Select
                                 value={newAccount.type}
-                                onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value })}
-                                className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} text-sm ${theme.text.primary} outline-none`}
-                            >
-                                <option value="bank">Bank</option>
-                                <option value="cash">Cash</option>
-                                <option value="card">Card</option>
-                                <option value="wallet">Wallet</option>
-                                <option value="loan">Loan</option>
-                            </select>
+                                onChange={(val) => setNewAccount({ ...newAccount, type: val })}
+                                options={[
+                                    { value: 'bank', label: 'Bank' },
+                                    { value: 'cash', label: 'Cash' },
+                                    { value: 'card', label: 'Card' },
+                                    { value: 'wallet', label: 'Wallet' },
+                                    { value: 'loan', label: 'Loan' },
+                                ]}
+                                className="w-full"
+                            />
                         </div>
                         <div>
                             <label className={`block text-xs font-medium mb-1 ${theme.text.secondary}`}>Opening Balance</label>

@@ -2,13 +2,13 @@ import { useState, Fragment, useMemo } from 'react';
 import clsx from 'clsx';
 import { Icons } from './Icons';
 import { FieldDisplayCompact } from '../config/fieldTypes';
-
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import api from '../api/axios';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'sonner';
+import Table from './ui/Table';
 
 const ProjectTable = ({ projects, onRefresh }) => {
     const [expandedId, setExpandedId] = useState(null);
@@ -62,23 +62,20 @@ const ProjectTable = ({ projects, onRefresh }) => {
     if (!projects.length) return null;
 
     return (
-        <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border} ${theme.canvas.bg} backdrop-blur-sm bg-opacity-30`}>
-            <table className={`w-full text-left text-sm ${theme.text.secondary}`}>
-                <thead className={`${theme.canvas.card} text-xs uppercase font-medium ${theme.text.secondary} border-b ${theme.canvas.border}`}>
-                    <tr>
-                        <th className="px-6 py-4">Code</th>
-                        <th className="px-6 py-4">Title / Client</th>
-                        <th className="px-6 py-4">Status</th>
-                        {/* Dynamic columns from config */}
-                        {dynamicCols.map(col => (
-                            <th key={col.name} className="px-6 py-4">{col.label}</th>
-                        ))}
-                        {/* Next Event column (only for event-based) */}
-                        {hasEvents && <th className="px-6 py-4">Next Event</th>}
-                        <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className={`divide-y ${theme.canvas.border}`}>
+        <Table>
+            <Table.Head>
+                <tr>
+                    <Table.HeadCell>Code</Table.HeadCell>
+                    <Table.HeadCell>Title / Client</Table.HeadCell>
+                    <Table.HeadCell>Status</Table.HeadCell>
+                    {dynamicCols.map(col => (
+                        <Table.HeadCell key={col.name}>{col.label}</Table.HeadCell>
+                    ))}
+                    {hasEvents && <Table.HeadCell>Next Event</Table.HeadCell>}
+                    <Table.HeadCell className="text-right">Actions</Table.HeadCell>
+                </tr>
+            </Table.Head>
+            <Table.Body>
                     {projects.map((project) => {
                         const nextEvent = project.events?.find(e => new Date(e.start_date) > new Date()) || null;
                         const isExpanded = expandedId === project._id;
@@ -86,20 +83,20 @@ const ProjectTable = ({ projects, onRefresh }) => {
 
                         return (
                             <Fragment key={project._id}>
-                                <tr
+                                <Table.Row
                                     onClick={() => toggleExpand(project._id)}
-                                    className={`hover:${theme.canvas.hover} transition-colors group cursor-pointer`}
+                                    className="group cursor-pointer"
                                 >
-                                    <td className={`px-6 py-4 font-mono ${theme.text.primary}`}>
+                                    <Table.Cell className={`font-mono ${theme.text.primary}`}>
                                         {project.code}
-                                    </td>
-                                    <td className="px-6 py-4">
+                                    </Table.Cell>
+                                    <Table.Cell>
                                         <div className={`font-medium ${theme.text.primary}`}>{resolveTitle(project)}</div>
                                         <div className={`text-xs ${theme.text.secondary}`}>
                                             {meta.client_name}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
+                                    </Table.Cell>
+                                    <Table.Cell>
                                         {(() => {
                                             const sc = config?.statusOptions?.find(s => s.id === project.status);
                                             const color = sc?.color || '#71717a';
@@ -145,21 +142,19 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                                 </div>
                                             );
                                         })()}
-                                    </td>
+                                    </Table.Cell>
 
-                                    {/* Dynamic field columns */}
                                     {dynamicCols.map(col => (
-                                        <td key={col.name} className={`px-6 py-4 ${theme.text.primary}`}>
+                                        <Table.Cell key={col.name} className={theme.text.primary}>
                                             {meta[col.name]
                                                 ? (FieldDisplayCompact({ field: col, value: meta[col.name] }) || <span className={theme.text.secondary}>-</span>)
                                                 : <span className={theme.text.secondary}>-</span>
                                             }
-                                        </td>
+                                        </Table.Cell>
                                     ))}
 
-                                    {/* Next Event column */}
                                     {hasEvents && (
-                                        <td className="px-6 py-4">
+                                        <Table.Cell>
                                             {nextEvent ? (
                                                 <div className={`flex items-center gap-2 ${theme.text.primary}`}>
                                                     <Icons.Calendar className="w-3 h-3 text-red-500" />
@@ -169,10 +164,10 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                             ) : (
                                                 <span className={`${theme.text.secondary}`}>-</span>
                                             )}
-                                        </td>
+                                        </Table.Cell>
                                     )}
 
-                                    <td className="px-6 py-4 text-right">
+                                    <Table.Cell className="text-right">
                                         <button
                                             className={clsx(
                                                 `p-2 hover:${theme.canvas.hover} rounded-full transition-all duration-300`,
@@ -181,8 +176,8 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                         >
                                             <Icons.ChevronRight className="w-4 h-4" />
                                         </button>
-                                    </td>
-                                </tr>
+                                    </Table.Cell>
+                                </Table.Row>
 
                                 {/* EXPANDED ROW */}
                                 <AnimatePresence>
@@ -261,9 +256,8 @@ const ProjectTable = ({ projects, onRefresh }) => {
                             </Fragment>
                         );
                     })}
-                </tbody>
-            </table>
-        </div>
+            </Table.Body>
+        </Table>
     );
 };
 

@@ -10,6 +10,10 @@ import { TemplateModal } from './TemplateModal';
 import DatePicker from '../ui/DatePicker';
 import TimePicker from '../ui/TimePicker';
 import { FieldInput, getEmptyValue } from '../../config/fieldTypes';
+import Select from '../ui/Select';
+import SearchableSelect from '../ui/SearchableSelect';
+import Textarea from '../ui/Textarea';
+import ConfirmModal from './ConfirmModal';
 
 const ProjectSlideOver = ({
     isOpen,
@@ -47,6 +51,7 @@ const ProjectSlideOver = ({
 
     // Template Import State
     const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
     // Resolve current vertical config
     const configVertical = config?.verticals?.find(v => v.id === vertical?.toLowerCase());
@@ -130,8 +135,21 @@ const ProjectSlideOver = ({
 
     const handleImportTemplate = (template) => {
         if (events.length > 0) {
-            if (!confirm("Importing a template will replace existing events. Continue?")) return;
+            setConfirmModal({
+                isOpen: true,
+                title: 'Import Template',
+                message: 'Importing a template will replace existing events. Continue?',
+                onConfirm: () => {
+                    setConfirmModal(s => ({ ...s, isOpen: false }));
+                    doImportTemplate(template);
+                }
+            });
+            return;
         }
+        doImportTemplate(template);
+    };
+
+    const doImportTemplate = (template) => {
 
         // Map template events to new instances with new IDs
         const newEvents = (template.events || []).map(evt => ({
@@ -626,16 +644,13 @@ const ProjectSlideOver = ({
                                         {event.deliverables.map((del, dIndex) => (
                                             <div key={del.id} className={`${theme.canvas.card} p-3 rounded-lg border ${theme.canvas.border} group/item hover:border-zinc-500 transition-colors`}>
                                                 <div className="flex items-center gap-2 sm:gap-3">
-                                                    <select
+                                                    <Select
                                                         value={del.type}
-                                                        onChange={(e) => handleDeliverableChange(index, dIndex, 'type', e.target.value)}
-                                                        className={`flex-1 bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
-                                                    >
-                                                        <option value="" disabled>Select Type</option>
-                                                        {(config?.deliverableTypes || []).map(dt => (
-                                                            <option key={dt} value={dt}>{dt}</option>
-                                                        ))}
-                                                    </select>
+                                                        onChange={(val) => handleDeliverableChange(index, dIndex, 'type', val)}
+                                                        placeholder="Select Type"
+                                                        options={(config?.deliverableTypes || []).map(dt => ({ value: dt, label: dt }))}
+                                                        className="flex-1"
+                                                    />
                                                     <div className={`hidden sm:block w-px h-6 ${theme.canvas.border}`}></div>
                                                     <div className="flex items-center gap-1.5 shrink-0">
                                                         <span className={`text-xs ${theme.text.secondary}`}>Qty:</span>
@@ -728,15 +743,12 @@ const ProjectSlideOver = ({
                                     <div className="space-y-2">
                                         {(event.team_requirements || []).map((req, rIndex) => (
                                             <div key={rIndex} className={`flex items-center gap-3 p-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg`}>
-                                                <select
+                                                <Select
                                                     value={req.role}
-                                                    onChange={e => handleTeamRequirementChange(index, rIndex, 'role', e.target.value)}
-                                                    className={`flex-1 bg-transparent border-none text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
-                                                >
-                                                    {(config?.associateRoles || []).map(r => (
-                                                        <option key={r} value={r}>{r}</option>
-                                                    ))}
-                                                </select>
+                                                    onChange={(val) => handleTeamRequirementChange(index, rIndex, 'role', val)}
+                                                    options={(config?.associateRoles || []).map(r => ({ value: r, label: r }))}
+                                                    className="flex-1"
+                                                />
                                                 <div className="flex items-center gap-1.5">
                                                     <span className={`text-xs ${theme.text.secondary}`}>Count</span>
                                                     <input
@@ -785,16 +797,13 @@ const ProjectSlideOver = ({
                                             <div key={assign.id} className={`${theme.canvas.card} border ${theme.canvas.border} rounded-lg group/item hover:border-zinc-500 transition-colors`}>
                                                 <div className="flex flex-col sm:grid sm:grid-cols-[1fr,1fr,auto] gap-2 sm:gap-3 items-start sm:items-center p-3 sm:p-2.5 relative">
                                                     <div className="w-full min-w-0 pr-8 sm:pr-0">
-                                                        <select
+                                                        <SearchableSelect
                                                             value={assign.associate_id}
-                                                            onChange={(e) => handleAssignmentChange(index, aIndex, 'associate_id', e.target.value)}
-                                                            className={`w-full bg-transparent border-0 text-base md:text-sm ${theme.text.primary} focus:ring-0 p-0 cursor-pointer`}
-                                                        >
-                                                            <option value="" disabled>Select Member</option>
-                                                            {associates.map(assoc => (
-                                                                <option key={assoc._id} value={assoc._id}>{assoc.name}</option>
-                                                            ))}
-                                                        </select>
+                                                            onChange={(val) => handleAssignmentChange(index, aIndex, 'associate_id', val)}
+                                                            placeholder="Select Member"
+                                                            options={associates.map(assoc => ({ value: assoc._id, label: assoc.name }))}
+                                                            className="w-full"
+                                                        />
                                                     </div>
                                                     <div className={`w-full min-w-0 sm:border-l ${theme.canvas.border} sm:pl-3 mt-1 sm:mt-0`}>
                                                         <input
@@ -859,6 +868,7 @@ const ProjectSlideOver = ({
     };
 
     return (
+        <>
         <SlideOver
             isOpen={isOpen}
             onClose={onClose}
@@ -933,48 +943,37 @@ const ProjectSlideOver = ({
                     {/* Status */}
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Status</label>
-                        <select
-                            name="status"
+                        <Select
                             value={formData.status}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                        >
-                            {(config?.statusOptions || []).map(option => (
-                                <option key={option.id} value={option.id}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFormData(prev => ({ ...prev, status: val }))}
+                            placeholder="Select Status..."
+                            options={(config?.statusOptions || []).map(opt => ({ value: opt.id, label: opt.label }))}
+                            className="w-full"
+                        />
                     </div>
 
                     {/* Lead Source */}
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Lead Source</label>
-                        <select
-                            name="lead_source"
+                        <Select
                             value={formData.lead_source}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                        >
-                            {(config?.leadSources || []).map(source => (
-                                <option key={source} value={source}>
-                                    {source}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFormData(prev => ({ ...prev, lead_source: val }))}
+                            placeholder="Select Source..."
+                            options={(config?.leadSources || []).map(s => ({ value: s, label: s }))}
+                            className="w-full"
+                        />
                     </div>
                 </div>
 
                 {/* Notes */}
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1`}>Notes</label>
-                    <textarea
+                    <Textarea
                         name="notes"
                         value={formData.notes}
                         onChange={handleChange}
                         rows={2}
                         placeholder="Project notes..."
-                        className={`w-full px-3 py-2 ${theme.canvas.input || theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500 resize-none`}
                     />
                 </div>
 
@@ -1021,6 +1020,15 @@ const ProjectSlideOver = ({
                 initialVertical={vertical}
             />
         </SlideOver>
+        <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+            onConfirm={confirmModal.onConfirm}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            variant="warning"
+        />
+        </>
     );
 };
 

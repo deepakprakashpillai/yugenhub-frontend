@@ -6,6 +6,8 @@ import { useTheme } from '../../context/ThemeContext';
 import DatePicker from '../ui/DatePicker';
 import api from '../../api/axios';
 import { FieldInput } from '../../config/fieldTypes';
+import Select from '../ui/Select';
+import Textarea from '../ui/Textarea';
 
 const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) => {
     const { config } = useAgencyConfig();
@@ -164,44 +166,35 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Status</label>
-                        <select
-                            name="status"
+                        <Select
                             value={formData.status}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                        >
-                            <option value="">Select Status...</option>
-                            {(config?.statusOptions || []).map(opt => (
-                                <option key={opt.id} value={opt.id}>{opt.label}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFormData(prev => ({ ...prev, status: val }))}
+                            placeholder="Select Status..."
+                            options={(config?.statusOptions || []).map(opt => ({ value: opt.id, label: opt.label }))}
+                            className="w-full"
+                        />
                     </div>
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Lead Source</label>
-                        <select
-                            name="lead_source"
+                        <Select
                             value={formData.lead_source}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                        >
-                            <option value="">Select Source...</option>
-                            {(config?.leadSources || []).map(source => (
-                                <option key={source} value={source}>{source}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFormData(prev => ({ ...prev, lead_source: val }))}
+                            placeholder="Select Source..."
+                            options={(config?.leadSources || []).map(s => ({ value: s, label: s }))}
+                            className="w-full"
+                        />
                     </div>
                 </div>
 
                 {/* Notes */}
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1`}>Notes</label>
-                    <textarea
+                    <Textarea
                         name="notes"
                         value={formData.notes}
                         onChange={handleChange}
                         rows={2}
                         placeholder="Project notes..."
-                        className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500 resize-none`}
                     />
                 </div>
 
@@ -218,12 +211,11 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
                                     <div key={field.name} className={field.type === 'textarea' || field.type === 'location' ? 'md:col-span-2' : ''}>
                                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>{field.label}</label>
                                         {field.type === 'textarea' ? (
-                                            <textarea
+                                            <Textarea
                                                 name={field.name}
                                                 value={metadata[field.name] ?? ''}
                                                 onChange={handleMetadataChange}
                                                 rows={2}
-                                                className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500 resize-none`}
                                             />
                                         ) : (
                                             <FieldInput

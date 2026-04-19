@@ -5,6 +5,7 @@ import api from '../../api/axios';
 import clsx from 'clsx';
 import Select from '../ui/Select';
 import DatePicker from '../ui/DatePicker';
+import Textarea from '../ui/Textarea';
 import { useAuth } from '../../context/AuthContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -463,13 +464,12 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
                 {/* Description */}
                 <div>
                     <label className={`block text-xs uppercase ${theme.text.secondary} font-bold mb-2 ml-1`}>Description</label>
-                    <textarea
+                    <Textarea
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
                         rows={6}
                         placeholder="Add a more detailed description..."
-                        className={`w-full ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-3 ${theme.text.primary} focus:outline-none focus:${theme.canvas.card} focus:border-purple-500 transition-all resize-none text-sm leading-relaxed placeholder:${theme.text.secondary} hover:${theme.canvas.hover}`}
                     />
                 </div>
 

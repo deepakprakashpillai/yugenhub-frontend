@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import TransactionItem from './TransactionItem';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { Skeleton } from '../ui/Skeleton';
+import Select from '../ui/Select';
 
 const TYPE_FILTERS = [
     { id: 'all', label: 'All' },
@@ -95,16 +96,15 @@ const FinanceTransactions = ({ refreshTrigger }) => {
 
                 {/* Account filter */}
                 {accounts.length > 1 && (
-                    <select
+                    <Select
                         value={accountFilter}
-                        onChange={(e) => setAccountFilter(e.target.value)}
-                        className={`px-2 py-1 rounded-lg text-xs font-semibold border ${theme.canvas.border} ${theme.canvas.bg} ${theme.text.secondary} outline-none`}
-                    >
-                        <option value="all">All Accounts</option>
-                        {accounts.map(a => (
-                            <option key={a.id} value={a.id}>{a.name}</option>
-                        ))}
-                    </select>
+                        onChange={setAccountFilter}
+                        options={[
+                            { value: 'all', label: 'All Accounts' },
+                            ...accounts.map(a => ({ value: a.id, label: a.name }))
+                        ]}
+                        className="min-w-[140px]"
+                    />
                 )}
 
                 {filtered.length !== transactions.length && (
