@@ -70,7 +70,7 @@ export default function InviteUserModal({ isOpen, onClose, onInvited }) {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden`}
+                className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl w-full max-w-md shadow-2xl relative`}
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
