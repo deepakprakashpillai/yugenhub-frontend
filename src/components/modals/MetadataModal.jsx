@@ -5,6 +5,7 @@ import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
 import DatePicker from '../ui/DatePicker';
 import api from '../../api/axios';
+import { FieldInput } from '../../config/fieldTypes';
 
 const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) => {
     const { config } = useAgencyConfig();
@@ -214,21 +215,9 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {fields.map(field => (
-                                    <div key={field.name} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
+                                    <div key={field.name} className={field.type === 'textarea' || field.type === 'location' ? 'md:col-span-2' : ''}>
                                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>{field.label}</label>
-                                        {field.type === 'select' ? (
-                                            <select
-                                                name={field.name}
-                                                value={metadata[field.name] ?? ''}
-                                                onChange={handleMetadataChange}
-                                                className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                                            >
-                                                <option value="">Select {field.label}</option>
-                                                {field.options?.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
-                                                ))}
-                                            </select>
-                                        ) : field.type === 'textarea' ? (
+                                        {field.type === 'textarea' ? (
                                             <textarea
                                                 name={field.name}
                                                 value={metadata[field.name] ?? ''}
@@ -236,21 +225,13 @@ const MetadataModal = ({ isOpen, onClose, onSave, project, loading = false }) =>
                                                 rows={2}
                                                 className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500 resize-none`}
                                             />
-                                        ) : field.type === 'date' ? (
-                                            <DatePicker
-                                                value={metadata[field.name] ? String(metadata[field.name]).slice(0, 10) : ''}
-                                                onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
-                                                placeholder={`Select ${field.label.toLowerCase()}`}
-                                                className="w-full"
-                                            />
                                         ) : (
-                                            <input
-                                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
-                                                name={field.name}
+                                            <FieldInput
+                                                field={field}
                                                 value={metadata[field.name] ?? ''}
-                                                onChange={handleMetadataChange}
-                                                placeholder={field.label}
-                                                className={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
+                                                inputClassName={`w-full px-3 py-2.5 ${theme.canvas.card} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                theme={theme}
                                             />
                                         )}
                                     </div>

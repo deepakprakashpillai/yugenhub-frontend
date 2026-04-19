@@ -66,7 +66,11 @@ import {
     Ban,
     Eye,
     Columns3,
-    UserCircle
+    UserCircle,
+    Copy,
+    ExternalLink,
+    Navigation,
+    Link
 } from 'lucide-react';
 
 export const Icons = {
@@ -117,6 +121,10 @@ export const Icons = {
     ListTodo,
     CircleDollarSign,
     Settings,
+    Copy,
+    ExternalLink,
+    Navigation,
+    Link,
     WhatsApp: (props) => (
         <svg
             viewBox="0 0 24 24"

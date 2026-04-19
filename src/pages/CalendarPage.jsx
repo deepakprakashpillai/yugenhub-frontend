@@ -196,10 +196,20 @@ const CalendarPage = () => {
                             <span>{evt.project_code}</span>
                         </div>
                     )}
-                    {evt.details?.venue && (
-                        <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
-                            <Icons.MapPin className="w-3 h-3 opacity-70" />
-                            <span>{evt.details.venue}</span>
+                    {(evt.details?.venue || evt.details?.venue_location) && (
+                        <div className={`flex items-start gap-2 ${theme.text.secondary}`}>
+                            <Icons.MapPin className="w-3 h-3 opacity-70 mt-0.5 shrink-0" />
+                            <span className="leading-tight">
+                                {evt.details.venue}
+                                {evt.details.venue_location && evt.details.venue_location !== evt.details.venue && (
+                                    <span className="block opacity-70">{evt.details.venue_location}</span>
+                                )}
+                            </span>
+                            {evt.details?.maps_url && (
+                                <a href={evt.details.maps_url} target="_blank" rel="noopener noreferrer" className="shrink-0 hover:text-purple-400 transition-colors" title="Open in Maps">
+                                    <Icons.ExternalLink className="w-3 h-3" />
+                                </a>
+                            )}
                         </div>
                     )}
                     {evt.details?.status && (
@@ -385,10 +395,15 @@ const CalendarPage = () => {
                                                             {evt.project_code}
                                                         </span>
                                                     )}
-                                                    {evt.details?.venue && (
+                                                    {(evt.details?.venue || evt.details?.venue_location) && (
                                                         <span className={`text-[11px] ${theme.text.secondary} flex items-center gap-1`}>
                                                             <Icons.MapPin className="w-3 h-3 opacity-70" />
-                                                            {evt.details.venue}
+                                                            {evt.details.venue || evt.details.venue_location}
+                                                            {evt.details?.maps_url && (
+                                                                <a href={evt.details.maps_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:text-purple-400">
+                                                                    <Icons.ExternalLink className="w-2.5 h-2.5" />
+                                                                </a>
+                                                            )}
                                                         </span>
                                                     )}
                                                     {evt.details?.assignee && (

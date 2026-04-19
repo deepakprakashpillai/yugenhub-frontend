@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import SlideOver from './SlideOver';
+import Modal from './Modal';
 import { Icons } from '../Icons';
 import { v4 as uuidv4 } from 'uuid';
 import DatePicker from '../ui/DatePicker';
 import TimePicker from '../ui/TimePicker';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
+import LocationPicker from '../location/LocationPicker';
+import LocationCard from '../location/LocationCard';
+import { FieldInput, getEmptyValue } from '../../config/fieldTypes';
 
 // Inline Editable Deliverable Row
 const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
@@ -237,6 +241,7 @@ const EventSlideOver = ({
     const verticalConfig = config?.verticals?.find(v => v.id === verticalId);
     const assignmentTags = verticalConfig?.assignment_tags || [];
     const verticalTeamRequirements = verticalConfig?.team_requirements || [];
+    const customEventFields = verticalConfig?.event_fields || [];
 
     const [formData, setFormData] = useState({
         type: '',
@@ -248,6 +253,17 @@ const EventSlideOver = ({
         end_time: '',
         notes: ''
     });
+
+    // Structured map location for main venue
+    const [venueMap, setVenueMap] = useState(null);
+    // Named additional locations
+    const [linkedLocations, setLinkedLocations] = useState([]);
+    // Add/edit location modal
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [editingLocationId, setEditingLocationId] = useState(null);
+    const [locationDraft, setLocationDraft] = useState({ name: '', map: null });
+    // Custom event field values
+    const [eventFieldValues, setEventFieldValues] = useState({});
 
     const [deliverables, setDeliverables] = useState([]);
     const [assignments, setAssignments] = useState([]);
@@ -289,6 +305,7 @@ const EventSlideOver = ({
         if (isOpen && event) {
             const start = parseDateTime(event.start_date);
             const end = parseDateTime(event.end_date);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFormData({
                 type: event.type || '',
                 venue_name: event.venue_name || '',
@@ -299,16 +316,31 @@ const EventSlideOver = ({
                 end_time: end.time,
                 notes: event.notes || ''
             });
+            setVenueMap(event.venue_map || null);
+            setLinkedLocations(event.linked_locations || []);
             setDeliverables(event.deliverables || []);
             setAssignments(event.assignments || []);
             setTeamRequirements(event.team_requirements || []);
+            // Hydrate custom event field values
+            const fields = verticalConfig?.event_fields || [];
+            const initial = {};
+            fields.forEach(f => {
+                initial[f.name] = event[f.name] ?? getEmptyValue(f.type);
+            });
+            setEventFieldValues(initial);
         } else if (isOpen) {
             setFormData({ type: '', venue_name: '', venue_location: '', start_date: '', start_time: '', end_date: '', end_time: '', notes: '' });
+            setVenueMap(null);
+            setLinkedLocations([]);
             setDeliverables([]);
             setAssignments([]);
             setTeamRequirements([]);
+            const fields = verticalConfig?.event_fields || [];
+            const initial = {};
+            fields.forEach(f => { initial[f.name] = getEmptyValue(f.type); });
+            setEventFieldValues(initial);
         }
-    }, [isOpen, event]);
+    }, [isOpen, event, verticalConfig]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -344,16 +376,27 @@ const EventSlideOver = ({
             }
         }
 
+        // Derive venue_name / venue_location from venue_map when text fields are empty
+        let venueName = formData.venue_name;
+        let venueLocation = formData.venue_location;
+        if (venueMap?.formatted_address) {
+            if (!venueName) venueName = venueMap.formatted_address.split(',')[0].trim();
+            if (!venueLocation) venueLocation = venueMap.formatted_address;
+        }
+
         onSave({
             type: formData.type,
-            venue_name: formData.venue_name,
-            venue_location: formData.venue_location,
+            venue_name: venueName,
+            venue_location: venueLocation,
+            venue_map: venueMap || null,
+            linked_locations: linkedLocations,
             start_date,
             end_date,
             notes: formData.notes,
             deliverables: deliverables.map(d => ({ ...d, due_date: d.due_date || null })),
             assignments,
-            team_requirements: teamRequirements
+            team_requirements: teamRequirements,
+            ...eventFieldValues,
         });
     };
 
@@ -437,7 +480,36 @@ const EventSlideOver = ({
         setNewMember({ ...newMember, tags: updated });
     };
 
+    // Linked location handlers
+    const openAddLocation = () => {
+        setEditingLocationId(null);
+        setLocationDraft({ name: '', map: null });
+        setShowLocationModal(true);
+    };
+
+    const openEditLocation = (loc) => {
+        setEditingLocationId(loc.id);
+        setLocationDraft({ name: loc.name, map: loc.map });
+        setShowLocationModal(true);
+    };
+
+    const saveLocationDraft = () => {
+        if (!locationDraft.map) { toast.error('Pick a location first'); return; }
+        if (!locationDraft.name.trim()) { toast.error('Give this location a name'); return; }
+        if (editingLocationId) {
+            setLinkedLocations(prev => prev.map(l => l.id === editingLocationId ? { ...l, name: locationDraft.name, map: locationDraft.map } : l));
+        } else {
+            setLinkedLocations(prev => [...prev, { id: uuidv4(), name: locationDraft.name, map: locationDraft.map }]);
+        }
+        setShowLocationModal(false);
+    };
+
+    const deleteLinkedLocation = (id) => {
+        setLinkedLocations(prev => prev.filter(l => l.id !== id));
+    };
+
     return (
+        <>
         <SlideOver
             isOpen={isOpen}
             onClose={onClose}
@@ -464,29 +536,39 @@ const EventSlideOver = ({
                                 className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs text-zinc-400 mb-1">Venue Name</label>
-                                <input
-                                    type="text"
-                                    name="venue_name"
-                                    value={formData.venue_name}
-                                    onChange={handleChange}
-                                    placeholder="Venue name"
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs text-zinc-400 mb-1">Location</label>
-                                <input
-                                    type="text"
-                                    name="venue_location"
-                                    value={formData.venue_location}
-                                    onChange={handleChange}
-                                    placeholder="City, Address"
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
-                                />
-                            </div>
+                        {/* Venue Name (optional text override) */}
+                        <div>
+                            <label className="block text-xs text-zinc-400 mb-1">Venue Name <span className="text-zinc-600">(optional — auto-filled from map)</span></label>
+                            <input
+                                type="text"
+                                name="venue_name"
+                                value={formData.venue_name}
+                                onChange={handleChange}
+                                placeholder="e.g. Grand Palace"
+                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                            />
+                        </div>
+                        {/* Map Location Picker */}
+                        <div>
+                            <label className="block text-xs text-zinc-400 mb-1">Venue Location (Map)</label>
+                            <LocationPicker
+                                value={venueMap}
+                                onChange={(loc) => {
+                                    setVenueMap(loc);
+                                    // Sync legacy text fields when empty
+                                    if (loc?.formatted_address) {
+                                        if (!formData.venue_location) {
+                                            setFormData(p => ({ ...p, venue_location: loc.formatted_address }));
+                                        }
+                                        if (!formData.venue_name) {
+                                            setFormData(p => ({ ...p, venue_name: loc.formatted_address.split(',')[0].trim() }));
+                                        }
+                                    } else if (!loc) {
+                                        // Cleared
+                                    }
+                                }}
+                                placeholder="Search venue or paste Maps link"
+                            />
                         </div>
 
                         {/* Start Date/Time */}
@@ -780,6 +862,69 @@ const EventSlideOver = ({
                     </div>
                 </div>
 
+                {/* Linked Locations Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm uppercase tracking-widest text-zinc-500 font-medium flex items-center gap-2">
+                            <Icons.MapPin className="w-4 h-4" />
+                            Linked Locations ({1 + linkedLocations.length})
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={openAddLocation}
+                            className="text-xs text-purple-400 hover:text-purple-300 font-medium"
+                        >
+                            + Add
+                        </button>
+                    </div>
+                    <div className="space-y-2">
+                        {/* Primary venue — auto-derived, read-only in this list */}
+                        {venueMap ? (
+                            <LocationCard
+                                location={venueMap}
+                                name={formData.venue_name || 'Main Venue'}
+                            />
+                        ) : (
+                            <div className="px-3 py-2 rounded-lg border border-dashed border-zinc-700 text-zinc-600 text-xs text-center">
+                                Set a venue location above to see it here
+                            </div>
+                        )}
+                        {/* Additional named locations */}
+                        {linkedLocations.map(loc => (
+                            <LocationCard
+                                key={loc.id}
+                                location={loc.map}
+                                name={loc.name}
+                                onEdit={() => openEditLocation(loc)}
+                                onDelete={() => deleteLinkedLocation(loc.id)}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Custom Event Fields */}
+                {customEventFields.length > 0 && (
+                    <div>
+                        <h3 className="text-sm uppercase tracking-widest text-zinc-500 font-medium mb-3 flex items-center gap-2">
+                            <Icons.Settings className="w-4 h-4" />
+                            Additional Details
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {customEventFields.map(field => (
+                                <div key={field.name} className={field.type === 'location' ? 'col-span-2' : ''}>
+                                    <label className="block text-xs text-zinc-400 mb-1">{field.label}</label>
+                                    <FieldInput
+                                        field={field}
+                                        value={eventFieldValues[field.name] ?? getEmptyValue(field.type)}
+                                        onChange={(val) => setEventFieldValues(prev => ({ ...prev, [field.name]: val }))}
+                                        inputClassName="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Actions */}
                 <div className="flex gap-3 pt-4 border-t border-zinc-800">
                     {isEditing && onDelete && (
@@ -818,6 +963,52 @@ const EventSlideOver = ({
                 </div>
             </div>
         </SlideOver>
+
+        {/* Add / Edit Location Modal */}
+        <Modal
+            isOpen={showLocationModal}
+            onClose={() => setShowLocationModal(false)}
+            title={editingLocationId ? 'Edit Location' : 'Add Location'}
+            size="md"
+        >
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-xs text-zinc-400 mb-1">Location Name *</label>
+                    <input
+                        type="text"
+                        value={locationDraft.name}
+                        onChange={(e) => setLocationDraft(d => ({ ...d, name: e.target.value }))}
+                        placeholder="e.g. Getting Ready Suite, Reception Hall"
+                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs text-zinc-400 mb-1">Location *</label>
+                    <LocationPicker
+                        value={locationDraft.map}
+                        onChange={(loc) => setLocationDraft(d => ({ ...d, map: loc }))}
+                        placeholder="Search place or paste Maps link"
+                    />
+                </div>
+                <div className="flex gap-2 pt-2">
+                    <button
+                        type="button"
+                        onClick={() => setShowLocationModal(false)}
+                        className="flex-1 px-3 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-sm rounded font-medium"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={saveLocationDraft}
+                        className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded font-medium"
+                    >
+                        {editingLocationId ? 'Save Changes' : 'Add Location'}
+                    </button>
+                </div>
+            </div>
+        </Modal>
+        </>
     );
 };
 

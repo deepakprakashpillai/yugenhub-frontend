@@ -6,6 +6,8 @@ import clsx from 'clsx';
 import { Icons } from './Icons';
 import { useAgencyConfig } from '../context/AgencyConfigContext';
 import { useTheme } from '../context/ThemeContext';
+import { FieldDisplayCompact } from '../config/fieldTypes';
+import { LocationBadge } from './location/LocationCard';
 import api from '../api/axios';
 import { toast } from 'sonner';
 
@@ -217,12 +219,17 @@ const ProjectCard = ({ project, onRefresh }) => {
                                         const fieldConfig = allFields.find(f => f.name === fieldName);
                                         const value = meta[fieldName];
                                         if (!value) return null;
+                                        if (fieldConfig?.type === 'location' && typeof value === 'object') {
+                                            return <LocationBadge key={fieldName} location={value} />;
+                                        }
+                                        const display = FieldDisplayCompact({ field: fieldConfig || { type: 'text' }, value });
+                                        if (!display) return null;
                                         return (
                                             <span
                                                 key={fieldName}
                                                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${theme.canvas.card} ${theme.text.secondary} border ${theme.canvas.border}`}
                                             >
-                                                {value}
+                                                {display}
                                             </span>
                                         );
                                     })}

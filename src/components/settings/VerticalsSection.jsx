@@ -6,6 +6,7 @@ import {
     Eye, Table2, Type, CornerDownRight, Check,
     Tag, Users
 } from 'lucide-react';
+import { FIELD_TYPES } from '../../config/fieldTypes';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -76,11 +77,9 @@ const FieldEditor = ({ fields, onFieldsChange, label, theme }) => {
                         onChange={e => setNewField({ ...newField, type: e.target.value })}
                         className={`w-28 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-2 py-2 text-sm ${theme.text.primary} focus:outline-none cursor-pointer`}
                     >
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="date">Date</option>
-                        <option value="tel">Phone</option>
-                        <option value="select">Select</option>
+                        {Object.entries(FIELD_TYPES).map(([type, { label }]) => (
+                            <option key={type} value={type}>{label}</option>
+                        ))}
                     </select>
                     <button
                         onClick={handleAdd}
@@ -154,6 +153,7 @@ const FieldEditor = ({ fields, onFieldsChange, label, theme }) => {
 
 
 // ─── FIELD PICKER (for card_fields / table_fields) ──────────────────────────
+// eslint-disable-next-line no-unused-vars
 const FieldPicker = ({ allFields, selectedFields, onChange, label, icon: Icon, theme }) => {
     const toggleField = (fieldName) => {
         if (selectedFields.includes(fieldName)) {

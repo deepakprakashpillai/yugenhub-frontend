@@ -21,6 +21,7 @@ import EmptyState from '../components/EmptyState';
 
 // Vertical-specific templates
 import { WeddingTemplate, KidsTemplate, EventsTemplate, GenericTemplate } from '../components/templates';
+import { FieldDisplay } from '../config/fieldTypes';
 import ProjectFinance from '../components/finance/ProjectFinance';
 import DeliverableManager from '../components/portal/DeliverableManager';
 
@@ -103,25 +104,11 @@ const VerticalTemplate = ({ project }) => {
                     if (!value && value !== 0) return null;
 
                     return (
-                        <div key={field.name}>
+                        <div key={field.name} className={field.type === 'location' ? 'col-span-2 md:col-span-3' : ''}>
                             <h4 className={`text-[10px] sm:text-xs ${theme.text.secondary} uppercase tracking-wider mb-0.5 sm:mb-1`}>
                                 {field.label}
                             </h4>
-                            {field.type === 'date' ? (
-                                <p className={`${theme.text.primary} font-medium text-sm sm:text-base`}>
-                                    {new Date(value).toLocaleDateString('en-IN', {
-                                        day: 'numeric', month: 'short', year: 'numeric'
-                                    })}
-                                </p>
-                            ) : field.type === 'select' ? (
-                                <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-purple-500/10 text-purple-400 capitalize`}>
-                                    {value}
-                                </span>
-                            ) : field.type === 'tel' ? (
-                                <p className={`${theme.text.primary} text-xs sm:text-sm font-mono break-words`}>{value}</p>
-                            ) : (
-                                <p className={`${theme.text.primary} font-medium text-sm sm:text-base truncate`}>{value}</p>
-                            )}
+                            <FieldDisplay field={field} value={value} theme={theme} />
                         </div>
                     );
                 })}
