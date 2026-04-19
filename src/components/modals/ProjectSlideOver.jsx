@@ -9,6 +9,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { TemplateModal } from './TemplateModal';
 import DatePicker from '../ui/DatePicker';
 import TimePicker from '../ui/TimePicker';
+import { FieldInput, getEmptyValue } from '../../config/fieldTypes';
 
 const ProjectSlideOver = ({
     isOpen,
@@ -166,7 +167,7 @@ const ProjectSlideOver = ({
         // Build default values for custom fields
         const initialCustomFields = {};
         customEventFields.forEach(field => {
-            initialCustomFields[field.name] = field.type === 'number' ? null : '';
+            initialCustomFields[field.name] = getEmptyValue(field.type);
         });
 
         setEvents(prev => [...prev, {
@@ -174,6 +175,8 @@ const ProjectSlideOver = ({
             type: '',
             venue_name: '',
             venue_location: '',
+            venue_map: null,
+            linked_locations: [],
             start_date: '',
             start_time: '',
             end_date: '',
@@ -263,8 +266,6 @@ const ProjectSlideOver = ({
 
     // --- Team Requirement Handlers ---
     const handleAddTeamRequirement = (eventIndex) => {
-        const vId = vertical?.toLowerCase();
-        const configVertical = config?.verticals?.find(v => v.id === vId);
         const existing = events[eventIndex]?.team_requirements || [];
         const firstUnused = (config?.associateRoles || []).find(r => !existing.some(e => e.role === r));
         if (!firstUnused) return;
@@ -350,17 +351,6 @@ const ProjectSlideOver = ({
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleMetadataChange = (e) => {
-        let { name, value, type } = e.target;
-
-        // Convert number inputs to actual numbers
-        if (type === 'number') {
-            value = value === '' ? null : Number(value);
-        }
-
-        setMetadata(prev => ({ ...prev, [name]: value }));
-    };
-
     const combineDateTime = (date, time) => {
         if (!date) return null;
         return time ? `${date}T${time}:00` : `${date}T00:00:00`;
@@ -424,38 +414,15 @@ const ProjectSlideOver = ({
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                     {fields.map(field => (
-                        <div key={field.name}>
+                        <div key={field.name} className={field.type === 'location' ? 'md:col-span-2 xl:col-span-3' : ''}>
                             <label className={`block text-xs ${theme.text.secondary} mb-1`}>{field.label}</label>
-                            {field.type === 'select' ? (
-                                <select
-                                    name={field.name}
-                                    value={metadata[field.name] || ''}
-                                    onChange={handleMetadataChange}
-                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-base md:text-sm focus:outline-none focus:border-purple-500`}
-                                >
-                                    <option value="">Select {field.label}</option>
-                                    {field.options?.map(opt => (
-                                        <option key={opt} value={opt}>{opt}</option>
-                                    ))}
-                                </select>
-                            ) : field.type === 'date' ? (
-                                <DatePicker
-                                    value={metadata[field.name] || ''}
-                                    onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
-                                    placeholder={field.label}
-                                    className="w-full"
-                                    inputClassName={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-sm focus:outline-none focus:border-purple-500`}
-                                />
-                            ) : (
-                                <input
-                                    type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
-                                    name={field.name}
-                                    value={metadata[field.name] || ''}
-                                    onChange={handleMetadataChange}
-                                    placeholder={field.label}
-                                    className={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-base md:text-sm focus:outline-none focus:border-purple-500`}
-                                />
-                            )}
+                            <FieldInput
+                                field={field}
+                                value={metadata[field.name] ?? getEmptyValue(field.type)}
+                                onChange={(val) => setMetadata(prev => ({ ...prev, [field.name]: val }))}
+                                inputClassName={`w-full px-3 py-2 ${theme.canvas.input || 'bg-zinc-800'} border ${theme.canvas.border} rounded-lg ${theme.text.primary} text-base md:text-sm focus:outline-none focus:border-purple-500`}
+                                theme={theme}
+                            />
                         </div>
                     ))}
                 </div>
@@ -621,42 +588,15 @@ const ProjectSlideOver = ({
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {customEventFields.map(field => (
-                                                    <div key={field.name}>
+                                                    <div key={field.name} className={field.type === 'location' ? 'col-span-2' : ''}>
                                                         <label className={`block text-[10px] ${theme.text.secondary} mb-1.5`}>{field.label}</label>
-                                                        {field.type === 'select' ? (
-                                                            <select
-                                                                name={field.name}
-                                                                value={event[field.name] || ''}
-                                                                onChange={(e) => handleEventChange(index, field.name, e.target.value)}
-                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                                                            >
-                                                                <option value="">Select {field.label}</option>
-                                                                {field.options?.map(opt => (
-                                                                    <option key={opt} value={opt}>{opt}</option>
-                                                                ))}
-                                                            </select>
-                                                        ) : field.type === 'date' ? (
-                                                            <DatePicker
-                                                                value={event[field.name] || ''}
-                                                                onChange={(val) => handleEventChange(index, field.name, val)}
-                                                                placeholder={field.label}
-                                                                className="w-full"
-                                                                inputClassName={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                                                            />
-                                                        ) : (
-                                                            <input
-                                                                type={field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : 'text'}
-                                                                name={field.name}
-                                                                value={event[field.name] || ''}
-                                                                onChange={(e) => {
-                                                                    let val = e.target.value;
-                                                                    if (field.type === 'number') val = val === '' ? null : Number(val);
-                                                                    handleEventChange(index, field.name, val);
-                                                                }}
-                                                                placeholder={field.label}
-                                                                className={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                                                            />
-                                                        )}
+                                                        <FieldInput
+                                                            field={field}
+                                                            value={event[field.name] ?? getEmptyValue(field.type)}
+                                                            onChange={(val) => handleEventChange(index, field.name, val)}
+                                                            inputClassName={`w-full px-2 py-1.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded text-base md:text-xs ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                                                            theme={theme}
+                                                        />
                                                     </div>
                                                 ))}
                                             </div>

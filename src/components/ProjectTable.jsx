@@ -1,6 +1,7 @@
 import { useState, Fragment, useMemo } from 'react';
 import clsx from 'clsx';
 import { Icons } from './Icons';
+import { FieldDisplayCompact } from '../config/fieldTypes';
 
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -149,9 +150,9 @@ const ProjectTable = ({ projects, onRefresh }) => {
                                     {/* Dynamic field columns */}
                                     {dynamicCols.map(col => (
                                         <td key={col.name} className={`px-6 py-4 ${theme.text.primary}`}>
-                                            {col.type === 'date' && meta[col.name]
-                                                ? new Date(meta[col.name]).toLocaleDateString()
-                                                : meta[col.name] || <span className={theme.text.secondary}>-</span>
+                                            {meta[col.name]
+                                                ? (FieldDisplayCompact({ field: col, value: meta[col.name] }) || <span className={theme.text.secondary}>-</span>)
+                                                : <span className={theme.text.secondary}>-</span>
                                             }
                                         </td>
                                     ))}

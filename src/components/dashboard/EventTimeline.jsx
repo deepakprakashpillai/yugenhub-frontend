@@ -66,10 +66,10 @@ const EventTimeline = ({ events }) => {
 
                                 {/* Info Row: Location & Team */}
                                 <div className="space-y-3">
-                                    {event.location && (
+                                    {(event.venue_name || event.venue_location) && (
                                         <div className={`flex items-center gap-2 ${theme.text.secondary} text-xs`}>
-                                            <Icons.MapPin className="w-3.5 h-3.5" />
-                                            <span>{event.location}</span>
+                                            <Icons.MapPin className="w-3.5 h-3.5 shrink-0" />
+                                            <span>{event.venue_name || event.venue_location}</span>
                                         </div>
                                     )}
 
