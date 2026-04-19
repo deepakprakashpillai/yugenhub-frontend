@@ -3,6 +3,7 @@ import { Icons } from '../Icons';
 import api from '../../api/axios';
 import { toast } from 'sonner';
 import { TemplateModal } from '../modals/TemplateModal';
+import { ConfirmModal } from '../modals';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -13,6 +14,7 @@ const TemplatesSection = () => {
     const [loading, setLoading] = useState(false);
     const [modal, setModal] = useState({ open: false, mode: 'create', template: null });
     const [filterVertical, setFilterVertical] = useState('all');
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
     const fetchTemplates = useCallback(async () => {
         setLoading(true);
@@ -32,16 +34,23 @@ const TemplatesSection = () => {
         fetchTemplates();
     }, [filterVertical, fetchTemplates]);
 
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this template?")) return;
-        try {
-            await api.delete(`/templates/${id}`);
-            toast.success("Template deleted");
-            fetchTemplates();
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to delete template");
-        }
+    const handleDelete = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Template',
+            message: 'Are you sure you want to delete this template?',
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                try {
+                    await api.delete(`/templates/${id}`);
+                    toast.success("Template deleted");
+                    fetchTemplates();
+                } catch (err) {
+                    console.error(err);
+                    toast.error("Failed to delete template");
+                }
+            }
+        });
     };
 
     return (
@@ -150,6 +159,14 @@ const TemplatesSection = () => {
                 }}
                 mode={modal.mode}
                 template={modal.template}
+            />
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                variant="danger"
             />
         </div>
     );

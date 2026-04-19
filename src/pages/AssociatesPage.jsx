@@ -11,7 +11,8 @@ import clsx from 'clsx';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import FloatingActionButton from '../components/FloatingActionButton';
-import { AssociateModal } from '../components/modals';
+import { AssociateModal, ConfirmModal } from '../components/modals';
+import Table from '../components/ui/Table';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
@@ -82,39 +83,38 @@ const AssociateCard = ({ associate, theme, onEdit, onDelete }) => (
     </motion.div>
 );
 
-const AssociateTable = ({ associates, theme, onEdit, onDelete }) => (
-    <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border}`}>
-        <table className={`w-full text-left text-sm ${theme.text.secondary} ${theme.canvas.bg} bg-opacity-50`}>
-            <thead className={`text-xs uppercase ${theme.canvas.bg} bg-opacity-80 ${theme.text.secondary} font-medium`}>
+const AssociateTable = ({ associates, onEdit, onDelete }) => {
+    const { theme } = useTheme();
+    return (
+        <Table>
+            <Table.Head>
                 <tr>
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4">Role</th>
-                    <th className="px-6 py-4">Employment</th>
-                    <th className="px-6 py-4">Contact</th>
-                    <th className="px-6 py-4">Location</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <Table.HeadCell>Name</Table.HeadCell>
+                    <Table.HeadCell>Role</Table.HeadCell>
+                    <Table.HeadCell>Employment</Table.HeadCell>
+                    <Table.HeadCell>Contact</Table.HeadCell>
+                    <Table.HeadCell>Location</Table.HeadCell>
+                    <Table.HeadCell className="text-right">Actions</Table.HeadCell>
                 </tr>
-            </thead>
-            <tbody className={`divide-y ${theme.canvas.border}`}>
+            </Table.Head>
+            <Table.Body>
                 {associates.map((assoc) => (
-                    <tr key={assoc._id} className={`hover:${theme.canvas.hover} transition-colors`}>
-                        <td className="px-6 py-4">
+                    <Table.Row key={assoc._id}>
+                        <Table.Cell>
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-xs">
                                     {assoc.name.charAt(0)}
                                 </div>
                                 <span className="font-medium text-white">{assoc.name}</span>
                             </div>
-                        </td>
-                        <td className="px-6 py-4">
+                        </Table.Cell>
+                        <Table.Cell>
                             <span className={`text-xs px-2 py-1 rounded-full border ${theme.canvas.bg} ${theme.text.secondary} ${theme.canvas.border}`}>
                                 {assoc.primary_role}
                             </span>
-                        </td>
-                        <td className={`px-6 py-4 ${theme.text.secondary}`}>
-                            {assoc.employment_type}
-                        </td>
-                        <td className="px-6 py-4 space-y-1">
+                        </Table.Cell>
+                        <Table.Cell className={theme.text.secondary}>{assoc.employment_type}</Table.Cell>
+                        <Table.Cell className="space-y-1">
                             <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
                                 <Icons.Phone className="w-3 h-3" /> {assoc.phone_number}
                             </div>
@@ -123,11 +123,9 @@ const AssociateTable = ({ associates, theme, onEdit, onDelete }) => (
                                     <Icons.Mail className="w-3 h-3" /> {assoc.email_id}
                                 </div>
                             )}
-                        </td>
-                        <td className="px-6 py-4">
-                            {assoc.base_city || '-'}
-                        </td>
-                        <td className="px-6 py-4 text-right">
+                        </Table.Cell>
+                        <Table.Cell>{assoc.base_city || '-'}</Table.Cell>
+                        <Table.Cell className="text-right">
                             <div className="flex justify-end gap-2">
                                 <a href={`tel:${assoc.phone_number}`} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:${theme.text.primary}`} title="Call"><Icons.Phone className="w-3 h-3" /></a>
                                 <a href={`https://wa.me/${assoc.phone_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:text-green-500`} title="WhatsApp"><Icons.WhatsApp className="w-3 h-3" /></a>
@@ -138,13 +136,13 @@ const AssociateTable = ({ associates, theme, onEdit, onDelete }) => (
                                     <Icons.Trash className="w-3 h-3" />
                                 </button>
                             </div>
-                        </td>
-                    </tr>
+                        </Table.Cell>
+                    </Table.Row>
                 ))}
-            </tbody>
-        </table>
-    </div>
-);
+            </Table.Body>
+        </Table>
+    );
+};
 
 const AssociatesPage = () => {
     const { theme } = useTheme();
@@ -172,6 +170,7 @@ const AssociatesPage = () => {
     // Modal State
     const [associateModal, setAssociateModal] = useState({ open: false, associate: null });
     const [actionLoading, setActionLoading] = useState(false);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
     const LIMIT = 12;
 
@@ -257,17 +256,23 @@ const AssociatesPage = () => {
         }
     };
 
-    const handleDeleteAssociate = async (associate) => {
-        if (!confirm(`Are you sure you want to delete ${associate.name}?`)) return;
-
-        try {
-            await api.delete(`/associates/${associate._id}`);
-            await fetchAssociates();
-            toast.success('Associate deleted successfully');
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to delete associate');
-        }
+    const handleDeleteAssociate = (associate) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Associate',
+            message: `Are you sure you want to delete ${associate.name}?`,
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                try {
+                    await api.delete(`/associates/${associate._id}`);
+                    await fetchAssociates();
+                    toast.success('Associate deleted successfully');
+                } catch (err) {
+                    console.error(err);
+                    toast.error('Failed to delete associate');
+                }
+            }
+        });
     };
 
     return (
@@ -453,7 +458,7 @@ const AssociatesPage = () => {
                             key="list"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         >
-                            <AssociateTable associates={associates} theme={theme} onEdit={(a) => setAssociateModal({ open: true, associate: a })} onDelete={handleDeleteAssociate} />
+                            <AssociateTable associates={associates} onEdit={(a) => setAssociateModal({ open: true, associate: a })} onDelete={handleDeleteAssociate} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -495,6 +500,14 @@ const AssociatesPage = () => {
                 onSave={handleSaveAssociate}
                 associate={associateModal.associate}
                 loading={actionLoading}
+            />
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                variant="danger"
             />
         </div>
     );

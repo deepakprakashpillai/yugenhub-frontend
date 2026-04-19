@@ -14,3 +14,4 @@ export { default as EditUserModal } from './EditUserModal';
 export { TemplateModal } from './TemplateModal';
 export { default as TransactionSlideOver } from './TransactionSlideOver';
 export { default as InvoiceSlideOver } from './InvoiceSlideOver';
+export { default as ConfirmModal } from './ConfirmModal';

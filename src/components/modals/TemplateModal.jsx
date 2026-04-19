@@ -5,6 +5,8 @@ import { Icons } from '../Icons';
 import api from '../../api/axios';
 import { toast } from 'sonner';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import Select from '../ui/Select';
+import Textarea from '../ui/Textarea';
 
 export const TemplateModal = ({
     isOpen,
@@ -242,25 +244,22 @@ export const TemplateModal = ({
                                 </div>
                                 <div>
                                     <label className="block text-xs font-medium text-zinc-400 mb-1">Vertical</label>
-                                    <select
+                                    <Select
                                         value={formData.vertical}
-                                        onChange={e => setFormData({ ...formData, vertical: e.target.value })}
-                                        disabled={mode === 'edit'} // Lock vertical on edit
-                                        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500 disabled:opacity-50"
-                                    >
-                                        {config?.verticals?.map(v => (
-                                            <option key={v.id} value={v.id}>{v.label}</option>
-                                        ))}
-                                    </select>
+                                        onChange={(val) => setFormData({ ...formData, vertical: val })}
+                                        disabled={mode === 'edit'}
+                                        options={(config?.verticals || []).map(v => ({ value: v.id, label: v.label }))}
+                                        className="w-full"
+                                    />
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-xs font-medium text-zinc-400 mb-1">Description</label>
-                                <textarea
+                                <Textarea
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500 h-20 resize-none"
+                                    rows={3}
                                     placeholder="Describe what this template includes..."
                                 />
                             </div>

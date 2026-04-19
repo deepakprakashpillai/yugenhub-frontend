@@ -9,6 +9,7 @@ import { useAgencyConfig } from '../../context/AgencyConfigContext'; // IMPORT c
 import { toast } from 'sonner';
 import { Plus, Trash, RefreshCw } from 'lucide-react';
 import SearchableSelect from '../ui/SearchableSelect';
+import Select from '../ui/Select';
 import DatePicker from '../ui/DatePicker';
 
 const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
@@ -259,14 +260,13 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
         }
     };
 
-    const handleVerticalChange = (e) => {
-        const newVertical = e.target.value;
+    const handleVerticalChange = (newVertical) => {
         setSelectedVertical(newVertical);
         setFormData(prev => ({
             ...prev,
             project_id: '',
             client_id: '',
-            invoice_no: 'Select Project...' // Reset to placeholder
+            invoice_no: 'Select Project...'
         }));
     };
 
@@ -356,16 +356,13 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                 {/* Vertical Selection */}
                 <div>
                     <label className="block text-xs font-medium mb-1 text-gray-500">Vertical</label>
-                    <select
+                    <Select
                         value={selectedVertical}
                         onChange={handleVerticalChange}
-                        className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} ${theme.text.primary} focus:border-indigo-500 focus:outline-none`}
-                    >
-                        <option value="" className="text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800">Select Vertical</option>
-                        {config?.verticals?.map(v => (
-                            <option key={v.id} value={v.id} className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">{v.label}</option>
-                        ))}
-                    </select>
+                        placeholder="Select Vertical"
+                        options={(config?.verticals || []).map(v => ({ value: v.id, label: v.label }))}
+                        className="w-full"
+                    />
                 </div>
 
                 {/* Project Selection (Auto-selects Client) */}
@@ -392,17 +389,12 @@ const InvoiceSlideOver = ({ isOpen, onClose, onSuccess, initialData }) => {
                                 {clients.find(c => c.id === formData.client_id || c._id === formData.client_id)?.name || 'Loading...'}
                             </div>
                         ) : (
-                            <select
-                                required
+                            <SearchableSelect
                                 value={formData.client_id}
-                                onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                                className={`w-full px-3 py-2 rounded-lg border ${theme.canvas.bg} ${theme.canvas.border} focus:border-indigo-500 focus:outline-none`}
-                            >
-                                <option value="" disabled>Select Client</option>
-                                {clients.map(c => (
-                                    <option key={c.id || c._id} value={c.id || c._id}>{c.name}</option>
-                                ))}
-                            </select>
+                                onChange={(val) => setFormData({ ...formData, client_id: val })}
+                                placeholder="Select Client"
+                                options={clients.map(c => ({ value: c.id || c._id, label: c.name }))}
+                            />
                         )}
                     </div>
                 )}

@@ -20,6 +20,7 @@
 import DatePicker from '../components/ui/DatePicker';
 import LocationPicker from '../components/location/LocationPicker';
 import LocationCard from '../components/location/LocationCard';
+import Select from '../components/ui/Select';
 
 export const FIELD_TYPES = {
     text:     { label: 'Text',     empty: '' },
@@ -39,17 +40,13 @@ export function FieldInput({ field, value, onChange, inputClassName = '', placeh
 
     if (field.type === 'select') {
         return (
-            <select
-                name={field.name}
+            <Select
                 value={value ?? ''}
-                onChange={(e) => onChange(e.target.value)}
-                className={cls}
-            >
-                <option value="">Select {field.label}</option>
-                {field.options?.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
-                ))}
-            </select>
+                onChange={onChange}
+                placeholder={`Select ${field.label}`}
+                options={(field.options || []).map(opt => ({ value: opt, label: opt }))}
+                className="w-full"
+            />
         );
     }
 

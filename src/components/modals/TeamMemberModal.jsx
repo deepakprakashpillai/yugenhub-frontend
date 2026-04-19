@@ -4,6 +4,8 @@ import { Icons } from '../Icons';
 import api from '../../api/axios';
 import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
+import SearchableSelect from '../ui/SearchableSelect';
+import Select from '../ui/Select';
 
 const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading = false, verticalId }) => {
     const { theme } = useTheme();
@@ -53,17 +55,6 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
         if (isOpen) fetchAssociates();
     }, [isOpen]);
 
-    const handleAssociateChange = (e) => {
-        const associateId = e.target.value;
-        const associate = associates.find(a => a._id === associateId);
-        setFormData(prev => ({
-            ...prev,
-            associate_id: associateId,
-            associate_name: associate?.name || '',
-            role: associate?.primary_role || prev.role || roleOptions[0] || ''
-        }));
-    };
-
     const handleChange = (e) => {
         setFormData(prev => ({
             ...prev,
@@ -96,19 +87,20 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                             Loading associates...
                         </div>
                     ) : (
-                        <select
-                            name="associate_id"
+                        <SearchableSelect
                             value={formData.associate_id}
-                            onChange={handleAssociateChange}
-                            className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                        >
-                            <option value="">Select an associate...</option>
-                            {associates.map(associate => (
-                                <option key={associate._id} value={associate._id}>
-                                    {associate.name} ({associate.primary_role})
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(val) => {
+                                const associate = associates.find(a => a._id === val);
+                                setFormData(prev => ({
+                                    ...prev,
+                                    associate_id: val,
+                                    associate_name: associate?.name || '',
+                                    role: associate?.primary_role || prev.role || roleOptions[0] || ''
+                                }));
+                            }}
+                            placeholder="Select an associate..."
+                            options={associates.map(a => ({ value: a._id, label: `${a.name} (${a.primary_role})` }))}
+                        />
                     )}
                 </div>
 
@@ -131,18 +123,13 @@ const TeamMemberModal = ({ isOpen, onClose, onSave, assignment = null, loading =
                 {/* Role */}
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1.5`}>Role *</label>
-                    <select
-                        name="role"
+                    <Select
                         value={formData.role}
-                        onChange={handleChange}
-                        required
-                        className={`w-full px-3 py-2.5 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                    >
-                        <option value="">Select a role</option>
-                        {roleOptions.map(role => (
-                            <option key={role} value={role}>{role}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => setFormData(prev => ({ ...prev, role: val }))}
+                        placeholder="Select a role"
+                        options={roleOptions.map(r => ({ value: r, label: r }))}
+                        className="w-full"
+                    />
                 </div>
 
                 {/* Tags */}

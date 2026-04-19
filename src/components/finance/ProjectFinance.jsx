@@ -7,6 +7,7 @@ import { Skeleton } from '../ui/Skeleton';
 import { toast } from 'sonner';
 import api from '../../api/axios';
 import { FINANCE_CATEGORIES, TRANSACTION_TYPES } from '../../constants';
+import Checkbox from '../ui/Checkbox';
 
 const fmt = (n) => (n || 0).toLocaleString('en-IN');
 
@@ -197,10 +198,12 @@ const ProjectFinance = ({ projectId, projectData, onUpdateProject }) => {
                                 <button onClick={handleSaveQuote} className="p-1.5 bg-green-500 text-white rounded hover:bg-green-600"><Save size={16} /></button>
                                 <button onClick={() => setIsEditingQuote(false)} className="p-1.5 bg-gray-500 text-white rounded hover:bg-gray-600"><X size={16} /></button>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <input type="checkbox" id="createQuote" checked={createQuoteRecord} onChange={(e) => setCreateQuoteRecord(e.target.checked)} className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <label htmlFor="createQuote" className={`text-[10px] sm:text-xs ${theme.text.secondary} cursor-pointer select-none`}>Generate Quote Record</label>
-                            </div>
+                            <Checkbox
+                                id="createQuote"
+                                checked={createQuoteRecord}
+                                onChange={(e) => setCreateQuoteRecord(e.target.checked)}
+                                label="Generate Quote Record"
+                            />
                         </div>
                     </div>
                 ) : quoteAmount === 0 ? (

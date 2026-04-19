@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import LocationPicker from '../location/LocationPicker';
 import LocationCard from '../location/LocationCard';
 import { FieldInput, getEmptyValue } from '../../config/fieldTypes';
+import Select from '../ui/Select';
+import Textarea from '../ui/Textarea';
 
 // Inline Editable Deliverable Row
 const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
@@ -30,18 +32,16 @@ const DeliverableRow = ({ deliverable, onUpdate, onDelete }) => {
         return (
             <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 space-y-2">
                 <div className="grid grid-cols-2 gap-2">
-                    <select
+                    <Select
                         value={data.type}
-                        onChange={(e) => setData({ ...data, type: e.target.value })}
-                        className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                    >
-                        {(config?.deliverableTypes || []).map(dt => (
-                            <option key={dt} value={dt}>{dt}</option>
-                        ))}
-                        {data.type && !(config?.deliverableTypes || []).includes(data.type) && (
-                            <option key={data.type} value={data.type}>{data.type}</option>
-                        )}
-                    </select>
+                        onChange={(val) => setData({ ...data, type: val })}
+                        placeholder="Select Type"
+                        options={[
+                            ...(config?.deliverableTypes || []).map(dt => ({ value: dt, label: dt })),
+                            ...(data.type && !(config?.deliverableTypes || []).includes(data.type) ? [{ value: data.type, label: data.type }] : [])
+                        ]}
+                        className="w-full"
+                    />
                     <input
                         type="number"
                         value={data.quantity}
@@ -612,13 +612,12 @@ const EventSlideOver = ({
                         </div>
                         <div>
                             <label className="block text-xs text-zinc-400 mb-1">Notes</label>
-                            <textarea
+                            <Textarea
                                 name="notes"
                                 value={formData.notes}
                                 onChange={handleChange}
                                 rows={2}
                                 placeholder="Any additional notes..."
-                                className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 resize-none"
                             />
                         </div>
                     </div>
@@ -643,16 +642,13 @@ const EventSlideOver = ({
                         {showAddDeliverable && (
                             <div className="p-3 bg-zinc-800/50 rounded-lg border border-purple-500/30 space-y-2">
                                 <div className="grid grid-cols-2 gap-2">
-                                    <select
+                                    <Select
                                         value={newDeliverable.type}
-                                        onChange={(e) => setNewDeliverable({ ...newDeliverable, type: e.target.value })}
-                                        className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm"
-                                    >
-                                        <option value="">Select Type</option>
-                                        {(config?.deliverableTypes || []).map(dt => (
-                                            <option key={dt} value={dt}>{dt}</option>
-                                        ))}
-                                    </select>
+                                        onChange={(val) => setNewDeliverable({ ...newDeliverable, type: val })}
+                                        placeholder="Select Type"
+                                        options={(config?.deliverableTypes || []).map(dt => ({ value: dt, label: dt }))}
+                                        className="w-full"
+                                    />
                                     <input
                                         type="number"
                                         value={newDeliverable.quantity}
@@ -733,15 +729,12 @@ const EventSlideOver = ({
                                 const isFulfilled = assigned >= req.count;
                                 return (
                                     <div key={i} className="flex items-center gap-3 px-3 py-2 bg-zinc-800/30 rounded-lg group">
-                                        <select
+                                        <Select
                                             value={req.role}
-                                            onChange={e => updateTeamRequirement(i, 'role', e.target.value)}
-                                            className="flex-1 bg-transparent border-none text-sm text-white focus:outline-none cursor-pointer"
-                                        >
-                                            {(config?.associateRoles || []).map(r => (
-                                                <option key={r} value={r}>{r}</option>
-                                            ))}
-                                        </select>
+                                            onChange={(val) => updateTeamRequirement(i, 'role', val)}
+                                            options={(config?.associateRoles || []).map(r => ({ value: r, label: r }))}
+                                            className="flex-1"
+                                        />
                                         <div className="flex items-center gap-1.5 text-xs">
                                             <span className={isFulfilled ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
                                                 {assigned}

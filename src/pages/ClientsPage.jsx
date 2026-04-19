@@ -8,7 +8,8 @@ import clsx from 'clsx';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import FloatingActionButton from '../components/FloatingActionButton';
-import { ClientModal } from '../components/modals';
+import { ClientModal, ConfirmModal } from '../components/modals';
+import Table from '../components/ui/Table';
 import { v4 as uuidv4 } from 'uuid';
 import { useTheme } from '../context/ThemeContext';
 import { useIsMobile } from '../hooks/useMediaQuery';
@@ -77,39 +78,40 @@ const ClientCard = ({ client, theme, onEdit, onDelete }) => (
     </motion.div>
 );
 
-const ClientTable = ({ clients, theme, onEdit, onDelete }) => (
-    <div className={`overflow-x-auto rounded-xl border ${theme.canvas.border}`}>
-        <table className={`w-full text-left text-sm ${theme.text.secondary} ${theme.canvas.bg} bg-opacity-50`}>
-            <thead className={`text-xs uppercase ${theme.canvas.bg} bg-opacity-80 ${theme.text.secondary} font-medium`}>
+const ClientTable = ({ clients, onEdit, onDelete }) => {
+    const { theme } = useTheme();
+    return (
+        <Table>
+            <Table.Head>
                 <tr>
-                    <th className="px-6 py-4">Client Name</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Contact Info</th>
-                    <th className="px-6 py-4">Location</th>
-                    <th className="px-6 py-4 text-center">Projects</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <Table.HeadCell>Client Name</Table.HeadCell>
+                    <Table.HeadCell>Status</Table.HeadCell>
+                    <Table.HeadCell>Contact Info</Table.HeadCell>
+                    <Table.HeadCell>Location</Table.HeadCell>
+                    <Table.HeadCell className="text-center">Projects</Table.HeadCell>
+                    <Table.HeadCell className="text-right">Actions</Table.HeadCell>
                 </tr>
-            </thead>
-            <tbody className={`divide-y ${theme.canvas.border}`}>
+            </Table.Head>
+            <Table.Body>
                 {clients.map((client) => (
-                    <tr key={client._id} className={`hover:${theme.canvas.hover} transition-colors`}>
-                        <td className="px-6 py-4">
+                    <Table.Row key={client._id}>
+                        <Table.Cell>
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs">
                                     {client.name.charAt(0)}
                                 </div>
                                 <span className="font-medium text-white">{client.name}</span>
                             </div>
-                        </td>
-                        <td className="px-6 py-4">
+                        </Table.Cell>
+                        <Table.Cell>
                             <span className={`text-xs px-2 py-1 rounded-full border ${client.type === 'Active Client' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                                 client.type === 'Lead' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                                     `${theme.canvas.bg} ${theme.text.secondary} border ${theme.canvas.border}`
                                 }`}>
                                 {client.type}
                             </span>
-                        </td>
-                        <td className="px-6 py-4 space-y-1">
+                        </Table.Cell>
+                        <Table.Cell className="space-y-1">
                             <div className={`flex items-center gap-2 ${theme.text.secondary}`}>
                                 <Icons.Phone className="w-3 h-3" /> {client.phone}
                             </div>
@@ -118,27 +120,25 @@ const ClientTable = ({ clients, theme, onEdit, onDelete }) => (
                                     <Icons.Mail className="w-3 h-3" /> {client.email}
                                 </div>
                             )}
-                        </td>
-                        <td className="px-6 py-4">
-                            {client.location || '-'}
-                        </td>
-                        <td className={`px-6 py-4 text-center font-mono ${theme.text.primary}`}>
+                        </Table.Cell>
+                        <Table.Cell>{client.location || '-'}</Table.Cell>
+                        <Table.Cell className={`text-center font-mono ${theme.text.primary}`}>
                             {client.total_projects}
-                        </td>
-                        <td className="px-6 py-4 text-right">
+                        </Table.Cell>
+                        <Table.Cell className="text-right">
                             <button onClick={(e) => { e.stopPropagation(); onEdit(client); }} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:bg-purple-500/10 hover:text-purple-500 transition-colors mr-2`} title="Edit Client">
                                 <Icons.Edit className="w-4 h-4" />
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); onDelete(client); }} className={`p-1.5 rounded ${theme.canvas.bg} ${theme.text.secondary} hover:bg-red-500/10 hover:text-red-500 transition-colors`} title="Delete Client">
                                 <Icons.Trash className="w-4 h-4" />
                             </button>
-                        </td>
-                    </tr>
+                        </Table.Cell>
+                    </Table.Row>
                 ))}
-            </tbody>
-        </table>
-    </div>
-);
+            </Table.Body>
+        </Table>
+    );
+};
 
 const ClientsPage = () => {
     const { theme } = useTheme();
@@ -163,6 +163,7 @@ const ClientsPage = () => {
     // Modal State
     const [clientModal, setClientModal] = useState({ open: false, client: null });
     const [actionLoading, setActionLoading] = useState(false);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
     const LIMIT = 12;
 
@@ -229,17 +230,23 @@ const ClientsPage = () => {
         }
     };
 
-    const handleDeleteClient = async (client) => {
-        if (!confirm(`Are you sure you want to delete ${client.name}?`)) return;
-
-        try {
-            await api.delete(`/clients/${client._id}`);
-            await fetchClients();
-            toast.success('Client deleted successfully');
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to delete client');
-        }
+    const handleDeleteClient = (client) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Client',
+            message: `Are you sure you want to delete ${client.name}?`,
+            onConfirm: async () => {
+                setConfirmModal(s => ({ ...s, isOpen: false }));
+                try {
+                    await api.delete(`/clients/${client._id}`);
+                    await fetchClients();
+                    toast.success('Client deleted successfully');
+                } catch (err) {
+                    console.error(err);
+                    toast.error('Failed to delete client');
+                }
+            }
+        });
     };
 
     return (
@@ -406,7 +413,7 @@ const ClientsPage = () => {
                             key="list"
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         >
-                            <ClientTable clients={clients} theme={theme} onEdit={(c) => setClientModal({ open: true, client: c })} onDelete={handleDeleteClient} />
+                            <ClientTable clients={clients} onEdit={(c) => setClientModal({ open: true, client: c })} onDelete={handleDeleteClient} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -449,6 +456,14 @@ const ClientsPage = () => {
                 onSave={handleSaveClient}
                 client={clientModal.client}
                 loading={actionLoading}
+            />
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal(s => ({ ...s, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                variant="danger"
             />
         </div>
     );

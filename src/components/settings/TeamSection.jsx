@@ -10,6 +10,7 @@ import RemoveUserModal from '../modals/RemoveUserModal';
 import ManageAccessModal from '../modals/ManageAccessModal';
 import { useTheme } from '../../context/ThemeContext';
 import { ROLES } from '../../constants';
+import Select from '../ui/Select';
 
 const ROLE_BADGE = {
     [ROLES.OWNER]: { label: 'Owner', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Crown },
@@ -169,14 +170,14 @@ function TeamSection({ role }) {
                                     </div>
 
                                     {canManagePermission && member.role !== ROLES.OWNER && (isOwner || member.role !== ROLES.ADMIN) && (
-                                        <select
+                                        <Select
                                             value={member.role}
-                                            onChange={e => handleRoleChange(member.id, e.target.value)}
-                                            className={`${theme.canvas.bg} border ${theme.canvas.border} rounded-lg px-2 py-1 text-xs ${theme.text.secondary} focus:outline-none focus:border-zinc-500 cursor-pointer hover:${theme.canvas.hover} transition-colors`}
-                                        >
-                                            <option value={ROLES.MEMBER}>Member</option>
-                                            <option value={ROLES.ADMIN}>Admin</option>
-                                        </select>
+                                            onChange={(val) => handleRoleChange(member.id, val)}
+                                            options={[
+                                                { value: ROLES.MEMBER, label: 'Member' },
+                                                { value: ROLES.ADMIN, label: 'Admin' },
+                                            ]}
+                                        />
                                     )}
                                 </div>
                             </div>

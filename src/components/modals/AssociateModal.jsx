@@ -5,6 +5,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAgencyConfig } from '../../context/AgencyConfigContext';
 import { toast } from 'sonner';
 import api from '../../api/axios';
+import Select from '../ui/Select';
+import SearchableSelect from '../ui/SearchableSelect';
+import Textarea from '../ui/Textarea';
 
 const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = false }) => {
     const { theme } = useTheme();
@@ -90,47 +93,41 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
 
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1`}>Role *</label>
-                    <select
-                        name="role"
+                    <Select
                         value={formData.role}
-                        onChange={handleChange}
-                        className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                    >
-                        <option value="">Select a role</option>
-                        {roleOptions.map(role => (
-                            <option key={role} value={role}>{role}</option>
-                        ))}
-                    </select>
+                        onChange={(val) => setFormData(prev => ({ ...prev, role: val }))}
+                        placeholder="Select a role"
+                        options={roleOptions.map(r => ({ value: r, label: r }))}
+                        className="w-full"
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Employment Type</label>
-                        <select
-                            name="employment_type"
+                        <Select
                             value={formData.employment_type}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
-                        >
-                            <option value="Freelance">Freelance</option>
-                            <option value="In-house">In-house</option>
-                            <option value="Contract">Contract</option>
-                        </select>
+                            onChange={(val) => setFormData(prev => ({ ...prev, employment_type: val }))}
+                            options={[
+                                { value: 'Freelance', label: 'Freelance' },
+                                { value: 'In-house', label: 'In-house' },
+                                { value: 'Contract', label: 'Contract' },
+                            ]}
+                            className="w-full"
+                        />
                     </div>
                     <div>
                         <label className={`block text-sm ${theme.text.secondary} mb-1`}>Link User Account (Optional)</label>
-                        <select
-                            name="linked_user_id"
+                        <SearchableSelect
                             value={formData.linked_user_id}
-                            onChange={handleChange}
-                            className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                            onChange={(val) => setFormData(prev => ({ ...prev, linked_user_id: val }))}
+                            placeholder={loadingUsers ? 'Loading...' : 'No linked account'}
                             disabled={loadingUsers}
-                        >
-                            <option value="">No linked account</option>
-                            {users.map(u => (
-                                <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-                            ))}
-                        </select>
+                            options={[
+                                { value: '', label: 'No linked account' },
+                                ...users.map(u => ({ value: u.id, label: `${u.name} (${u.email})` }))
+                            ]}
+                        />
                         <p className={`text-[10px] ${theme.text.secondary} mt-1`}>Linking allows the user to see tasks assigned to this associate.</p>
                     </div>
                 </div>
@@ -174,13 +171,12 @@ const AssociateModal = ({ isOpen, onClose, onSave, associate = null, loading = f
 
                 <div>
                     <label className={`block text-sm ${theme.text.secondary} mb-1`}>Notes</label>
-                    <textarea
+                    <Textarea
                         name="notes"
                         value={formData.notes}
                         onChange={handleChange}
                         rows={2}
                         placeholder="Any notes about this associate..."
-                        className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500 resize-none`}
                     />
                 </div>
 
