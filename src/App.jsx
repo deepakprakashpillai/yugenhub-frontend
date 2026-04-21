@@ -21,6 +21,7 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const FinancePage = lazy(() => import('./pages/FinancePage'));
 const MediaPage = lazy(() => import('./pages/MediaPage'));
+const CommunicationsPage = lazy(() => import('./pages/CommunicationsPage'));
 const PortalPage = lazy(() => import('./pages/PortalPage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
@@ -182,6 +183,11 @@ function AppRoutes() {
         <Route path="/media" element={
           <ProtectedRoute>
             <MediaPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/communications" element={
+          <ProtectedRoute>
+            <CommunicationsPage />
           </ProtectedRoute>
         } />
 

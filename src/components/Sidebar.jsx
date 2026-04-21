@@ -13,6 +13,7 @@ import {
   Calendar,
   Settings,
   HardDrive,
+  MessageCircle,
   X
 } from 'lucide-react';
 
@@ -75,6 +76,10 @@ export default function Sidebar({ isOpen, onClose, isMobile }) {
 
   if (user?.role === ROLES.OWNER || user?.media_access) {
     opsItems.push({ id: 'media', label: 'Media', icon: HardDrive });
+  }
+
+  if (user?.role === ROLES.OWNER || user?.role === ROLES.ADMIN || user?.communications_access) {
+    opsItems.push({ id: 'communications', label: 'Communications', icon: MessageCircle });
   }
 
   const managementItems = [

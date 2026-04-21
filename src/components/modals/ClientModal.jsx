@@ -13,6 +13,7 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
         name: '',
         email: '',
         phone: '',
+        whatsapp_number: '',
         location: '',
         notes: ''
     });
@@ -23,11 +24,12 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
                 name: client.name || '',
                 email: client.email || '',
                 phone: client.phone || '',
+                whatsapp_number: client.whatsapp_number || '',
                 company: client.company || '',
                 notes: client.notes || ''
             }), 0);
         } else if (isOpen) {
-            setTimeout(() => setFormData({ name: '', email: '', phone: '', location: '', notes: '' }), 0);
+            setTimeout(() => setFormData({ name: '', email: '', phone: '', whatsapp_number: '', location: '', notes: '' }), 0);
         }
     }, [isOpen, client]);
 
@@ -84,6 +86,18 @@ const ClientModal = ({ isOpen, onClose, onSave, client = null, loading = false }
                             className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
                         />
                     </div>
+                </div>
+
+                <div>
+                    <label className={`block text-sm ${theme.text.secondary} mb-1`}>WhatsApp Number <span className="text-xs opacity-60">(optional — uses Phone if blank)</span></label>
+                    <input
+                        type="tel"
+                        name="whatsapp_number"
+                        value={formData.whatsapp_number}
+                        onChange={handleChange}
+                        placeholder="+91 98765 43210"
+                        className={`w-full px-3 py-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-lg ${theme.text.primary} focus:outline-none focus:border-purple-500`}
+                    />
                 </div>
 
                 <div>
