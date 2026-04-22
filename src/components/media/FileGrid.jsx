@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Video, FileText, File, MoreVertical } from 'lucide-react';
+import { Image, Video, FileText, File, MoreVertical, Play } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import FileContextMenu from './FileContextMenu';
 
@@ -14,6 +14,8 @@ function FileCard({ item, onDownload, onRename, onMove, onShare, onDelete, onPre
     const { theme } = useTheme();
     const [menuPos, setMenuPos] = useState(null);
     const badge = typeBadge(item.content_type);
+    const isVideo = item.content_type?.startsWith('video/');
+    const hasThumbnail = item.thumbnail_r2_url && item.thumbnail_status === 'done';
 
     const openMenu = (e) => {
         e.preventDefault();
@@ -28,8 +30,8 @@ function FileCard({ item, onDownload, onRename, onMove, onShare, onDelete, onPre
             onClick={() => onPreview(item)}
         >
             {/* Thumbnail */}
-            <div className={`aspect-[4/5] flex items-center justify-center ${theme.canvas.bg} relative`}>
-                {item.thumbnail_r2_url && item.thumbnail_status === 'done' ? (
+            <div className={`aspect-[4/5] flex items-center justify-center ${theme.canvas.bg} relative overflow-hidden`}>
+                {hasThumbnail ? (
                     <img
                         src={item.thumbnail_r2_url}
                         alt={item.name}
@@ -38,12 +40,23 @@ function FileCard({ item, onDownload, onRename, onMove, onShare, onDelete, onPre
                     />
                 ) : item.content_type?.startsWith('image/') ? (
                     <Image size={32} className={theme.text.secondary} />
-                ) : item.content_type?.startsWith('video/') ? (
-                    <Video size={32} className={theme.text.secondary} />
+                ) : isVideo ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800/60 to-slate-900/80">
+                        <Video size={28} className="text-white/30" />
+                    </div>
                 ) : item.content_type === 'application/pdf' ? (
                     <FileText size={32} className={theme.text.secondary} />
                 ) : (
                     <File size={32} className={theme.text.secondary} />
+                )}
+
+                {/* Play button overlay for videos */}
+                {isVideo && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-9 h-9 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm border border-white/20 group-hover:bg-black/70 transition-colors">
+                            <Play size={14} className="text-white fill-white ml-0.5" />
+                        </div>
+                    </div>
                 )}
 
                 {/* Type badge — bottom-left, consistent dark background */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Video, FileText, File, MoreVertical } from 'lucide-react';
+import { Image, Video, FileText, File, MoreVertical, Play } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import FileContextMenu from './FileContextMenu';
 
@@ -71,11 +71,27 @@ export default function FileList({ items, onDownload, onRename, onMove, onShare,
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             {item.thumbnail_r2_url && item.thumbnail_status === 'done' ? (
-                                <img src={item.thumbnail_r2_url} alt="" className="w-7 h-7 rounded object-cover shrink-0 hidden md:block" />
+                                <div className="relative w-7 h-7 shrink-0 hidden md:block">
+                                    <img src={item.thumbnail_r2_url} alt="" className="w-7 h-7 rounded object-cover" />
+                                    {item.content_type?.startsWith('video/') && (
+                                        <div className="absolute inset-0 flex items-center justify-center rounded bg-black/40">
+                                            <Play size={8} className="text-white fill-white ml-px" />
+                                        </div>
+                                    )}
+                                </div>
+                            ) : item.content_type?.startsWith('video/') ? (
+                                <div className="w-7 h-7 rounded bg-slate-700/60 flex items-center justify-center shrink-0 hidden md:block">
+                                    <Play size={10} className="text-white/70 fill-white/70 ml-px" />
+                                </div>
                             ) : (
-                                <Icon size={15} className={`shrink-0 ${theme.text.secondary}`} />
+                                <Icon size={15} className={`shrink-0 ${theme.text.secondary} hidden md:block`} />
                             )}
-                            <span title={item.name} className={`text-xs truncate ${theme.text.primary}`}>{item.name}</span>
+                            <div className="flex items-center gap-1.5 min-w-0">
+                                {item.content_type?.startsWith('video/') && (
+                                    <Play size={11} className={`shrink-0 ${theme.text.secondary} md:hidden`} />
+                                )}
+                                <span title={item.name} className={`text-xs truncate ${theme.text.primary}`}>{item.name}</span>
+                            </div>
                         </div>
                         <span className={`text-xs self-center ${theme.text.secondary} hidden md:block`}>{typeLabel(item.content_type)}</span>
                         <span className={`text-xs self-center ${theme.text.secondary} hidden md:block`}>{formatDate(item.created_at)}</span>
