@@ -72,10 +72,14 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
     // Initialize formData when modal opens or task changes
     useEffect(() => {
         if (isOpen && task) {
-            // For deliverable tasks, title is stored as "Type (EventType)".
-            // Strip the suffix — backend reconstructs the full title on save.
+            // For deliverable tasks the select needs the deliverable type (e.g. "Photo").
+            // New tasks store it in deliverable_type; older tasks derive it by stripping " (EventType)".
+            // When an alternate name is set the title is "<name> (EventType)", so stripping would give
+            // the name — not the type. deliverable_type is always correct when present.
             let titleForForm = task.title || '';
-            if (task.category === 'deliverable' && titleForForm.includes(' (')) {
+            if (task.deliverable_type) {
+                titleForForm = task.deliverable_type;
+            } else if (task.category === 'deliverable' && titleForForm.includes(' (')) {
                 titleForForm = titleForForm.substring(0, titleForForm.lastIndexOf(' ('));
             }
             setFormData({
@@ -220,6 +224,8 @@ const TaskModal = ({ isOpen, onClose, onSave, task = null, users = [], projectId
             quantity: isDeliverable ? parseInt(formData.quantity) || 1 : undefined,
             // PRESERVE category if it was a deliverable
             category: isDeliverable ? 'deliverable' : 'general',
+            // Always send deliverable_type so backend keeps it in sync
+            deliverable_type: isDeliverable ? formData.title : undefined,
             // PRESERVE type logic
             type: (isDeliverable || selectedProjectId) ? 'project' : 'internal',
             project_id: selectedProjectId || projectId || task?.project_id,

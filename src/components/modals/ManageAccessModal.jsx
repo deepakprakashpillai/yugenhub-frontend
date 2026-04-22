@@ -74,7 +74,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden"
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
@@ -94,7 +94,7 @@ export default function ManageAccessModal({ isOpen, onClose, user, onUpdated }) 
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 overflow-y-auto flex-1">
 
                     {/* Vertical Access */}
                     <div>
