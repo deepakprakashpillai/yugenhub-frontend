@@ -1,9 +1,186 @@
-import { useState, useEffect } from 'react';
-import { Settings, RefreshCw, Save, User, Users, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Settings, RefreshCw, Save, User, Users, AlertTriangle, FileText, Clock, Play, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import * as commApi from '../../api/communications';
 import { getClients } from '../../api/clients';
 import api from '../../api/axios';
+
+// ─── Template Editor ──────────────────────────────────────────────────────────
+
+function TemplateEditor({ tpl, onSaved, theme }) {
+    const [open, setOpen] = useState(false);
+    const [body, setBody] = useState(tpl.body_template);
+    const [saving, setSaving] = useState(false);
+    const [resetting, setResetting] = useState(false);
+    const textareaRef = useRef(null);
+
+    const insertVariable = (v) => {
+        const el = textareaRef.current;
+        if (!el) return;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const newBody = body.slice(0, start) + `{{${v}}}` + body.slice(end);
+        setBody(newBody);
+        requestAnimationFrame(() => {
+            el.selectionStart = el.selectionEnd = start + v.length + 4;
+            el.focus();
+        });
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await commApi.saveTemplate(tpl.alert_type, body);
+            toast.success('Template saved');
+            onSaved(tpl.alert_type, body, true);
+            setOpen(false);
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Failed to save template');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleReset = async () => {
+        setResetting(true);
+        try {
+            await commApi.resetTemplate(tpl.alert_type);
+            toast.success('Reset to default');
+            setBody(tpl.default_template);
+            onSaved(tpl.alert_type, tpl.default_template, false);
+            setOpen(false);
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Reset failed');
+        } finally {
+            setResetting(false);
+        }
+    };
+
+    return (
+        <div className={`${theme.canvas.bg} border ${theme.canvas.border} rounded-xl overflow-hidden`}>
+            <button
+                onClick={() => setOpen(o => !o)}
+                className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.02] transition-colors`}
+            >
+                <div className="flex items-center gap-3">
+                    <span className={`text-xs font-medium ${theme.text.primary}`}>{tpl.label}</span>
+                    {tpl.is_custom && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-400 border border-violet-500/20">custom</span>
+                    )}
+                </div>
+                {open ? <ChevronUp size={13} className={theme.text.secondary} /> : <ChevronDown size={13} className={theme.text.secondary} />}
+            </button>
+
+            {open && (
+                <div className={`border-t ${theme.canvas.border} p-4 space-y-3`}>
+                    {/* Variable pills */}
+                    <div className="flex flex-wrap gap-1.5">
+                        {tpl.variables.map(v => (
+                            <button
+                                key={v}
+                                onClick={() => insertVariable(v)}
+                                className={`text-[10px] px-2 py-0.5 rounded-md border ${theme.canvas.border} ${theme.text.secondary} hover:text-accent hover:border-accent/30 transition-colors font-mono`}
+                            >
+                                {`{{${v}}}`}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Textarea */}
+                    <textarea
+                        ref={textareaRef}
+                        value={body}
+                        onChange={e => setBody(e.target.value)}
+                        rows={10}
+                        className={`w-full font-mono text-xs ${theme.canvas.card} border ${theme.canvas.border} rounded-xl px-3 py-2.5 ${theme.text.primary} resize-none focus:outline-none focus:border-violet-500/40 whitespace-pre-wrap`}
+                        style={{ whiteSpace: 'pre-wrap' }}
+                    />
+
+                    <div className="flex items-center justify-between gap-2">
+                        <button
+                            onClick={handleReset}
+                            disabled={resetting || !tpl.is_custom}
+                            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border ${theme.canvas.border} ${theme.text.secondary} hover:text-white disabled:opacity-40 transition-colors`}
+                        >
+                            <RotateCcw size={11} className={resetting ? 'animate-spin' : ''} />
+                            Reset to default
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            disabled={saving}
+                            className="flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-50 transition-colors font-medium"
+                        >
+                            {saving ? <RefreshCw size={11} className="animate-spin" /> : <Save size={11} />}
+                            {saving ? 'Saving…' : 'Save'}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Scheduler Card ───────────────────────────────────────────────────────────
+
+function SchedulerCard({ title, enabledKey, thresholdKey, thresholdLabel, jobName, config, onToggle, onThreshold, onRunNow, theme }) {
+    const enabled = config[enabledKey] ?? true;
+    const threshold = config[thresholdKey] ?? (jobName === 'task_deadline' ? 24 : 3);
+    const [running, setRunning] = useState(false);
+
+    const handleRunNow = async () => {
+        setRunning(true);
+        try {
+            const result = await commApi.runSchedulerNow(jobName);
+            toast.success(`Scan complete — ${result.queued} message${result.queued !== 1 ? 's' : ''} queued`);
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Scan failed');
+        } finally {
+            setRunning(false);
+        }
+    };
+
+    return (
+        <div className={`${theme.canvas.bg} border ${theme.canvas.border} rounded-xl p-4 space-y-3`}>
+            <div className="flex items-center justify-between">
+                <p className={`text-xs font-semibold ${theme.text.primary}`}>{title}</p>
+                <button
+                    onClick={() => onToggle(enabledKey, !enabled)}
+                    className={`relative w-9 h-5 rounded-full transition-colors ${enabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
+                >
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${enabled ? 'translate-x-4' : ''}`} />
+                </button>
+            </div>
+
+            {enabled && (
+                <div className="flex items-center gap-2">
+                    <span className={`text-[11px] ${theme.text.secondary}`}>{thresholdLabel}</span>
+                    <input
+                        type="number"
+                        min={1}
+                        max={jobName === 'task_deadline' ? 168 : 30}
+                        value={threshold}
+                        onChange={e => onThreshold(thresholdKey, parseInt(e.target.value) || 1)}
+                        className={`w-16 text-xs px-2 py-1 rounded-lg border ${theme.canvas.border} ${theme.canvas.card} ${theme.text.primary} outline-none focus:border-violet-500/40`}
+                    />
+                    <span className={`text-[11px] ${theme.text.secondary}`}>
+                        {jobName === 'task_deadline' ? 'hours' : 'days'} before
+                    </span>
+                </div>
+            )}
+
+            <button
+                onClick={handleRunNow}
+                disabled={running || !enabled}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border ${theme.canvas.border} ${theme.text.secondary} hover:text-white disabled:opacity-40 transition-colors`}
+            >
+                {running ? <RefreshCw size={11} className="animate-spin" /> : <Play size={11} />}
+                {running ? 'Running…' : 'Run now'}
+            </button>
+        </div>
+    );
+}
+
+// ─── Main component ────────────────────────────────────────────────────────────
 
 export default function SettingsTab({ theme }) {
     // eslint-disable-next-line no-unused-vars
@@ -18,15 +195,22 @@ export default function SettingsTab({ theme }) {
     const [clientOverrides, setClientOverrides] = useState({});
     const [operatorOverrides, setOperatorOverrides] = useState({});
 
+    const [templates, setTemplates] = useState([]);
+    const [schedulerConfig, setSchedulerConfig] = useState({});
+    const [savingScheduler, setSavingScheduler] = useState(false);
+    const [teamNotificationsEnabled, setTeamNotificationsEnabled] = useState(true);
+
     useEffect(() => {
         const load = async () => {
             setLoading(true);
             try {
-                const [s, types, cls, team] = await Promise.all([
+                const [s, types, cls, team, tpls, sched] = await Promise.all([
                     commApi.getSettings(),
                     commApi.getAlertTypes(),
                     getClients(),
                     api.get('/settings/team').then(r => r.data).catch(() => []),
+                    commApi.getTemplates().catch(() => []),
+                    commApi.getSchedulerConfig().catch(() => ({})),
                 ]);
                 setSettings(s);
                 setAlertTypes(types);
@@ -35,6 +219,9 @@ export default function SettingsTab({ theme }) {
                 setGlobalEnabled(s.globally_enabled_types || types.map(t => t.value));
                 setClientOverrides(s.client_overrides || {});
                 setOperatorOverrides(s.operator_overrides || {});
+                setTeamNotificationsEnabled(s.team_notifications_enabled ?? true);
+                setTemplates(tpls);
+                setSchedulerConfig(sched);
             } catch {
                 toast.error('Failed to load settings');
             } finally {
@@ -51,6 +238,7 @@ export default function SettingsTab({ theme }) {
                 globally_enabled_types: globalEnabled,
                 client_overrides: clientOverrides,
                 operator_overrides: operatorOverrides,
+                team_notifications_enabled: teamNotificationsEnabled,
             });
             toast.success('Settings saved');
         } catch (err) {
@@ -71,6 +259,37 @@ export default function SettingsTab({ theme }) {
 
     const getOpOverride = (uid) => operatorOverrides[uid] || { excluded: false, hidden_types: [] };
     const setOpOverride = (uid, val) => setOperatorOverrides(prev => ({ ...prev, [uid]: val }));
+
+    const handleTemplateSaved = (alertType, bodyTemplate, isCustom) => {
+        setTemplates(prev => prev.map(t =>
+            t.alert_type === alertType ? { ...t, body_template: bodyTemplate, is_custom: isCustom } : t
+        ));
+    };
+
+    const handleSchedulerToggle = (key, value) => {
+        setSchedulerConfig(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSchedulerThreshold = (key, value) => {
+        setSchedulerConfig(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSaveScheduler = async () => {
+        setSavingScheduler(true);
+        try {
+            await commApi.updateSchedulerConfig({
+                task_deadline_enabled: schedulerConfig.task_deadline_enabled ?? true,
+                task_deadline_hours_before: schedulerConfig.task_deadline_hours_before ?? 24,
+                invoice_scan_enabled: schedulerConfig.invoice_scan_enabled ?? true,
+                invoice_due_soon_days_before: schedulerConfig.invoice_due_soon_days_before ?? 3,
+            });
+            toast.success('Scheduler settings saved');
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Failed to save scheduler config');
+        } finally {
+            setSavingScheduler(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -113,6 +332,95 @@ export default function SettingsTab({ theme }) {
                         );
                     })}
                 </div>
+            </section>
+
+            {/* Template editor */}
+            {templates.length > 0 && (
+                <section className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-5`}>
+                    <div className="flex items-center gap-2 mb-4">
+                        <FileText size={15} className="text-emerald-400" />
+                        <h3 className={`text-sm font-semibold ${theme.text.primary}`}>Message Templates</h3>
+                    </div>
+                    <p className={`text-xs ${theme.text.secondary} mb-4`}>
+                        Customise the WhatsApp message body for each alert type. Use{' '}
+                        <span className="font-mono text-accent/80">{'{{variable}}'}</span> placeholders for dynamic values.
+                    </p>
+                    <div className="space-y-2">
+                        {templates.map(tpl => (
+                            <TemplateEditor
+                                key={tpl.alert_type}
+                                tpl={tpl}
+                                onSaved={handleTemplateSaved}
+                                theme={theme}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Automation schedule */}
+            <section className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-5`}>
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <Clock size={15} className="text-amber-400" />
+                        <h3 className={`text-sm font-semibold ${theme.text.primary}`}>Automation Schedule</h3>
+                    </div>
+                    <button
+                        onClick={handleSaveScheduler}
+                        disabled={savingScheduler}
+                        className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 disabled:opacity-50 transition-colors"
+                    >
+                        {savingScheduler ? <RefreshCw size={11} className="animate-spin" /> : <Save size={11} />}
+                        Save
+                    </button>
+                </div>
+                <p className={`text-xs ${theme.text.secondary} mb-4`}>
+                    Configure when automated reminders are sent. "Run now" triggers an immediate scan for your agency.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <SchedulerCard
+                        title="Task Deadline Reminders"
+                        enabledKey="task_deadline_enabled"
+                        thresholdKey="task_deadline_hours_before"
+                        thresholdLabel="Warn"
+                        jobName="task_deadline"
+                        config={schedulerConfig}
+                        onToggle={handleSchedulerToggle}
+                        onThreshold={handleSchedulerThreshold}
+                        theme={theme}
+                    />
+                    <SchedulerCard
+                        title="Invoice Reminders"
+                        enabledKey="invoice_scan_enabled"
+                        thresholdKey="invoice_due_soon_days_before"
+                        thresholdLabel="Warn"
+                        jobName="invoice"
+                        config={schedulerConfig}
+                        onToggle={handleSchedulerToggle}
+                        onThreshold={handleSchedulerThreshold}
+                        theme={theme}
+                    />
+                </div>
+            </section>
+
+            {/* Team notifications */}
+            <section className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl p-5`}>
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <Users size={15} className="text-teal-400" />
+                        <h3 className={`text-sm font-semibold ${theme.text.primary}`}>Team Notifications</h3>
+                    </div>
+                    <button
+                        onClick={() => setTeamNotificationsEnabled(v => !v)}
+                        className={`relative w-9 h-5 rounded-full transition-colors ${teamNotificationsEnabled ? 'bg-teal-600' : 'bg-zinc-700'}`}
+                    >
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${teamNotificationsEnabled ? 'translate-x-4' : ''}`} />
+                    </button>
+                </div>
+                <p className={`text-xs ${theme.text.secondary}`}>
+                    When enabled, associates are notified via WhatsApp when tasks are assigned to them and as deadlines approach.
+                    Uses the <span className="font-mono text-accent/80">phone_number</span> field on each associate record.
+                </p>
             </section>
 
             {/* Per-client overrides */}

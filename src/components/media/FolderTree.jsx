@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ChevronRight, Folder, FolderOpen, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { ChevronRight, Folder, FolderOpen, Lock, MoreHorizontal, Pencil, Trash2, Share2 } from 'lucide-react';
+import { useDroppable } from '@dnd-kit/core';
 import { useTheme } from '../../context/ThemeContext';
 
 function buildTree(folders) {
@@ -29,15 +30,16 @@ function buildAncestorIds(folders, currentId) {
     return ids;
 }
 
-function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds, depth = 0 }) {
+function TreeNode({ node, selectedId, onSelect, onRename, onDelete, onShare, ancestorIds, depth = 0 }) {
     const { theme } = useTheme();
     const isAncestor = ancestorIds.has(node.id);
-    // userExpanded tracks manual toggle; ancestors are always shown expanded
     const [userExpanded, setUserExpanded] = useState(depth === 0);
     const expanded = isAncestor || userExpanded;
     const [menuOpen, setMenuOpen] = useState(false);
     const hasChildren = node.children && node.children.length > 0;
     const isSelected = node.id === selectedId;
+
+    const { setNodeRef, isOver } = useDroppable({ id: node.id, data: { folder: node } });
 
     const handleMenuClick = (e) => {
         e.stopPropagation();
@@ -56,9 +58,15 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
         onDelete?.(node);
     };
 
+    const handleShare = (e) => {
+        e.stopPropagation();
+        setMenuOpen(false);
+        onShare?.(node);
+    };
+
     return (
-        <div className="relative">
-            <div className="group flex items-center">
+        <div className="relative" ref={setNodeRef}>
+            <div className={`group flex items-center rounded-lg transition-colors ${isOver ? 'bg-accent/10 ring-1 ring-accent/40' : ''}`}>
                 <button
                     onClick={() => {
                         onSelect(node.id);
@@ -82,7 +90,7 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                     )}
                     {isSelected
                         ? <FolderOpen size={13} className="shrink-0 text-accent" />
-                        : <Folder size={13} className={`shrink-0 ${isAncestor ? 'text-accent/60' : theme.text.secondary}`} />
+                        : <Folder size={13} className={`shrink-0 ${isOver ? 'text-accent' : isAncestor ? 'text-accent/60' : theme.text.secondary}`} />
                     }
                     <span className="truncate flex-1">{node.name}</span>
                     {node.is_system && (
@@ -90,8 +98,7 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                     )}
                 </button>
 
-                {/* Actions menu — shown on hover, hidden for system folders */}
-                {!node.is_system && (onRename || onDelete) && (
+                {!node.is_system && (onRename || onDelete || onShare) && (
                     <div className="relative shrink-0">
                         <button
                             onClick={handleMenuClick}
@@ -103,7 +110,16 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                         {menuOpen && (
                             <>
                                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                                <div className={`absolute right-0 top-6 z-20 min-w-[120px] rounded-xl border shadow-lg overflow-hidden ${theme.canvas.card} ${theme.canvas.border}`}>
+                                <div className={`absolute right-0 top-6 z-20 min-w-[130px] rounded-xl border shadow-lg overflow-hidden ${theme.canvas.card} ${theme.canvas.border}`}>
+                                    {onShare && (
+                                        <button
+                                            onClick={handleShare}
+                                            className={`flex items-center gap-2 w-full px-3 py-2 text-xs ${theme.canvas.hover} ${theme.text.secondary} hover:${theme.text.primary} transition-colors`}
+                                        >
+                                            <Share2 size={11} /> Share
+                                            {node.share_token && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                                        </button>
+                                    )}
                                     {onRename && (
                                         <button
                                             onClick={handleRename}
@@ -137,6 +153,7 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
                             onSelect={onSelect}
                             onRename={onRename}
                             onDelete={onDelete}
+                            onShare={onShare}
                             ancestorIds={ancestorIds}
                             depth={depth + 1}
                         />
@@ -147,7 +164,7 @@ function TreeNode({ node, selectedId, onSelect, onRename, onDelete, ancestorIds,
     );
 }
 
-export default function FolderTree({ folders, selectedId, onSelect, onRename, onDelete }) {
+export default function FolderTree({ folders, selectedId, onSelect, onRename, onDelete, onShare }) {
     const { theme } = useTheme();
     const tree = useMemo(() => buildTree(folders), [folders]);
     const ancestorIds = useMemo(() => buildAncestorIds(folders, selectedId), [folders, selectedId]);
@@ -170,6 +187,7 @@ export default function FolderTree({ folders, selectedId, onSelect, onRename, on
                     onSelect={onSelect}
                     onRename={onRename}
                     onDelete={onDelete}
+                    onShare={onShare}
                     ancestorIds={ancestorIds}
                 />
             ))}
