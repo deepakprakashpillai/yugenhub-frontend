@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Download, Pencil, FolderInput, Share2, Trash2 } from 'lucide-react';
+import { Download, Pencil, FolderInput, Share2, Trash2, Copy } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
-export default function FileContextMenu({ x, y, item, onClose, onDownload, onRename, onMove, onShare, onDelete }) {
+export default function FileContextMenu({ x, y, item, onClose, onDownload, onRename, onMove, onShare, onDuplicate, onDelete }) {
     const { theme } = useTheme();
     const menuRef = useRef(null);
 
@@ -21,12 +21,13 @@ export default function FileContextMenu({ x, y, item, onClose, onDownload, onRen
 
     // Adjust position so menu doesn't overflow viewport
     const adjustedX = Math.min(x, window.innerWidth - 180);
-    const adjustedY = Math.min(y, window.innerHeight - 220);
+    const adjustedY = Math.min(y, window.innerHeight - 260);
 
     const actions = [
         { label: 'Download', icon: Download, action: onDownload },
         { label: 'Rename', icon: Pencil, action: onRename },
         { label: 'Move to', icon: FolderInput, action: onMove },
+        { label: 'Duplicate', icon: Copy, action: onDuplicate },
         { label: 'Share', icon: Share2, action: onShare },
         { divider: true },
         { label: 'Delete', icon: Trash2, action: onDelete, danger: true },

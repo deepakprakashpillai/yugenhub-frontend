@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { MessageCircle, Send, Trash2, Edit3, X, RefreshCw, Plus, RotateCcw } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Edit3, X, RefreshCw, Plus, RotateCcw, Eye, ExternalLink, Zap, Check, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import * as commApi from '../../api/communications';
 import { getClients } from '../../api/clients';
+import api from '../../api/axios';
 
 const STATUS_COLORS = {
     pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -111,13 +113,19 @@ function BodyPopover({ body, theme }) {
     );
 }
 
-// eslint-disable-next-line no-unused-vars
-function ComposeModal({ clients, alertTypes, onClose, onCreated, theme }) {
+function ComposeModal({ clients, associates, onClose, onCreated, theme }) {
+    const [recipientType, setRecipientType] = useState('client');
     const [recipientId, setRecipientId] = useState('');
     const [body, setBody] = useState('');
     const [saving, setSaving] = useState(false);
 
-    const selectedClient = clients.find(c => c._id === recipientId);
+    const list = recipientType === 'client'
+        ? clients
+        : associates.filter(a => a.phone_number?.trim());
+    const selected = list.find(r => (r._id || r.id) === recipientId);
+    const selectedPhone = recipientType === 'client'
+        ? (selected?.whatsapp_number || selected?.phone)
+        : selected?.phone_number;
 
     const handleCreate = async () => {
         if (!recipientId || !body.trim()) return;
@@ -125,6 +133,7 @@ function ComposeModal({ clients, alertTypes, onClose, onCreated, theme }) {
         try {
             const msg = await commApi.createMessage({
                 recipient_id: recipientId,
+                recipient_type: recipientType,
                 message_body: body,
             });
             toast.success('Message queued');
@@ -153,6 +162,19 @@ function ComposeModal({ clients, alertTypes, onClose, onCreated, theme }) {
                     </button>
                 </div>
                 <div className="p-6 space-y-4">
+                    {/* Recipient type toggle */}
+                    <div className={`flex rounded-xl border ${theme.canvas.border} overflow-hidden`}>
+                        {['client', 'associate'].map(type => (
+                            <button
+                                key={type}
+                                onClick={() => { setRecipientType(type); setRecipientId(''); }}
+                                className={`flex-1 py-1.5 text-xs font-medium transition-colors capitalize ${recipientType === type ? 'bg-violet-600 text-white' : `${theme.text.secondary} hover:text-white`}`}
+                            >
+                                {type === 'client' ? 'Client' : 'Team Member'}
+                            </button>
+                        ))}
+                    </div>
+
                     <div>
                         <label className={`text-xs font-medium ${theme.text.secondary} mb-1.5 block`}>Recipient</label>
                         <select
@@ -160,16 +182,19 @@ function ComposeModal({ clients, alertTypes, onClose, onCreated, theme }) {
                             onChange={e => setRecipientId(e.target.value)}
                             className={`w-full text-sm ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-4 py-2.5 ${theme.text.primary} focus:outline-none focus:border-violet-500/50`}
                         >
-                            <option value="">Select client…</option>
-                            {clients.map(c => (
-                                <option key={c._id} value={c._id}>{c.name} — {c.whatsapp_number || c.phone}</option>
+                            <option value="">Select {recipientType === 'client' ? 'client' : 'team member'}…</option>
+                            {list.map(r => (
+                                <option key={r._id || r.id} value={r._id || r.id}>
+                                    {r.name} — {recipientType === 'client' ? (r.whatsapp_number || r.phone) : r.phone_number}
+                                </option>
                             ))}
                         </select>
+                        {recipientType === 'associate' && list.length === 0 && (
+                            <p className={`text-xs ${theme.text.secondary} mt-1.5`}>No team members with a phone number on file.</p>
+                        )}
                     </div>
-                    {selectedClient && (
-                        <p className={`text-xs ${theme.text.secondary}`}>
-                            WhatsApp: {selectedClient.whatsapp_number || selectedClient.phone}
-                        </p>
+                    {selected && selectedPhone && (
+                        <p className={`text-xs ${theme.text.secondary}`}>WhatsApp: {selectedPhone}</p>
                     )}
                     <div>
                         <label className={`text-xs font-medium ${theme.text.secondary} mb-1.5 block`}>Message</label>
@@ -200,6 +225,264 @@ function ComposeModal({ clients, alertTypes, onClose, onCreated, theme }) {
     );
 }
 
+function PreviewModal({ message, onClose, onSend, sending, theme }) {
+    if (!message) return null;
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
+            <div
+                className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl w-full max-w-sm shadow-2xl`}
+                onClick={e => e.stopPropagation()}
+            >
+                <div className={`px-5 py-4 border-b ${theme.canvas.border} flex items-center justify-between`}>
+                    <div>
+                        <p className={`text-sm font-semibold ${theme.text.primary}`}>{message.recipient_name}</p>
+                        <p className={`text-[11px] ${theme.text.secondary}`}>{message.recipient_phone}</p>
+                    </div>
+                    <button onClick={onClose} className={`${theme.text.secondary} hover:text-white transition-colors`}>
+                        <X size={16} />
+                    </button>
+                </div>
+
+                {/* WhatsApp-style chat bubble */}
+                <div className="p-5 bg-[#0a0a0a]/60">
+                    <div className="flex justify-end">
+                        <div className="max-w-[85%] bg-[#005c4b] rounded-2xl rounded-tr-sm px-4 py-3 shadow-md">
+                            <p className="text-[13px] text-white/95 leading-relaxed whitespace-pre-wrap font-sans">
+                                {message.message_body}
+                            </p>
+                            <p className="text-[10px] text-white/50 text-right mt-1.5">{timeStr} ✓</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={`px-5 py-4 border-t ${theme.canvas.border} flex justify-end gap-3`}>
+                    <button onClick={onClose} className={`px-4 py-2 rounded-xl text-sm ${theme.text.secondary} hover:text-white transition-colors`}>
+                        Close
+                    </button>
+                    {message.status === 'pending' && onSend && (
+                        <button
+                            onClick={() => { onSend(message); onClose(); }}
+                            disabled={sending}
+                            className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 transition-colors"
+                        >
+                            <Send size={13} />
+                            {sending ? 'Sending…' : 'Send on WhatsApp'}
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SourceChip({ source, theme }) {
+    const navigate = useNavigate();
+    if (!source?.kind || source.kind === 'manual' || !source.id) return null;
+
+    const MAP = {
+        project: { label: 'Project', path: `/projects/${source.id}` },
+        invoice: { label: 'Invoice', path: '/finance' },
+        task: { label: 'Task', path: null },
+    };
+    const entry = MAP[source.kind];
+    if (!entry) return null;
+
+    const cls = `text-[9px] font-semibold px-1.5 py-0.5 rounded border flex items-center gap-0.5 whitespace-nowrap
+        bg-zinc-800/60 border-zinc-700 ${theme.text.secondary}`;
+
+    if (entry.path) {
+        return (
+            <button onClick={() => navigate(entry.path)} className={`${cls} hover:text-white hover:border-zinc-500 transition-colors`}>
+                {entry.label} <ExternalLink size={8} />
+            </button>
+        );
+    }
+    return <span className={cls}>{entry.label}</span>;
+}
+
+const BLAST_TYPES = [
+    { value: 'task_deadline', label: 'Task Deadline Reminders' },
+    { value: 'invoice_due_soon', label: 'Invoice Due Soon' },
+    { value: 'invoice_overdue', label: 'Invoice Overdue' },
+    { value: 'approval_requested', label: 'Approval Requested' },
+];
+
+function BlastModal({ onClose, onQueued, theme }) {
+    const [step, setStep] = useState(1); // 1 = select type, 2 = preview, 3 = done
+    const [alertType, setAlertType] = useState('');
+    const [candidates, setCandidates] = useState([]);
+    const [selected, setSelected] = useState(new Set());
+    const [loading, setLoading] = useState(false);
+    const [sending, setSending] = useState(false);
+    const [result, setResult] = useState(null);
+
+    const fetchPreview = async () => {
+        if (!alertType) return;
+        setLoading(true);
+        try {
+            const data = await commApi.blastPreview(alertType);
+            setCandidates(data.items || []);
+            setSelected(new Set((data.items || []).map(i => i.recipient_id + '|' + i.source.id)));
+            setStep(2);
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Preview failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleItem = (item) => {
+        const key = item.recipient_id + '|' + item.source.id;
+        setSelected(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
+            return next;
+        });
+    };
+
+    const handleSend = async () => {
+        const selectedItems = candidates.filter(i => selected.has(i.recipient_id + '|' + i.source.id));
+        if (!selectedItems.length) { toast.error('No recipients selected'); return; }
+        setSending(true);
+        try {
+            const data = await commApi.blastSend(alertType, selectedItems);
+            setResult(data);
+            setStep(3);
+            onQueued();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Blast failed');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
+            <div
+                className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl w-full max-w-lg shadow-2xl`}
+                onClick={e => e.stopPropagation()}
+            >
+                <div className={`px-6 py-4 border-b ${theme.canvas.border} flex items-center justify-between`}>
+                    <div className="flex items-center gap-2">
+                        <Zap size={15} className="text-amber-400" />
+                        <span className={`font-semibold text-sm ${theme.text.primary}`}>Blast Message</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20`}>
+                            Step {step}/3
+                        </span>
+                    </div>
+                    <button onClick={onClose} className={`${theme.text.secondary} hover:text-white transition-colors`}>
+                        <X size={16} />
+                    </button>
+                </div>
+
+                {step === 1 && (
+                    <div className="p-6 space-y-4">
+                        <p className={`text-xs ${theme.text.secondary}`}>Select an alert type to preview which recipients will be targeted.</p>
+                        <div className="space-y-2">
+                            {BLAST_TYPES.map(bt => (
+                                <button
+                                    key={bt.value}
+                                    onClick={() => setAlertType(bt.value)}
+                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-left transition-all text-sm ${alertType === bt.value
+                                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                                        : `${theme.canvas.bg} border-zinc-700 ${theme.text.secondary} hover:border-zinc-600`}`}
+                                >
+                                    {bt.label}
+                                    {alertType === bt.value && <Check size={14} className="text-amber-400" />}
+                                </button>
+                            ))}
+                        </div>
+                        <div className={`flex justify-end pt-2 border-t ${theme.canvas.border}`}>
+                            <button
+                                onClick={fetchPreview}
+                                disabled={!alertType || loading}
+                                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-amber-600 hover:bg-amber-500 text-white disabled:opacity-50 transition-colors"
+                            >
+                                {loading ? <RefreshCw size={13} className="animate-spin" /> : null}
+                                {loading ? 'Loading…' : 'Preview recipients →'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {step === 2 && (
+                    <div className="p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <p className={`text-xs ${theme.text.secondary}`}>
+                                {candidates.length} recipient{candidates.length !== 1 ? 's' : ''} found — deselect any to exclude.
+                            </p>
+                            <button onClick={() => setSelected(new Set(candidates.map(i => i.recipient_id + '|' + i.source.id)))} className={`text-[10px] ${theme.text.secondary} hover:text-white`}>Select all</button>
+                        </div>
+                        {candidates.length === 0 ? (
+                            <div className={`text-center py-8 ${theme.text.secondary} text-sm`}>
+                                <Users size={28} className="mx-auto mb-2 opacity-30" />
+                                No recipients match right now.
+                            </div>
+                        ) : (
+                            <div className="max-h-64 overflow-y-auto space-y-1.5">
+                                {candidates.map(item => {
+                                    const key = item.recipient_id + '|' + item.source.id;
+                                    const on = selected.has(key);
+                                    return (
+                                        <button
+                                            key={key}
+                                            onClick={() => toggleItem(item)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all ${on
+                                                ? `${theme.canvas.bg} border-emerald-500/30 bg-emerald-500/5`
+                                                : `${theme.canvas.bg} border-zinc-800 opacity-50`}`}
+                                        >
+                                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${on ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600'}`}>
+                                                {on && <Check size={9} className="text-white" strokeWidth={3} />}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-xs font-medium ${theme.text.primary} truncate`}>{item.recipient_name}</p>
+                                                <p className={`text-[10px] ${theme.text.secondary} truncate`}>{item.recipient_phone}</p>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        <div className={`flex justify-between items-center pt-2 border-t ${theme.canvas.border}`}>
+                            <button onClick={() => setStep(1)} className={`text-xs ${theme.text.secondary} hover:text-white transition-colors`}>← Back</button>
+                            <button
+                                onClick={handleSend}
+                                disabled={sending || selected.size === 0}
+                                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 transition-colors"
+                            >
+                                {sending ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+                                {sending ? 'Queuing…' : `Queue ${selected.size} message${selected.size !== 1 ? 's' : ''}`}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {step === 3 && result && (
+                    <div className="p-6 text-center space-y-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto">
+                            <Check size={22} className="text-emerald-400" />
+                        </div>
+                        <div>
+                            <p className={`text-sm font-semibold ${theme.text.primary}`}>Blast queued!</p>
+                            <p className={`text-xs ${theme.text.secondary} mt-1`}>
+                                {result.queued} message{result.queued !== 1 ? 's' : ''} queued
+                                {result.skipped > 0 && `, ${result.skipped} skipped (already sent recently)`}
+                            </p>
+                        </div>
+                        <button onClick={onClose} className={`w-full py-2 rounded-xl text-sm ${theme.canvas.card} border ${theme.canvas.border} ${theme.text.secondary} hover:text-white transition-colors`}>
+                            Close
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export default function QueueTab({ theme }) {
     const [messages, setMessages] = useState([]);
     const [total, setTotal] = useState(0);
@@ -207,19 +490,25 @@ export default function QueueTab({ theme }) {
     const [loading, setLoading] = useState(false);
     const [alertTypes, setAlertTypes] = useState([]);
     const [clients, setClients] = useState([]);
+    const [associates, setAssociates] = useState([]);
 
     const [filterStatus, setFilterStatus] = useState('');
     const [filterType, setFilterType] = useState('');
     const [filterRecipient, setFilterRecipient] = useState('');
+    const [filterChannel, setFilterChannel] = useState('');
     const [filterDateFrom, setFilterDateFrom] = useState('');
     const [filterDateTo, setFilterDateTo] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [order, setOrder] = useState('desc');
 
     const [editingMsg, setEditingMsg] = useState(null);
+    const [previewMsg, setPreviewMsg] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [composing, setComposing] = useState(false);
+    const [blasting, setBlasting] = useState(false);
     const [sendingId, setSendingId] = useState(null);
+    const [confirmResendId, setConfirmResendId] = useState(null);
+    const confirmResendTimer = useRef(null);
 
     const LIMIT = 50;
 
@@ -230,6 +519,7 @@ export default function QueueTab({ theme }) {
                 status: filterStatus || undefined,
                 alert_type: filterType || undefined,
                 recipient_id: filterRecipient || undefined,
+                send_channel: filterChannel || undefined,
                 date_from: filterDateFrom || undefined,
                 date_to: filterDateTo || undefined,
                 sort_by: sortBy,
@@ -244,7 +534,7 @@ export default function QueueTab({ theme }) {
         } finally {
             setLoading(false);
         }
-    }, [filterStatus, filterType, filterRecipient, filterDateFrom, filterDateTo, sortBy, order, page]);
+    }, [filterStatus, filterType, filterRecipient, filterChannel, filterDateFrom, filterDateTo, sortBy, order, page]);
 
     useEffect(() => {
         fetchMessages();
@@ -252,7 +542,8 @@ export default function QueueTab({ theme }) {
 
     useEffect(() => {
         commApi.getAlertTypes().then(setAlertTypes).catch(() => {});
-        getClients().then(res => setClients(res.data || [])).catch(() => {});
+        getClients().then(res => setClients(Array.isArray(res) ? res : (res.data || []))).catch(() => {});
+        api.get('/associates').then(res => setAssociates(Array.isArray(res.data) ? res.data : [])).catch(() => {});
     }, []);
 
     const handleSend = async (msg) => {
@@ -274,6 +565,8 @@ export default function QueueTab({ theme }) {
     };
 
     const handleResend = async (msg) => {
+        setConfirmResendId(null);
+        clearTimeout(confirmResendTimer.current);
         setSendingId(msg.id);
         try {
             const result = await commApi.resendMessage(msg.id);
@@ -288,6 +581,16 @@ export default function QueueTab({ theme }) {
             toast.error(err.response?.data?.detail || 'Resend failed');
         } finally {
             setSendingId(null);
+        }
+    };
+
+    const requestResend = (msg) => {
+        if (confirmResendId === msg.id) {
+            handleResend(msg);
+        } else {
+            clearTimeout(confirmResendTimer.current);
+            setConfirmResendId(msg.id);
+            confirmResendTimer.current = setTimeout(() => setConfirmResendId(null), 3000);
         }
     };
 
@@ -320,12 +623,13 @@ export default function QueueTab({ theme }) {
         setFilterStatus('');
         setFilterType('');
         setFilterRecipient('');
+        setFilterChannel('');
         setFilterDateFrom('');
         setFilterDateTo('');
         setPage(1);
     };
 
-    const hasFilters = filterStatus || filterType || filterRecipient || filterDateFrom || filterDateTo;
+    const hasFilters = filterStatus || filterType || filterRecipient || filterChannel || filterDateFrom || filterDateTo;
     const totalPages = Math.ceil(total / LIMIT);
 
     return (
@@ -362,6 +666,17 @@ export default function QueueTab({ theme }) {
                     <option value="pending">Pending</option>
                     <option value="sent">Sent</option>
                     <option value="failed">Failed</option>
+                </select>
+
+                {/* Channel filter */}
+                <select
+                    value={filterChannel}
+                    onChange={e => { setFilterChannel(e.target.value); setPage(1); }}
+                    className={`text-xs ${theme.canvas.bg} border ${theme.canvas.border} rounded-xl px-3 py-2 ${theme.text.secondary} focus:outline-none focus:border-violet-500/50`}
+                >
+                    <option value="">All channels</option>
+                    <option value="manual">Manual</option>
+                    <option value="automation">Automated</option>
                 </select>
 
                 {/* Date from */}
@@ -409,6 +724,12 @@ export default function QueueTab({ theme }) {
                         <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                     </button>
                     <button
+                        onClick={() => setBlasting(true)}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium bg-amber-600/80 hover:bg-amber-600 text-white transition-colors"
+                    >
+                        <Zap size={13} /> Blast
+                    </button>
+                    <button
                         onClick={() => setComposing(true)}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors"
                     >
@@ -445,19 +766,30 @@ export default function QueueTab({ theme }) {
                                 {messages.map(msg => (
                                     <tr key={msg.id} className={`hover:${theme.canvas.hover} transition-colors`}>
                                         <td className="px-4 py-3">
-                                            <p className={`text-xs font-medium ${theme.text.primary} truncate max-w-[120px]`}>{msg.recipient_name}</p>
+                                            <div className="flex items-center gap-1.5 mb-0.5">
+                                                <p className={`text-xs font-medium ${theme.text.primary} truncate max-w-[100px]`}>{msg.recipient_name}</p>
+                                                {msg.recipient_type === 'associate' && (
+                                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20 whitespace-nowrap shrink-0">Team</span>
+                                                )}
+                                            </div>
                                             <p className={`text-[10px] ${theme.text.secondary} truncate max-w-[120px]`}>{msg.recipient_phone}</p>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STATUS_COLORS.pending} whitespace-nowrap`}>
-                                                {alertTypes.find(t => t.value === msg.alert_type)?.label || msg.alert_type}
-                                            </span>
+                                            <div className="flex flex-col gap-1">
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${STATUS_COLORS.pending} whitespace-nowrap self-start`}>
+                                                    {alertTypes.find(t => t.value === msg.alert_type)?.label || msg.alert_type}
+                                                </span>
+                                                <SourceChip source={msg.source} theme={theme} />
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-1.5">
                                                 <BodyPopover body={msg.message_body} theme={theme} />
                                                 {msg.edited && (
                                                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 whitespace-nowrap">edited</span>
+                                                )}
+                                                {msg.send_channel === 'automation' && (
+                                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-400 border border-zinc-600/30 whitespace-nowrap">auto</span>
                                                 )}
                                             </div>
                                         </td>
@@ -478,6 +810,15 @@ export default function QueueTab({ theme }) {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-1.5">
+                                                {/* Preview */}
+                                                <button
+                                                    onClick={() => setPreviewMsg(msg)}
+                                                    title="Preview message"
+                                                    className={`p-1.5 rounded-lg ${theme.text.secondary} hover:text-white hover:bg-white/5 transition-colors`}
+                                                >
+                                                    <Eye size={13} />
+                                                </button>
+
                                                 {msg.status === 'pending' && (
                                                     <>
                                                         <button
@@ -498,14 +839,34 @@ export default function QueueTab({ theme }) {
                                                     </>
                                                 )}
                                                 {(msg.status === 'sent' || msg.status === 'failed') && (
-                                                    <button
-                                                        onClick={() => handleResend(msg)}
-                                                        disabled={!!sendingId}
-                                                        title="Resend on WhatsApp"
-                                                        className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${msg.status === 'failed' ? 'text-red-400 hover:bg-red-500/10' : `${theme.text.secondary} hover:text-emerald-400 hover:bg-emerald-500/10`}`}
-                                                    >
-                                                        <RotateCcw size={13} className={sendingId === msg.id ? 'animate-spin' : ''} />
-                                                    </button>
+                                                    confirmResendId === msg.id ? (
+                                                        <div className="flex items-center gap-1">
+                                                            <span className={`text-[10px] ${theme.text.secondary}`}>Sure?</span>
+                                                            <button
+                                                                onClick={() => handleResend(msg)}
+                                                                disabled={!!sendingId}
+                                                                className="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-40"
+                                                                title="Confirm resend"
+                                                            >
+                                                                <RotateCcw size={13} className={sendingId === msg.id ? 'animate-spin' : ''} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setConfirmResendId(null)}
+                                                                className={`p-1.5 rounded-lg ${theme.text.secondary} hover:text-white transition-colors`}
+                                                            >
+                                                                <X size={11} />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => requestResend(msg)}
+                                                            disabled={!!sendingId}
+                                                            title="Resend on WhatsApp"
+                                                            className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${msg.status === 'failed' ? 'text-red-400 hover:bg-red-500/10' : `${theme.text.secondary} hover:text-emerald-400 hover:bg-emerald-500/10`}`}
+                                                        >
+                                                            <RotateCcw size={13} />
+                                                        </button>
+                                                    )
                                                 )}
                                                 <button
                                                     onClick={() => handleDelete(msg.id)}
@@ -555,12 +916,28 @@ export default function QueueTab({ theme }) {
                     theme={theme}
                 />
             )}
+            {previewMsg && (
+                <PreviewModal
+                    message={previewMsg}
+                    onClose={() => setPreviewMsg(null)}
+                    onSend={handleSend}
+                    sending={sendingId === previewMsg.id}
+                    theme={theme}
+                />
+            )}
             {composing && (
                 <ComposeModal
                     clients={clients}
-                    alertTypes={alertTypes}
+                    associates={associates}
                     onClose={() => setComposing(false)}
                     onCreated={handleCreated}
+                    theme={theme}
+                />
+            )}
+            {blasting && (
+                <BlastModal
+                    onClose={() => setBlasting(false)}
+                    onQueued={fetchMessages}
                     theme={theme}
                 />
             )}

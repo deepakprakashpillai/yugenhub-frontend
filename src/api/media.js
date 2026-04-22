@@ -78,6 +78,49 @@ export const searchFiles = async (q) => {
     return response.data;
 };
 
+export const retryProcessing = async (itemId) => {
+    const response = await api.post(`/media/items/${itemId}/retry-processing`);
+    return response.data;
+};
+
+export const duplicateFile = async (itemId) => {
+    const response = await api.post(`/media/items/${itemId}/duplicate`);
+    return response.data;
+};
+
+export const bulkDelete = async (ids) => {
+    await api.delete('/media/items/bulk', { data: { ids } });
+};
+
+export const bulkMove = async (ids, folderId) => {
+    const response = await api.patch('/media/items/bulk-move', { ids, folder_id: folderId });
+    return response.data;
+};
+
+export const shareFolderCreate = async (folderId, options = {}) => {
+    const response = await api.post(`/media/folders/${folderId}/share`, options);
+    return response.data;
+};
+
+export const shareFolderRevoke = async (folderId) => {
+    await api.delete(`/media/folders/${folderId}/share`);
+};
+
+export const getFolderShare = async (token) => {
+    const response = await api.get(`/media/folder-share/${token}`);
+    return response.data;
+};
+
+export const getFolderShareItems = async (token, page = 1, limit = 50) => {
+    const response = await api.get(`/media/folder-share/${token}/items`, { params: { page, limit } });
+    return response.data;
+};
+
+export const getFolderShareItemDownload = async (token, itemId) => {
+    const response = await api.get(`/media/folder-share/${token}/items/${itemId}/download`);
+    return response.data;
+};
+
 export const getUsageStats = async () => {
     const response = await api.get('/media/usage');
     return response.data;

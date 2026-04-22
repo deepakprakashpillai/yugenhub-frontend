@@ -1,5 +1,10 @@
 import api from './axios';
 
+export const getAssociates = async () => {
+    const response = await api.get('/associates');
+    return response.data;
+};
+
 export const getAlertTypes = async () => {
     const response = await api.get('/communications/alert-types');
     return response.data;
@@ -10,6 +15,7 @@ export const listMessages = async (filters = {}) => {
     if (filters.alert_type) params.alert_type = filters.alert_type;
     if (filters.recipient_id) params.recipient_id = filters.recipient_id;
     if (filters.status) params.status = filters.status;
+    if (filters.send_channel) params.send_channel = filters.send_channel;
     if (filters.date_from) params.date_from = filters.date_from;
     if (filters.date_to) params.date_to = filters.date_to;
     if (filters.sort_by) params.sort_by = filters.sort_by;
@@ -51,5 +57,44 @@ export const getSettings = async () => {
 
 export const updateSettings = async (payload) => {
     const response = await api.put('/communications/settings', payload);
+    return response.data;
+};
+
+export const getTemplates = async () => {
+    const response = await api.get('/communications/templates');
+    return response.data;
+};
+
+export const saveTemplate = async (alertType, bodyTemplate) => {
+    const response = await api.put(`/communications/templates/${alertType}`, { body_template: bodyTemplate });
+    return response.data;
+};
+
+export const resetTemplate = async (alertType) => {
+    await api.delete(`/communications/templates/${alertType}`);
+};
+
+export const getSchedulerConfig = async () => {
+    const response = await api.get('/communications/scheduler-config');
+    return response.data;
+};
+
+export const updateSchedulerConfig = async (payload) => {
+    const response = await api.patch('/communications/scheduler-config', payload);
+    return response.data;
+};
+
+export const runSchedulerNow = async (jobName) => {
+    const response = await api.post(`/communications/scheduler/run-now/${jobName}`);
+    return response.data;
+};
+
+export const blastPreview = async (alertType) => {
+    const response = await api.post('/communications/blast/preview', { alert_type: alertType });
+    return response.data;
+};
+
+export const blastSend = async (alertType, items) => {
+    const response = await api.post('/communications/blast/send', { alert_type: alertType, items });
     return response.data;
 };

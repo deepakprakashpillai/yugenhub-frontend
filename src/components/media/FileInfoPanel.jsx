@@ -1,5 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import SlideOver from '../modals/SlideOver';
-import { Image, Video, FileText, File, Download } from 'lucide-react';
+import { Image, Video, FileText, File, Download, RefreshCw, ExternalLink } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 function formatBytes(bytes) {
@@ -24,6 +25,14 @@ const SOURCE_BADGES = {
     direct: { label: 'Direct Upload', color: 'bg-green-500/20 text-green-400' },
 };
 
+const PROCESSING_STATUS_LABELS = {
+    pending: { label: 'Queued', color: 'text-amber-400' },
+    processing: { label: 'Processing…', color: 'text-blue-400' },
+    done: { label: 'Done', color: 'text-emerald-400' },
+    failed: { label: 'Failed', color: 'text-red-400' },
+    'n/a': { label: '—', color: '' },
+};
+
 function FileThumbnail({ item }) {
     const { theme } = useTheme();
     if (item.thumbnail_r2_url && item.thumbnail_status === 'done') {
@@ -42,11 +51,19 @@ function FileThumbnail({ item }) {
     return <File size={48} className={cls} />;
 }
 
-export default function FileInfoPanel({ isOpen, onClose, item, onDownload }) {
+export default function FileInfoPanel({ isOpen, onClose, item, onDownload, onRetry }) {
     const { theme } = useTheme();
+    const navigate = useNavigate();
     if (!item) return null;
 
     const source = SOURCE_BADGES[item.source] || SOURCE_BADGES.direct;
+    const needsProcessing = item.content_type?.startsWith('image/') || item.content_type?.startsWith('video/');
+    const thumbFailed = needsProcessing && item.thumbnail_status === 'failed';
+    const previewFailed = item.content_type?.startsWith('image/') && item.preview_status === 'failed';
+    const showRetry = thumbFailed || previewFailed;
+
+    const thumbInfo = PROCESSING_STATUS_LABELS[item.thumbnail_status] || PROCESSING_STATUS_LABELS['n/a'];
+    const previewInfo = PROCESSING_STATUS_LABELS[item.preview_status] || PROCESSING_STATUS_LABELS['n/a'];
 
     const meta = [
         { label: 'Name', value: item.name },
@@ -74,12 +91,50 @@ export default function FileInfoPanel({ isOpen, onClose, item, onDownload }) {
                     ))}
                 </div>
 
-                {/* Source badge */}
+                {/* Processing status */}
+                {needsProcessing && (
+                    <div className={`rounded-xl border ${theme.canvas.border} divide-y ${theme.canvas.border}`}>
+                        <div className="flex items-center justify-between px-4 py-2.5">
+                            <span className={`text-xs font-semibold ${theme.text.secondary}`}>Thumbnail</span>
+                            <span className={`text-xs font-medium ${thumbInfo.color}`}>{thumbInfo.label}</span>
+                        </div>
+                        {item.content_type?.startsWith('image/') && (
+                            <div className="flex items-center justify-between px-4 py-2.5">
+                                <span className={`text-xs font-semibold ${theme.text.secondary}`}>Preview</span>
+                                <span className={`text-xs font-medium ${previewInfo.color}`}>{previewInfo.label}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Retry processing */}
+                {showRetry && (
+                    <button
+                        onClick={() => onRetry?.(item)}
+                        className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl border ${theme.canvas.border} text-xs font-medium text-red-400 hover:text-red-300 hover:border-red-500/40 transition-colors`}
+                    >
+                        <RefreshCw size={13} />
+                        Retry Processing
+                    </button>
+                )}
+
+                {/* Source badge + project link */}
                 <div className="flex items-center justify-between">
                     <span className={`text-xs font-semibold ${theme.text.secondary}`}>Source</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${source.color}`}>
-                        {source.label}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        {item.source === 'deliverable' && item.source_project_id && (
+                            <button
+                                onClick={() => { onClose(); navigate(`/projects/${item.source_project_id}`); }}
+                                className="flex items-center gap-1 text-[10px] text-blue-400 hover:text-blue-300 transition-colors"
+                            >
+                                <ExternalLink size={10} />
+                                View project
+                            </button>
+                        )}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${source.color}`}>
+                            {source.label}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Share status */}
