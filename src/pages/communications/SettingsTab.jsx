@@ -124,7 +124,7 @@ function TemplateEditor({ tpl, onSaved, theme }) {
 
 function SchedulerCard({ title, enabledKey, thresholdKey, thresholdLabel, jobName, config, onToggle, onThreshold, onRunNow, theme }) {
     const enabled = config[enabledKey] ?? true;
-    const threshold = config[thresholdKey] ?? (jobName === 'task_deadline' ? 24 : 3);
+    const threshold = config[thresholdKey] ?? (jobName === 'event_reminder' ? 24 : 3);
     const [running, setRunning] = useState(false);
 
     const handleRunNow = async () => {
@@ -157,13 +157,13 @@ function SchedulerCard({ title, enabledKey, thresholdKey, thresholdLabel, jobNam
                     <input
                         type="number"
                         min={1}
-                        max={jobName === 'task_deadline' ? 168 : 30}
+                        max={jobName === 'event_reminder' ? 168 : 30}
                         value={threshold}
                         onChange={e => onThreshold(thresholdKey, parseInt(e.target.value) || 1)}
                         className={`w-16 text-xs px-2 py-1 rounded-lg border ${theme.canvas.border} ${theme.canvas.card} ${theme.text.primary} outline-none focus:border-violet-500/40`}
                     />
                     <span className={`text-[11px] ${theme.text.secondary}`}>
-                        {jobName === 'task_deadline' ? 'hours' : 'days'} before
+                        {jobName === 'event_reminder' ? 'hours' : 'days'} before
                     </span>
                 </div>
             )}
@@ -278,10 +278,10 @@ export default function SettingsTab({ theme }) {
         setSavingScheduler(true);
         try {
             await commApi.updateSchedulerConfig({
-                task_deadline_enabled: schedulerConfig.task_deadline_enabled ?? true,
-                task_deadline_hours_before: schedulerConfig.task_deadline_hours_before ?? 24,
-                invoice_scan_enabled: schedulerConfig.invoice_scan_enabled ?? true,
-                invoice_due_soon_days_before: schedulerConfig.invoice_due_soon_days_before ?? 3,
+                event_scan_enabled: schedulerConfig.event_scan_enabled ?? true,
+                event_reminder_hours_before: schedulerConfig.event_reminder_hours_before ?? 24,
+                deliverable_scan_enabled: schedulerConfig.deliverable_scan_enabled ?? true,
+                deliverable_reminder_days_before: schedulerConfig.deliverable_reminder_days_before ?? 3,
             });
             toast.success('Scheduler settings saved');
         } catch (err) {
@@ -379,22 +379,22 @@ export default function SettingsTab({ theme }) {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <SchedulerCard
-                        title="Task Deadline Reminders"
-                        enabledKey="task_deadline_enabled"
-                        thresholdKey="task_deadline_hours_before"
+                        title="Event Reminders (Team)"
+                        enabledKey="event_scan_enabled"
+                        thresholdKey="event_reminder_hours_before"
                         thresholdLabel="Warn"
-                        jobName="task_deadline"
+                        jobName="event_reminder"
                         config={schedulerConfig}
                         onToggle={handleSchedulerToggle}
                         onThreshold={handleSchedulerThreshold}
                         theme={theme}
                     />
                     <SchedulerCard
-                        title="Invoice Reminders"
-                        enabledKey="invoice_scan_enabled"
-                        thresholdKey="invoice_due_soon_days_before"
+                        title="Deliverable Reminders (Team)"
+                        enabledKey="deliverable_scan_enabled"
+                        thresholdKey="deliverable_reminder_days_before"
                         thresholdLabel="Warn"
-                        jobName="invoice"
+                        jobName="deliverable"
                         config={schedulerConfig}
                         onToggle={handleSchedulerToggle}
                         onThreshold={handleSchedulerThreshold}
@@ -418,7 +418,7 @@ export default function SettingsTab({ theme }) {
                     </button>
                 </div>
                 <p className={`text-xs ${theme.text.secondary}`}>
-                    When enabled, associates are notified via WhatsApp when tasks are assigned to them and as deadlines approach.
+                    When enabled, associates are notified via WhatsApp when assigned to events or deliverables, and as event/due dates approach.
                     Uses the <span className="font-mono text-accent/80">phone_number</span> field on each associate record.
                 </p>
             </section>
