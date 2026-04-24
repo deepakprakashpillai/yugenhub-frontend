@@ -284,7 +284,7 @@ function SourceChip({ source, theme }) {
 
     const MAP = {
         project: { label: 'Project', path: `/projects/${source.id}` },
-        invoice: { label: 'Invoice', path: '/finance' },
+        event: { label: 'Event', path: source.project_id ? `/projects/${source.project_id}` : null },
         task: { label: 'Task', path: null },
     };
     const entry = MAP[source.kind];
@@ -304,9 +304,6 @@ function SourceChip({ source, theme }) {
 }
 
 const BLAST_TYPES = [
-    { value: 'task_deadline', label: 'Task Deadline Reminders' },
-    { value: 'invoice_due_soon', label: 'Invoice Due Soon' },
-    { value: 'invoice_overdue', label: 'Invoice Overdue' },
     { value: 'approval_requested', label: 'Approval Requested' },
 ];
 
