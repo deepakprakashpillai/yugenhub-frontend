@@ -1,10 +1,12 @@
 import { format, isToday, isTomorrow } from 'date-fns';
 import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { Icons } from '../Icons';
 
 const EventTimeline = ({ events }) => {
     const { theme } = useTheme();
+    const navigate = useNavigate();
 
     if (!events || events.length === 0) {
         return (
@@ -27,7 +29,11 @@ const EventTimeline = ({ events }) => {
                     const isTmrw = isTomorrow(date);
 
                     return (
-                        <div key={index} className="flex gap-6 items-start relative group">
+                        <div
+                            key={index}
+                            className={`flex gap-6 items-start relative group ${event.project_id ? 'cursor-pointer' : ''}`}
+                            onClick={() => event.project_id && navigate(`/projects/${event.project_id}`)}
+                        >
 
                             {/* Date Circle */}
                             <div className={clsx(
@@ -59,9 +65,11 @@ const EventTimeline = ({ events }) => {
                                             {event.client_name && <span className={`${theme.text.secondary} font-normal text-sm border-l ${theme.canvas.border} pl-2`}>for {event.client_name}</span>}
                                         </h4>
                                     </div>
-                                    <div className={`p-2 ${theme.canvas.bg} rounded-lg ${theme.text.secondary} group-hover:${theme.text.primary} transition-colors cursor-pointer hover:${theme.canvas.hover}`}>
-                                        <Icons.ChevronRight className="w-4 h-4" />
-                                    </div>
+                                    {event.project_id && (
+                                        <div className={`p-2 ${theme.canvas.bg} rounded-lg ${theme.text.secondary} group-hover:${theme.text.primary} transition-colors`}>
+                                            <Icons.ChevronRight className="w-4 h-4" />
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Info Row: Location & Team */}

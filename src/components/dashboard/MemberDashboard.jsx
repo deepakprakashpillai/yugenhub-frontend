@@ -4,13 +4,14 @@ import { Icons } from '../Icons';
 import AttentionSection from './AttentionSection';
 import WorkloadSection from './WorkloadSection';
 import { Badge } from '../ui/badge';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import EmptyState from '../EmptyState';
 
 import { useTheme } from '../../context/ThemeContext';
 
 const MemberDashboard = ({ user }) => {
     const { theme } = useTheme();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [attention, setAttention] = useState([]);
     const [workload, setWorkload] = useState({});
@@ -95,7 +96,11 @@ const MemberDashboard = ({ user }) => {
                         />
                     ) : (
                         myTasks.map((task) => (
-                            <div key={task.id} className={`flex items-center justify-between p-5 md:p-4 rounded-xl ${theme.canvas.bg} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-all cursor-pointer`}>
+                            <div
+                                key={task.id}
+                                onClick={() => task.project_id ? navigate(`/projects/${task.project_id}`) : navigate('/tasks')}
+                                className={`flex items-center justify-between p-5 md:p-4 rounded-xl ${theme.canvas.bg} border ${theme.canvas.border} hover:${theme.canvas.hover} transition-all cursor-pointer`}
+                            >
                                 <div>
                                     <h3 className={`font-medium ${theme.text.primary} mb-1 text-base md:text-sm`}>{task.title}</h3>
                                     <div className={`flex items-center gap-3 text-sm md:text-xs ${theme.text.secondary}`}>

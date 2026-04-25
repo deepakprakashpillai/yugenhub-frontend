@@ -12,7 +12,7 @@ const VerticalList = ({ data }) => {
                 <div
                     key={index}
                     className={`flex items-center justify-between p-3 rounded-lg ${theme.canvas.bg} hover:${theme.canvas.hover} border ${theme.canvas.border} transition-all cursor-pointer group`}
-                    onClick={() => navigate('/projects')} // In future could filter
+                    onClick={() => navigate(`/${item.id}`)}
                 >
                     <span className={`font-medium ${theme.text.primary}`}>
                         {item.name}

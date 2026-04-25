@@ -112,7 +112,7 @@ const ProjectCard = ({ project, onRefresh }) => {
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className={clsx(
-                "relative border rounded-2xl overflow-hidden transition-colors duration-300 flex flex-col",
+                "relative border rounded-2xl transition-colors duration-300 flex flex-col",
                 expanded ? `${theme.canvas.card} border-${theme.accent?.primary || 'zinc-500'} shadow-2xl z-10` : `${theme.canvas.card} ${theme.canvas.border} hover:border-${theme.accent?.primary || 'zinc-500'}`
             )}
         >

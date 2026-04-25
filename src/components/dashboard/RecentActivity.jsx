@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { formatDistanceToNow } from 'date-fns';
 import { Icons } from '../Icons';
 
 const RecentActivity = ({ activities }) => {
     const { theme } = useTheme();
+    const navigate = useNavigate();
 
     if (!activities || activities.length === 0) {
         return <div className={`${theme.text.secondary} text-sm italic p-4 text-center`}>No recent activity.</div>;
@@ -12,7 +14,11 @@ const RecentActivity = ({ activities }) => {
     return (
         <div className="space-y-0">
             {activities.map((activity) => (
-                <div key={activity.id} className={`group flex gap-3 md:gap-4 text-sm border-b ${theme.canvas.border} p-3 md:p-4 hover:${theme.canvas.hover} transition-colors first:rounded-t-2xl last:rounded-b-2xl last:border-0 items-start`}>
+                <div
+            key={activity.id}
+            onClick={() => activity.project_id && navigate(`/projects/${activity.project_id}`)}
+            className={`group flex gap-3 md:gap-4 text-sm border-b ${theme.canvas.border} p-3 md:p-4 hover:${theme.canvas.hover} transition-colors first:rounded-t-2xl last:rounded-b-2xl last:border-0 items-start ${activity.project_id ? 'cursor-pointer' : ''}`}
+        >
                     <div className={`mt-1 p-2 ${theme.canvas.bg} border ${theme.canvas.border} rounded-full ${theme.text.secondary} group-hover:border-zinc-500 group-hover:text-purple-500 transition-colors shrink-0 shadow-sm`}>
                         <Icons.Activity className="w-4 h-4" />
                     </div>
