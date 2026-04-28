@@ -129,3 +129,17 @@ export const attachMediaToDeliverable = async (projectId, deliverableId, mediaIt
     );
     return response.data;
 };
+
+export const createEditorToken = async (projectId, body) => {
+    const r = await api.post(`/projects/${projectId}/editor-tokens`, body);
+    return r.data;
+};
+
+export const listEditorTokens = async (projectId) => {
+    const r = await api.get(`/projects/${projectId}/editor-tokens`);
+    return r.data;
+};
+
+export const revokeEditorToken = async (projectId, tokenId) => {
+    await api.delete(`/projects/${projectId}/editor-tokens/${tokenId}`);
+};

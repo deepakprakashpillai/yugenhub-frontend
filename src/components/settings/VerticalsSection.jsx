@@ -258,7 +258,7 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
     return (
         <motion.div
             layoutId={`card-${vertical.id || 'new'}`}
-            className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden shadow-2xl`}
+            className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl shadow-2xl`}
         >
             {/* Editor Header */}
             <div className={`px-6 py-4 border-b ${theme.canvas.border} flex items-center justify-between ${theme.canvas.bg}`}>
@@ -306,7 +306,7 @@ const VerticalEditor = ({ vertical, isCreating, onSave, onCancel, onDelete, them
             </div>
 
             {/* Tab Content */}
-            <div className={`p-6 min-h-[300px] max-h-[500px] overflow-y-auto ${theme.canvas.bg}`}>
+            <div className={`p-6 min-h-[300px] max-h-[500px] overflow-y-auto pb-48 ${theme.canvas.bg}`}>
                 <AnimatePresence mode="wait">
                     {/* ─── IDENTITY TAB ─── */}
                     {activeTab === 'identity' && (

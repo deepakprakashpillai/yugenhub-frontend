@@ -446,6 +446,7 @@ const EventSection = ({
     const { theme } = useTheme();
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
+    const [isAnimating, setIsAnimating] = useState(isExpanded);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -489,9 +490,9 @@ const EventSection = ({
     const eventTotal = eventTasks.length;
 
     return (
-        <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl overflow-hidden`}>
+        <div className={`${theme.canvas.card} border ${theme.canvas.border} rounded-2xl`}>
             {/* Event Header (Clickable) */}
-            <div className={`flex items-center justify-between p-5 hover:${theme.canvas.hover} transition-colors`}>
+            <div className={`flex items-center justify-between p-5 hover:${theme.canvas.hover} transition-colors rounded-t-2xl`}>
                 <button onClick={onToggle} className="flex items-center gap-4 text-left flex-1">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-black text-lg">
                         {index + 1}
@@ -571,7 +572,9 @@ const EventSection = ({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
+                        onAnimationStart={() => setIsAnimating(true)}
+                        onAnimationComplete={() => setIsAnimating(false)}
+                        style={{ overflow: isAnimating ? 'hidden' : 'visible' }}
                     >
                         <div className="px-5 pb-5 pt-0 border-t border-zinc-800">
                             {/* Venue Info */}
@@ -1417,7 +1420,7 @@ const ProjectPage = () => {
             {/* Portal / Deliverables Tab */}
             {activeTab === 'portal' && (
                 <div className="mb-8">
-                    <DeliverableManager projectId={id} events={project?.events || []} project={project || {}} />
+                    <DeliverableManager projectId={id} events={project?.events || []} project={project || {}} onRefresh={fetchProject} />
                 </div>
             )}
 

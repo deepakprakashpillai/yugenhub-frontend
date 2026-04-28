@@ -16,8 +16,10 @@ import FileUpload, { FileList } from './FileUpload';
 import DownloadLimitSettings from './DownloadLimitSettings';
 import VersionHistory from './VersionHistory';
 import PortalAnalyticsSlideOver from './PortalAnalyticsSlideOver';
+import PortalSettingsModal from './PortalSettingsModal';
+import EditorTokensModal from './EditorTokensModal';
 import MediaPickerModal from '../media/MediaPickerModal';
-import { Trash2, Link, MessageSquare, Send, ChevronDown, ChevronUp, Package, Loader2, Calendar, FileText, BarChart3, Eye, X, Stamp, RefreshCw, ChevronLeft, ChevronRight, Play, HardDrive } from 'lucide-react';
+import { Trash2, Link, MessageSquare, Send, ChevronDown, ChevronUp, Package, Loader2, Calendar, FileText, BarChart3, Eye, X, Stamp, RefreshCw, ChevronLeft, ChevronRight, Play, HardDrive, Settings, Users } from 'lucide-react';
 
 const isMediaFile = (f) => f.content_type?.startsWith('image/') || f.content_type?.startsWith('video/');
 
@@ -454,14 +456,21 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
                     <div
                       key={entry.id}
                       className={`rounded-lg p-3 text-sm ${
-                        entry.author_type === 'team' ? `${theme.canvas.card} border ${theme.canvas.border}` : 'bg-accent/10'
+                        entry.author_type === 'editor'
+                          ? 'bg-purple-500/10 border border-purple-500/30'
+                          : entry.author_type === 'team'
+                          ? `${theme.canvas.card} border ${theme.canvas.border}`
+                          : 'bg-accent/10'
                       }`}
                       style={entry.author_type === 'client' ? { backgroundColor: 'var(--accent-glow)' } : undefined}
                     >
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className={`text-xs font-semibold ${theme.text.secondary}`}>
-                          {entry.author_name || (entry.author_type === 'client' ? 'Client' : 'Team')}
+                          {entry.author_name || (entry.author_type === 'client' ? 'Client' : entry.author_type === 'editor' ? 'Editor' : 'Team')}
                         </span>
+                        {entry.author_type === 'editor' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 font-medium">Editor</span>
+                        )}
                         <span className={`text-[10px] ${theme.text.secondary}`}>
                           {new Date(entry.timestamp).toLocaleString()}
                         </span>
@@ -471,6 +480,9 @@ function DeliverableCard({ deliverable, projectId, onRefresh, theme }) {
                           </span>
                         )}
                       </div>
+                      {entry.author_type === 'editor' && entry.author_email && (
+                        <p className={`text-[10px] ${theme.text.secondary} mb-1`}>{entry.author_email}</p>
+                      )}
                       <p className={theme.text.primary}>{entry.message}</p>
                     </div>
                   );
@@ -658,13 +670,14 @@ function DeliverablesByEvent({ deliverables, events, projectId, onRefresh, theme
   );
 }
 
-// eslint-disable-next-line no-unused-vars
-export default function DeliverableManager({ projectId, events = [], project = {} }) {
+export default function DeliverableManager({ projectId, events = [], project = {}, onRefresh: onProjectRefresh }) {
   const { theme } = useTheme();
   const [deliverables, setDeliverables] = useState([]);
   const [portalToken, setPortalToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showPortalSettings, setShowPortalSettings] = useState(false);
+  const [showEditorTokens, setShowEditorTokens] = useState(false);
 
   const fetchDeliverables = useCallback(async () => {
     try {
@@ -722,6 +735,20 @@ export default function DeliverableManager({ projectId, events = [], project = {
             <BarChart3 className="w-4 h-4" />
           </button>
           <button
+            onClick={() => setShowPortalSettings(true)}
+            className={`p-2 ${theme.canvas.button?.secondary || ''} border rounded-lg transition-colors ${theme.canvas.border}`}
+            title="Portal Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setShowEditorTokens(true)}
+            className={`p-2 ${theme.canvas.button?.secondary || ''} border rounded-lg transition-colors ${theme.canvas.border}`}
+            title="Editor Access"
+          >
+            <Users className="w-4 h-4" />
+          </button>
+          <button
             onClick={handleCopyLink}
             className={`flex items-center gap-2 px-4 py-2 ${theme.canvas.button.secondary} border rounded-lg font-bold text-sm transition-colors`}
           >
@@ -754,6 +781,27 @@ export default function DeliverableManager({ projectId, events = [], project = {
         onClose={() => setShowAnalytics(false)}
         theme={theme}
       />
+
+      {/* Portal Settings Modal */}
+      {showPortalSettings && (
+        <PortalSettingsModal
+          projectId={projectId}
+          project={project}
+          onClose={() => setShowPortalSettings(false)}
+          onRefresh={() => { onProjectRefresh?.(); }}
+          theme={theme}
+        />
+      )}
+
+      {/* Editor Tokens Modal */}
+      {showEditorTokens && (
+        <EditorTokensModal
+          projectId={projectId}
+          deliverables={deliverables}
+          onClose={() => setShowEditorTokens(false)}
+          theme={theme}
+        />
+      )}
     </div>
   );
 }
