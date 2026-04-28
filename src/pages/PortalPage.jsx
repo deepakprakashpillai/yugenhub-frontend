@@ -1093,31 +1093,23 @@ export default function PortalPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 sm:px-6 sm:py-8 space-y-8 sm:space-y-10">
-        {/* Project Overview */}
-        <section>
-          <div className={`rounded-2xl border ${t.card} p-4 sm:p-6`}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {data.client_name && (
-                <div>
-                  <p className={`text-xs font-bold uppercase tracking-wider ${t.textSecondary} mb-1`}>Client</p>
-                  <p className="font-semibold text-sm sm:text-base">{data.client_name}</p>
-                </div>
+        {/* Portal Heading & Description */}
+        {(data.portal_heading || data.portal_description) && (
+          <section>
+            <div className={`rounded-2xl border ${t.card} p-4 sm:p-6`}>
+              {data.portal_heading && (
+                <h2 className="text-lg sm:text-xl font-bold leading-snug mb-1" style={{ color: accentColor }}>
+                  {data.portal_heading}
+                </h2>
               )}
-              {data.vertical && (
-                <div>
-                  <p className={`text-xs font-bold uppercase tracking-wider ${t.textSecondary} mb-1`}>Type</p>
-                  <p className="font-semibold text-sm sm:text-base capitalize">{data.vertical}</p>
-                </div>
-              )}
-              {data.created_on && (
-                <div>
-                  <p className={`text-xs font-bold uppercase tracking-wider ${t.textSecondary} mb-1`}>Created</p>
-                  <p className="font-semibold text-sm sm:text-base">{new Date(data.created_on).toLocaleDateString()}</p>
-                </div>
+              {data.portal_description && (
+                <p className={`text-sm sm:text-base leading-relaxed ${t.textSecondary}`}>
+                  {data.portal_description}
+                </p>
               )}
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Gallery CTA — shown when linked album is published */}
         {data.gallery_url && (

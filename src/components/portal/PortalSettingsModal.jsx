@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { updatePortalSettings } from '../../api/projects';
-import { X, Shield, Download } from 'lucide-react';
+import { X, Shield, Download, Type } from 'lucide-react';
 
 export default function PortalSettingsModal({ projectId, project, onClose, onRefresh, theme }) {
   const [watermarkEnabled, setWatermarkEnabled] = useState(project.portal_watermark_enabled || false);
   const [watermarkText, setWatermarkText] = useState(project.portal_watermark_text || '');
   const [defaultLimit, setDefaultLimit] = useState(project.portal_default_download_limit ?? '');
+  const [portalHeading, setPortalHeading] = useState(project.portal_heading || '');
+  const [portalDescription, setPortalDescription] = useState(project.portal_description || '');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -16,6 +18,8 @@ export default function PortalSettingsModal({ projectId, project, onClose, onRef
         portal_watermark_enabled: watermarkEnabled,
         portal_watermark_text: watermarkText || null,
         portal_default_download_limit: defaultLimit === '' ? null : parseInt(defaultLimit, 10),
+        portal_heading: portalHeading || null,
+        portal_description: portalDescription || null,
       });
       toast.success('Portal settings updated');
       onRefresh();
@@ -41,6 +45,33 @@ export default function PortalSettingsModal({ projectId, project, onClose, onRef
         </div>
 
         <div className="space-y-6">
+          {/* Portal Heading & Description */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Type className={`w-4 h-4 ${theme.text.secondary}`} />
+              <span className={`text-sm font-semibold ${theme.text.primary}`}>Portal Header</span>
+            </div>
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={portalHeading}
+                onChange={(e) => setPortalHeading(e.target.value)}
+                placeholder="e.g. Your Wedding Gallery is Ready!"
+                className={`w-full px-3 py-2 rounded-lg border text-sm ${theme.canvas.card} ${theme.canvas.border} ${theme.text.primary}`}
+              />
+              <textarea
+                value={portalDescription}
+                onChange={(e) => setPortalDescription(e.target.value)}
+                placeholder="Add a message for your client..."
+                rows={3}
+                className={`w-full px-3 py-2 rounded-lg border text-sm resize-none ${theme.canvas.card} ${theme.canvas.border} ${theme.text.primary}`}
+              />
+            </div>
+            <p className={`text-xs mt-1 ${theme.text.secondary}`}>
+              Shown at the top of the portal instead of the project details.
+            </p>
+          </div>
+
           {/* Watermark Section */}
           <div>
             <div className="flex items-center gap-2 mb-3">

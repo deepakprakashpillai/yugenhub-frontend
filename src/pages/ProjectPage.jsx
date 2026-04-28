@@ -1420,7 +1420,7 @@ const ProjectPage = () => {
             {/* Portal / Deliverables Tab */}
             {activeTab === 'portal' && (
                 <div className="mb-8">
-                    <DeliverableManager projectId={id} events={project?.events || []} project={project || {}} />
+                    <DeliverableManager projectId={id} events={project?.events || []} project={project || {}} onRefresh={fetchProject} />
                 </div>
             )}
 

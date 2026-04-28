@@ -24,6 +24,7 @@ const MediaPage = lazy(() => import('./pages/MediaPage'));
 const CommunicationsPage = lazy(() => import('./pages/CommunicationsPage'));
 const PortalPage = lazy(() => import('./pages/PortalPage'));
 const FolderSharePage = lazy(() => import('./pages/FolderSharePage'));
+const EditorPortalPage = lazy(() => import('./pages/EditorPortalPage'));
 import { CommandPalette } from './components/CommandPalette';
 import { Skeleton } from './components/ui/Skeleton';
 import ReloadPrompt from './components/PWA/ReloadPrompt';
@@ -126,6 +127,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/portal/:token" element={<PortalPage />} />
         <Route path="/folder-share/:token" element={<FolderSharePage />} />
+        <Route path="/editor/:token" element={<EditorPortalPage />} />
         {import.meta.env.DEV && (
           <Route path="/dev-login" element={<DevLoginPage />} />
         )}
